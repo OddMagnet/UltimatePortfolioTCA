@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-UltimatePortfolio is a multiplatform SwiftUI app (iOS, macOS, visionOS) built with the Composable Architecture (TCA) and SQLiteData for persistence. The Xcode project is at `UltimatePortfolio/UltimatePortfolio.xcodeproj`.
+UltimatePortfolioTCA is a multiplatform SwiftUI app (iOS, macOS, visionOS) built with the Composable Architecture (TCA) and SQLiteData for persistence, with iCloud sync via SyncEngine. The Xcode project is at `UltimatePortfolioTCA.xcodeproj`.
 
 ## Build & Test Commands
 
@@ -12,13 +12,13 @@ This is an Xcode project — build and test via Xcode or `xcodebuild`:
 
 ```bash
 # Build
-xcodebuild -project UltimatePortfolio/UltimatePortfolio.xcodeproj -scheme UltimatePortfolio build
+xcodebuild -project UltimatePortfolioTCA.xcodeproj -scheme UltimatePortfolioTCA build
 
 # Run all unit tests
-xcodebuild -project UltimatePortfolio/UltimatePortfolio.xcodeproj -scheme UltimatePortfolio test -destination 'platform=iOS Simulator,name=iPhone 16'
+xcodebuild -project UltimatePortfolioTCA.xcodeproj -scheme UltimatePortfolioTCA test -destination 'platform=iOS Simulator,name=iPhone 16'
 
 # Run a single test (Swift Testing)
-xcodebuild -project UltimatePortfolio/UltimatePortfolio.xcodeproj -scheme UltimatePortfolio test -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:UltimatePortfolioTests/SuiteOrTestName
+xcodebuild -project UltimatePortfolioTCA.xcodeproj -scheme UltimatePortfolioTCA test -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:UltimatePortfolioTCATests/SuiteOrTestName
 ```
 
 When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests`, and `RunSomeTests` tools instead.
@@ -30,6 +30,18 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 - **Persistence**: SQLiteData (pointfreeco) with StructuredQueries for type-safe SQL (`@Table`, not GRDB's `FetchableRecord`/`PersistableRecord`). The test target links `SQLiteDataTestSupport` for in-memory database testing.
 - **Testing**: Swift Testing framework (`import Testing`, `@Test`, `@Suite`, `#expect`)
 
+## Database
+
+- **Setup**: `Schema.swift` in `Dependencies/` — `bootstrapDatabase()` on `DependencyValues` configures the database, runs migrations, and starts `SyncEngine`.
+- **Models**: `Issue`, `Tag`, `IssueTag` (join table) — all use `@Table` with UUID primary keys.
+- **iCloud sync**: `SyncEngine` initialized for all three tables. Entitlements and `CKSharingSupported` are configured. Metadatabase is attached for future sharing support.
+- **Foreign keys**: `configuration.foreignKeysEnabled = true` — enforced at runtime.
+- **`modified` column on `Issue`**: Managed by a SQLite trigger (`AFTER UPDATE ... WHEN OLD."modified" IS NEW."modified"`). The Swift property is `let modified: Date?` to prevent manual updates. Do NOT set `modified` from Swift code.
+- **Tag names**: Use `COLLATE NOCASE` — case-insensitive by default.
+- **Date precision**: `datetime('subsec')` for sub-second precision.
+- **Debug only**: `eraseDatabaseOnSchemaChange = true`, SQL query tracing via `os.Logger`.
+- **Context-aware database**: `SQLiteData.defaultDatabase()` automatically uses in-memory for previews, temporary file for tests, app container for live.
+
 ## Key Dependencies
 
 | Package | Product(s) | Target |
@@ -40,17 +52,26 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 
 ## Swift Settings
 
-- **Swift 6 concurrency**: `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor` and `SWIFT_APPROACHABLE_CONCURRENCY = YES` are enabled — all declarations default to `@MainActor`. Mark nonisolated explicitly when needed.
+- **Swift 6 language mode**: All targets use Swift 6 (`SWIFT_VERSION = 6.0`).
+- **Strict concurrency**: `SWIFT_STRICT_CONCURRENCY = complete` at the project level.
+- **Default MainActor isolation**: `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor` and `SWIFT_APPROACHABLE_CONCURRENCY = YES` — all declarations default to `@MainActor`. Mark `nonisolated` explicitly when needed.
 - **Member import visibility**: `SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES` — modules must be explicitly imported to use their members.
 - Deployment targets: iOS 26.2, macOS 26.2, visionOS 26.2
 
 ## Project Structure
 
-The Xcode project uses **File System Synchronized Groups** — the on-disk folder structure under `UltimatePortfolio/UltimatePortfolio/` is automatically mirrored in the project navigator. New Swift files placed in the source directory are automatically included in the build.
+The Xcode project uses **File System Synchronized Groups** — the on-disk folder structure under `UltimatePortfolioTCA/` is automatically mirrored in the project navigator. New Swift files placed in the source directory are automatically included in the build.
 
-- `UltimatePortfolio/UltimatePortfolio/` — App source files
-- `UltimatePortfolio/UltimatePortfolioTests/` — Unit tests (Swift Testing)
-- `UltimatePortfolio/UltimatePortfolioUITests/` — UI tests
+```
+UltimatePortfolioTCA/
+  App/                  — App entry point (UltimatePortfolioTCAApp.swift)
+  Assets.xcassets
+  Dependencies/         — Database setup, dependency keys (Schema.swift)
+  Features/             — TCA reducer + view pairs
+  Models/               — Data models (Issue.swift, Tag.swift, IssueTag.swift)
+UltimatePortfolioTCATests/    — Unit tests (Swift Testing)
+UltimatePortfolioTCAUITests/  — UI tests
+```
 
 ## Point-Free Skills (slash commands)
 

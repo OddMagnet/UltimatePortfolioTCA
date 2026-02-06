@@ -1,13 +1,13 @@
 //
-//  UltimatePortfolioUITests.swift
-//  UltimatePortfolioUITests
+//  UltimatePortfolioTCAUITests.swift
+//  UltimatePortfolioTCAUITests
 //
 //  Created by Michael Brünen on 06.02.26.
 //
 
 import XCTest
 
-final class UltimatePortfolioUITests: XCTestCase {
+final class UltimatePortfolioTCAUITests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.

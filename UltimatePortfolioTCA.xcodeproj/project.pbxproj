@@ -30,25 +30,25 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		4C4404D52F366C21005052D0 /* UltimatePortfolio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UltimatePortfolio.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		4C4404E22F366C22005052D0 /* UltimatePortfolioTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UltimatePortfolioTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		4C4404EC2F366C22005052D0 /* UltimatePortfolioUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UltimatePortfolioUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4C4404D52F366C21005052D0 /* UltimatePortfolioTCA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UltimatePortfolioTCA.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		4C4404E22F366C22005052D0 /* UltimatePortfolioTCATests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UltimatePortfolioTCATests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4C4404EC2F366C22005052D0 /* UltimatePortfolioTCAUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UltimatePortfolioTCAUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		4C4404D72F366C21005052D0 /* UltimatePortfolio */ = {
+		4C4404D72F366C21005052D0 /* UltimatePortfolioTCA */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = UltimatePortfolio;
+			path = UltimatePortfolioTCA;
 			sourceTree = "<group>";
 		};
-		4C4404E52F366C22005052D0 /* UltimatePortfolioTests */ = {
+		4C4404E52F366C22005052D0 /* UltimatePortfolioTCATests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = UltimatePortfolioTests;
+			path = UltimatePortfolioTCATests;
 			sourceTree = "<group>";
 		};
-		4C4404EF2F366C22005052D0 /* UltimatePortfolioUITests */ = {
+		4C4404EF2F366C22005052D0 /* UltimatePortfolioTCAUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = UltimatePortfolioUITests;
+			path = UltimatePortfolioTCAUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -84,9 +84,9 @@
 		4C4404CC2F366C20005052D0 = {
 			isa = PBXGroup;
 			children = (
-				4C4404D72F366C21005052D0 /* UltimatePortfolio */,
-				4C4404E52F366C22005052D0 /* UltimatePortfolioTests */,
-				4C4404EF2F366C22005052D0 /* UltimatePortfolioUITests */,
+				4C4404D72F366C21005052D0 /* UltimatePortfolioTCA */,
+				4C4404E52F366C22005052D0 /* UltimatePortfolioTCATests */,
+				4C4404EF2F366C22005052D0 /* UltimatePortfolioTCAUITests */,
 				4C4404D62F366C21005052D0 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -94,9 +94,9 @@
 		4C4404D62F366C21005052D0 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				4C4404D52F366C21005052D0 /* UltimatePortfolio.app */,
-				4C4404E22F366C22005052D0 /* UltimatePortfolioTests.xctest */,
-				4C4404EC2F366C22005052D0 /* UltimatePortfolioUITests.xctest */,
+				4C4404D52F366C21005052D0 /* UltimatePortfolioTCA.app */,
+				4C4404E22F366C22005052D0 /* UltimatePortfolioTCATests.xctest */,
+				4C4404EC2F366C22005052D0 /* UltimatePortfolioTCAUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -104,9 +104,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		4C4404D42F366C21005052D0 /* UltimatePortfolio */ = {
+		4C4404D42F366C21005052D0 /* UltimatePortfolioTCA */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4C4404F62F366C22005052D0 /* Build configuration list for PBXNativeTarget "UltimatePortfolio" */;
+			buildConfigurationList = 4C4404F62F366C22005052D0 /* Build configuration list for PBXNativeTarget "UltimatePortfolioTCA" */;
 			buildPhases = (
 				4C4404D12F366C21005052D0 /* Sources */,
 				4C4404D22F366C21005052D0 /* Frameworks */,
@@ -117,20 +117,20 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				4C4404D72F366C21005052D0 /* UltimatePortfolio */,
+				4C4404D72F366C21005052D0 /* UltimatePortfolioTCA */,
 			);
-			name = UltimatePortfolio;
+			name = UltimatePortfolioTCA;
 			packageProductDependencies = (
 				4C4405002F366C76005052D0 /* ComposableArchitecture */,
 				4C4405032F366D76005052D0 /* SQLiteData */,
 			);
 			productName = UltimatePortfolio;
-			productReference = 4C4404D52F366C21005052D0 /* UltimatePortfolio.app */;
+			productReference = 4C4404D52F366C21005052D0 /* UltimatePortfolioTCA.app */;
 			productType = "com.apple.product-type.application";
 		};
-		4C4404E12F366C22005052D0 /* UltimatePortfolioTests */ = {
+		4C4404E12F366C22005052D0 /* UltimatePortfolioTCATests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4C4404F92F366C22005052D0 /* Build configuration list for PBXNativeTarget "UltimatePortfolioTests" */;
+			buildConfigurationList = 4C4404F92F366C22005052D0 /* Build configuration list for PBXNativeTarget "UltimatePortfolioTCATests" */;
 			buildPhases = (
 				4C4404DE2F366C22005052D0 /* Sources */,
 				4C4404DF2F366C22005052D0 /* Frameworks */,
@@ -142,19 +142,19 @@
 				4C4404E42F366C22005052D0 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				4C4404E52F366C22005052D0 /* UltimatePortfolioTests */,
+				4C4404E52F366C22005052D0 /* UltimatePortfolioTCATests */,
 			);
-			name = UltimatePortfolioTests;
+			name = UltimatePortfolioTCATests;
 			packageProductDependencies = (
 				4C4405052F366D76005052D0 /* SQLiteDataTestSupport */,
 			);
 			productName = UltimatePortfolioTests;
-			productReference = 4C4404E22F366C22005052D0 /* UltimatePortfolioTests.xctest */;
+			productReference = 4C4404E22F366C22005052D0 /* UltimatePortfolioTCATests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		4C4404EB2F366C22005052D0 /* UltimatePortfolioUITests */ = {
+		4C4404EB2F366C22005052D0 /* UltimatePortfolioTCAUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 4C4404FC2F366C22005052D0 /* Build configuration list for PBXNativeTarget "UltimatePortfolioUITests" */;
+			buildConfigurationList = 4C4404FC2F366C22005052D0 /* Build configuration list for PBXNativeTarget "UltimatePortfolioTCAUITests" */;
 			buildPhases = (
 				4C4404E82F366C22005052D0 /* Sources */,
 				4C4404E92F366C22005052D0 /* Frameworks */,
@@ -166,13 +166,13 @@
 				4C4404EE2F366C22005052D0 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				4C4404EF2F366C22005052D0 /* UltimatePortfolioUITests */,
+				4C4404EF2F366C22005052D0 /* UltimatePortfolioTCAUITests */,
 			);
-			name = UltimatePortfolioUITests;
+			name = UltimatePortfolioTCAUITests;
 			packageProductDependencies = (
 			);
 			productName = UltimatePortfolioUITests;
-			productReference = 4C4404EC2F366C22005052D0 /* UltimatePortfolioUITests.xctest */;
+			productReference = 4C4404EC2F366C22005052D0 /* UltimatePortfolioTCAUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -198,7 +198,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 4C4404D02F366C20005052D0 /* Build configuration list for PBXProject "UltimatePortfolio" */;
+			buildConfigurationList = 4C4404D02F366C20005052D0 /* Build configuration list for PBXProject "UltimatePortfolioTCA" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -216,9 +216,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				4C4404D42F366C21005052D0 /* UltimatePortfolio */,
-				4C4404E12F366C22005052D0 /* UltimatePortfolioTests */,
-				4C4404EB2F366C22005052D0 /* UltimatePortfolioUITests */,
+				4C4404D42F366C21005052D0 /* UltimatePortfolioTCA */,
+				4C4404E12F366C22005052D0 /* UltimatePortfolioTCATests */,
+				4C4404EB2F366C22005052D0 /* UltimatePortfolioTCAUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -274,12 +274,12 @@
 /* Begin PBXTargetDependency section */
 		4C4404E42F366C22005052D0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 4C4404D42F366C21005052D0 /* UltimatePortfolio */;
+			target = 4C4404D42F366C21005052D0 /* UltimatePortfolioTCA */;
 			targetProxy = 4C4404E32F366C22005052D0 /* PBXContainerItemProxy */;
 		};
 		4C4404EE2F366C22005052D0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 4C4404D42F366C21005052D0 /* UltimatePortfolio */;
+			target = 4C4404D42F366C21005052D0 /* UltimatePortfolioTCA */;
 			targetProxy = 4C4404ED2F366C22005052D0 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -510,7 +510,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/UltimatePortfolio.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/UltimatePortfolio";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/UltimatePortfolioTCA.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/UltimatePortfolioTCA";
 				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Debug;
@@ -536,7 +536,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/UltimatePortfolio.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/UltimatePortfolio";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/UltimatePortfolioTCA.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/UltimatePortfolioTCA";
 				XROS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Release;
@@ -594,7 +594,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		4C4404D02F366C20005052D0 /* Build configuration list for PBXProject "UltimatePortfolio" */ = {
+		4C4404D02F366C20005052D0 /* Build configuration list for PBXProject "UltimatePortfolioTCA" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4C4404F42F366C22005052D0 /* Debug */,
@@ -603,7 +603,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4C4404F62F366C22005052D0 /* Build configuration list for PBXNativeTarget "UltimatePortfolio" */ = {
+		4C4404F62F366C22005052D0 /* Build configuration list for PBXNativeTarget "UltimatePortfolioTCA" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4C4404F72F366C22005052D0 /* Debug */,
@@ -612,7 +612,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4C4404F92F366C22005052D0 /* Build configuration list for PBXNativeTarget "UltimatePortfolioTests" */ = {
+		4C4404F92F366C22005052D0 /* Build configuration list for PBXNativeTarget "UltimatePortfolioTCATests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4C4404FA2F366C22005052D0 /* Debug */,
@@ -621,7 +621,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		4C4404FC2F366C22005052D0 /* Build configuration list for PBXNativeTarget "UltimatePortfolioUITests" */ = {
+		4C4404FC2F366C22005052D0 /* Build configuration list for PBXNativeTarget "UltimatePortfolioTCAUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				4C4404FD2F366C22005052D0 /* Debug */,

@@ -1,13 +1,13 @@
 //
-//  UltimatePortfolioUITestsLaunchTests.swift
-//  UltimatePortfolioUITests
+//  UltimatePortfolioTCAUITestsLaunchTests.swift
+//  UltimatePortfolioTCAUITests
 //
 //  Created by Michael Brünen on 06.02.26.
 //
 
 import XCTest
 
-final class UltimatePortfolioUITestsLaunchTests: XCTestCase {
+final class UltimatePortfolioTCAUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

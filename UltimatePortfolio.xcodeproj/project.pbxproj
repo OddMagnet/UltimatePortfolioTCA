@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		4C4405012F366C76005052D0 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 4C4405002F366C76005052D0 /* ComposableArchitecture */; };
+		4C4405042F366D76005052D0 /* SQLiteData in Frameworks */ = {isa = PBXBuildFile; productRef = 4C4405032F366D76005052D0 /* SQLiteData */; };
+		4C4405062F366D76005052D0 /* SQLiteDataTestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 4C4405052F366D76005052D0 /* SQLiteDataTestSupport */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		4C4404E32F366C22005052D0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -52,6 +58,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4C4405042F366D76005052D0 /* SQLiteData in Frameworks */,
+				4C4405012F366C76005052D0 /* ComposableArchitecture in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -59,6 +67,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4C4405062F366D76005052D0 /* SQLiteDataTestSupport in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -112,6 +121,8 @@
 			);
 			name = UltimatePortfolio;
 			packageProductDependencies = (
+				4C4405002F366C76005052D0 /* ComposableArchitecture */,
+				4C4405032F366D76005052D0 /* SQLiteData */,
 			);
 			productName = UltimatePortfolio;
 			productReference = 4C4404D52F366C21005052D0 /* UltimatePortfolio.app */;
@@ -135,6 +146,7 @@
 			);
 			name = UltimatePortfolioTests;
 			packageProductDependencies = (
+				4C4405052F366D76005052D0 /* SQLiteDataTestSupport */,
 			);
 			productName = UltimatePortfolioTests;
 			productReference = 4C4404E22F366C22005052D0 /* UltimatePortfolioTests.xctest */;
@@ -195,6 +207,10 @@
 			);
 			mainGroup = 4C4404CC2F366C20005052D0;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				4C4404FF2F366C76005052D0 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
+				4C4405022F366D76005052D0 /* XCRemoteSwiftPackageReference "sqlite-data" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4C4404D62F366C21005052D0 /* Products */;
 			projectDirPath = "";
@@ -615,6 +631,43 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		4C4404FF2F366C76005052D0 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-composable-architecture";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.23.1;
+			};
+		};
+		4C4405022F366D76005052D0 /* XCRemoteSwiftPackageReference "sqlite-data" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/sqlite-data";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.5.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		4C4405002F366C76005052D0 /* ComposableArchitecture */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4C4404FF2F366C76005052D0 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
+			productName = ComposableArchitecture;
+		};
+		4C4405032F366D76005052D0 /* SQLiteData */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4C4405022F366D76005052D0 /* XCRemoteSwiftPackageReference "sqlite-data" */;
+			productName = SQLiteData;
+		};
+		4C4405052F366D76005052D0 /* SQLiteDataTestSupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4C4405022F366D76005052D0 /* XCRemoteSwiftPackageReference "sqlite-data" */;
+			productName = SQLiteDataTestSupport;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 4C4404CD2F366C20005052D0 /* Project object */;
 }

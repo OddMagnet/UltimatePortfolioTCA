@@ -27,6 +27,7 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 
 - **UI Framework**: SwiftUI with `#Preview` macros
 - **App Architecture**: Composable Architecture (TCA) from pointfreeco — features are `@Reducer` structs with `@ObservableState struct State`, `enum Action`, and `var body: some Reducer<State, Action>`. Views take `StoreOf<Feature>` directly (do NOT use legacy `ViewStore`/`WithViewStore`).
+- **Navigation**: Three-column `NavigationSplitView` — Sidebar (always present), Content (optional, shown when a filter is selected), Detail (optional, shown when an issue is selected). `AppFeature` composes children via `Scope` (sidebar) and `.ifLet` (content/detail). Child-to-parent communication uses `BindableAction` — the parent intercepts binding changes to drive navigation.
 - **Persistence**: SQLiteData (pointfreeco) with StructuredQueries for type-safe SQL (`@Table`, not GRDB's `FetchableRecord`/`PersistableRecord`). The test target links `SQLiteDataTestSupport` for in-memory database testing.
 - **Testing**: Swift Testing framework (`import Testing`, `@Test`, `@Suite`, `#expect`)
 
@@ -54,7 +55,7 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 
 - **Swift 6 language mode**: All targets use Swift 6 (`SWIFT_VERSION = 6.0`).
 - **Strict concurrency**: `SWIFT_STRICT_CONCURRENCY = complete` at the project level.
-- **Default MainActor isolation**: `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor` and `SWIFT_APPROACHABLE_CONCURRENCY = YES` — all declarations default to `@MainActor`. Mark `nonisolated` explicitly when needed.
+- **Default nonisolated**: `SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated` — traditional Swift default. Mark `@MainActor` explicitly when needed.
 - **Member import visibility**: `SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES` — modules must be explicitly imported to use their members.
 - Deployment targets: iOS 26.2, macOS 26.2, visionOS 26.2
 
@@ -67,7 +68,11 @@ UltimatePortfolioTCA/
   App/                  — App entry point (UltimatePortfolioTCAApp.swift)
   Assets.xcassets
   Dependencies/         — Database setup, dependency keys (Schema.swift)
-  Features/             — TCA reducer + view pairs
+  Features/
+    App/                — Root AppFeature + AppView (NavigationSplitView)
+    Sidebar/            — SidebarFeature + SidebarView + Filter enum
+    Content/            — ContentFeature + ContentView (issue list)
+    Detail/             — DetailFeature + DetailView (single issue)
   Models/               — Data models (Issue.swift, Tag.swift, IssueTag.swift)
 UltimatePortfolioTCATests/    — Unit tests (Swift Testing)
 UltimatePortfolioTCAUITests/  — UI tests

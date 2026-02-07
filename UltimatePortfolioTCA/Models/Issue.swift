@@ -1,7 +1,7 @@
 import Foundation
 import StructuredQueries
 
-@Table struct Issue: Identifiable {
+@Table struct Issue: Hashable, Identifiable {
     enum Priority: Int, QueryBindable {
         case low = 0
         case medium = 1

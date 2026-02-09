@@ -1,10 +1,8 @@
 import ComposableArchitecture
-import SQLiteData
 import SwiftUI
 
 struct SidebarView: View {
     @Bindable var store: StoreOf<SidebarFeature>
-    @FetchAll(Tag.order(by: \.name)) var tags
 
     var body: some View {
         List(selection: $store.selectedFilter) {
@@ -15,11 +13,11 @@ struct SidebarView: View {
             }
 
             Section("Tags") {
-                if tags.isEmpty {
+                if store.tags.isEmpty {
                     Text("No tags yet")
                         .foregroundStyle(.secondary)
                 } else {
-                    ForEach(tags) { tag in
+                    ForEach(store.tags) { tag in
                         FilterRow(filter: .tag(tag))
                     }
                 }

@@ -70,7 +70,7 @@ UltimatePortfolioTCA/
   Dependencies/         — Database setup, dependency keys (Schema.swift)
   Features/
     App/                — Root AppFeature + AppView (NavigationSplitView)
-    Sidebar/            — SidebarFeature + SidebarView + Filter enum
+    Sidebar/            — SidebarFeature + SidebarView + IssueFilter
     Content/            — ContentFeature + ContentView (issue list)
     Detail/             — DetailFeature + DetailView (single issue)
   Models/               — Data models (Issue.swift, Tag.swift, IssueTag.swift)

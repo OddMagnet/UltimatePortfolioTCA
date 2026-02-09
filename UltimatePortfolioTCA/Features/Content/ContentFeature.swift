@@ -2,7 +2,7 @@ import ComposableArchitecture
 
 @Reducer struct ContentFeature {
     @ObservableState struct State {
-        var filter: SidebarFeature.State.Filter
+        var filter: IssueFilter
         var selectedIssue: Issue?
     }
 

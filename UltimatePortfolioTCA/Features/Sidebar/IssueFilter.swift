@@ -1,13 +1,15 @@
-extension SidebarFeature.State {
-    enum Filter: Hashable {
-        case all
-        case completed
-        case recent
-        case tag(Tag)
-    }
-}
+enum IssueFilter: Hashable, Identifiable {
+    var id: Self { self }
 
-extension SidebarFeature.State.Filter {
+    case all
+    case completed
+    case recent
+    case tag(Tag)
+
+    static var smartFilters: [Self] {
+        [.all, .completed, .recent]
+    }
+
     var systemImage: String {
         switch self {
         case .all: "tray"

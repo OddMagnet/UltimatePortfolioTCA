@@ -2,7 +2,7 @@ import ComposableArchitecture
 
 @Reducer struct SidebarFeature {
     @ObservableState struct State {
-        var selectedFilter: Filter? = .all
+        var selectedFilter: IssueFilter? = .all
     }
 
     enum Action: BindableAction {

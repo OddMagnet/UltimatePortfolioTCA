@@ -2,16 +2,23 @@ import ComposableArchitecture
 import SQLiteData
 import SwiftUI
 
+@Selection struct IssueWithTags: Identifiable {
+    var issue: Issue
+    var tagNames: String?
+    var id: Issue.ID { issue.id }
+}
+
 @Reducer struct ContentFeature {
     @ObservableState struct State {
         var filter: IssueFilter
         var selectedIssue: Issue?
-        @FetchAll(Issue.none) var issues
+        @FetchAll var issueRows: [IssueWithTags] = []
 
         init(filter: IssueFilter) {
             self.filter = filter
-            _issues = FetchAll(
+            _issueRows = FetchAll(
                 Issue
+                    .group(by: \.id)
                     .order { ($0.priority.desc(nulls: .last), $0.modified.desc(nulls: .last), $0.created.desc()) }
                     .where {
                         switch filter {
@@ -25,6 +32,14 @@ import SwiftUI
                                 IssueTag.select(\.issueID).where { $0.tagID.eq(tag.id) }
                             )
                         }
+                    }
+                    .leftJoin(IssueTag.all) { $0.id.eq($1.issueID) }
+                    .leftJoin(Tag.all) { $1.tagID.eq($2.id) }
+                    .select { issues, _, tags in
+                        IssueWithTags.Columns(
+                            issue: issues,
+                            tagNames: tags.name.groupConcat(#sql("', '"))
+                        )
                     },
                 animation: .default
             )
@@ -51,7 +66,7 @@ import SwiftUI
             case .delegate:
                 return .none
             case let .deleteIssuesSwiped(offsets):
-                let ids = offsets.map { state.issues[$0].id }
+                let ids = offsets.map { state.issueRows[$0].issue.id }
                 let didDeleteSelectedIssue = switch(state.selectedIssue) {
                 case let .some(selectedIssue): ids.contains(selectedIssue.id)
                 default: false

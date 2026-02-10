@@ -6,12 +6,12 @@ struct ContentView: View {
 
     var body: some View {
         List(selection: $store.selectedIssue) {
-            if store.issues.isEmpty {
+            if store.issueRows.isEmpty {
                 ContentUnavailableView("No Issues", systemImage: "tray")
             } else {
-                ForEach(store.issues) { issue in
-                    IssueRow(issue: issue)
-                        .tag(issue)
+                ForEach(store.issueRows) { row in
+                    IssueRow(row)
+                        .tag(row.issue)
                 }
                 .onDelete { store.send(.deleteIssuesSwiped(offsets: $0)) }
             }
@@ -22,6 +22,12 @@ struct ContentView: View {
 
 private struct IssueRow: View {
     let issue: Issue
+    let tagNames: String?
+
+    init(_ row: IssueWithTags) {
+        issue = row.issue
+        tagNames = row.tagNames
+    }
 
     var body: some View {
         HStack {
@@ -29,9 +35,17 @@ private struct IssueRow: View {
                 .fill(issue.priorityColor)
                 .frame(width: 10, height: 10)
 
-            Text(issue.title)
-                .strikethrough(issue.completed)
-                .foregroundStyle(issue.completed ? .secondary : .primary)
+            VStack(alignment: .leading) {
+                Text(issue.title)
+                    .strikethrough(issue.completed)
+                    .foregroundStyle(issue.completed ? .secondary : .primary)
+
+                if let tagNames {
+                    Text(tagNames)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
 
             Spacer()
 

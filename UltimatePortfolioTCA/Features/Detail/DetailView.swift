@@ -15,6 +15,7 @@ struct DetailView: View {
             }
         }
         .navigationTitle(store.issue.title)
+        .navigationBarTitleDisplayMode(.large)
     }
 }
 

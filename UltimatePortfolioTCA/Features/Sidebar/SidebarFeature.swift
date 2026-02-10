@@ -33,7 +33,7 @@ import SQLiteData
         case deleteTagsSwiped(offsets: IndexSet)
 
         enum Delegate {
-            case selectedFilterChanged
+            case selectedFilterChanged(IssueFilter?)
         }
     }
 
@@ -42,10 +42,15 @@ import SQLiteData
     var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
+            case .binding(\.selectedFilter):
+                return .send(.delegate(.selectedFilterChanged(state.selectedFilter)))
+
             case .binding:
                 return .none
+
             case .delegate:
                 return .none
+
             case let .deleteTagsSwiped(offsets):
                 let ids = offsets.map { state.tagRows[$0].tag.id }
                 let didDeleteSelectedFilter = switch(state.selectedFilter) {
@@ -59,7 +64,7 @@ import SQLiteData
                             try Tag.find(ids).delete().execute(db)
                         }
                     }
-                    if didDeleteSelectedFilter { await send(.delegate(.selectedFilterChanged)) }
+                    if didDeleteSelectedFilter { await send(.delegate(.selectedFilterChanged(nil))) }
                 }
             }
         }

@@ -50,7 +50,7 @@ import SwiftUI
         case deleteIssuesSwiped(offsets: IndexSet)
 
         enum Delegate {
-            case selectedIssueChanged
+            case selectedIssueChanged(Issue?)
         }
     }
 
@@ -59,10 +59,15 @@ import SwiftUI
     var body: some Reducer<State, Action> {
         Reduce { state, action in
             switch action {
+            case .binding(\.selectedIssue):
+                return .send(.delegate(.selectedIssueChanged(state.selectedIssue)))
+
             case .binding:
                 return .none
+
             case .delegate:
                 return .none
+
             case let .deleteIssuesSwiped(offsets):
                 let ids = offsets.map { state.issueRows[$0].issue.id }
                 let didDeleteSelectedIssue = switch(state.selectedIssue) {
@@ -76,7 +81,7 @@ import SwiftUI
                             try Issue.find(ids).delete().execute(db)
                         }
                     }
-                    if didDeleteSelectedIssue { await send(.delegate(.selectedIssueChanged)) }
+                    if didDeleteSelectedIssue { await send(.delegate(.selectedIssueChanged(nil))) }
                 }
             }
         }

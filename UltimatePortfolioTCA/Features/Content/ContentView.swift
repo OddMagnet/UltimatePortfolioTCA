@@ -17,6 +17,7 @@ struct ContentView: View {
             }
         }
         .navigationTitle(store.filter.title)
+        .navigationBarTitleDisplayMode(.large)
     }
 }
 

@@ -1,6 +1,7 @@
 import ComposableArchitecture
 import SwiftUI
 
+@ViewAction(for: SidebarFeature.self)
 struct SidebarView: View {
     @Bindable var store: StoreOf<SidebarFeature>
 
@@ -18,7 +19,7 @@ struct SidebarView: View {
                         .foregroundStyle(.secondary)
                 } else {
                     ForEach(store.tagRows, content: FilterRow.init)
-                        .onDelete { store.send(.deleteTagsSwiped(offsets: $0)) }
+                        .onDelete { send(.deleteTagsSwiped(offsets: $0)) }
                 }
             }
         }

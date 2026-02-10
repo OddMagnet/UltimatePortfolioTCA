@@ -54,13 +54,17 @@ import SQLiteData
         ) var tagRows
     }
 
-    enum Action: BindableAction {
+    enum Action: BindableAction, ViewAction {
         case binding(BindingAction<State>)
         case delegate(Delegate)
-        case deleteTagsSwiped(offsets: IndexSet)
+        case view(View)
 
         enum Delegate {
             case selectedFilterChanged(IssueFilter?)
+        }
+
+        enum View {
+            case deleteTagsSwiped(offsets: IndexSet)
         }
     }
 
@@ -80,7 +84,7 @@ import SQLiteData
             case .delegate:
                 return .none
 
-            case let .deleteTagsSwiped(offsets):
+            case let .view(.deleteTagsSwiped(offsets)):
                 let ids = offsets.map { state.tagRows[$0].tag.id }
                 let didDeleteSelectedFilter = switch(state.selectedFilter) {
                 case let .tag(tag): ids.contains(tag.id)

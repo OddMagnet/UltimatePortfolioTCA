@@ -1,6 +1,7 @@
 import ComposableArchitecture
 import SwiftUI
 
+@ViewAction(for: ContentFeature.self)
 struct ContentView: View {
     @Bindable var store: StoreOf<ContentFeature>
 
@@ -13,7 +14,7 @@ struct ContentView: View {
                     IssueRow(row)
                         .tag(row.issue)
                 }
-                .onDelete { store.send(.deleteIssuesSwiped(offsets: $0)) }
+                .onDelete { send(.deleteIssuesSwiped(offsets: $0)) }
             }
         }
         .navigationTitle(store.filter.title)

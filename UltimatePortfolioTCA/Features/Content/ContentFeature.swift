@@ -47,13 +47,17 @@ import SwiftUI
         }
     }
 
-    enum Action: BindableAction {
+    enum Action: BindableAction, ViewAction {
         case binding(BindingAction<State>)
         case delegate(Delegate)
-        case deleteIssuesSwiped(offsets: IndexSet)
+        case view(View)
 
         enum Delegate {
             case selectedIssueChanged(Issue?)
+        }
+
+        enum View {
+            case deleteIssuesSwiped(offsets: IndexSet)
         }
     }
 
@@ -73,7 +77,7 @@ import SwiftUI
             case .delegate:
                 return .none
 
-            case let .deleteIssuesSwiped(offsets):
+            case let .view(.deleteIssuesSwiped(offsets)):
                 let ids = offsets.map { state.issueRows[$0].issue.id }
                 let didDeleteSelectedIssue = switch(state.selectedIssue) {
                 case let .some(selectedIssue): ids.contains(selectedIssue.id)

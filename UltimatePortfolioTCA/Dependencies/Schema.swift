@@ -94,10 +94,13 @@ extension DependencyValues {
         }
 
         try migrator.migrate(database)
-        defaultDatabase = database
+        try database.write { db in
+            try db.seedSampleData()
+        }
         defaultSyncEngine = try SyncEngine(
             for: database,
             tables: Issue.self, Tag.self, IssueTag.self
         )
+        defaultDatabase = database
     }
 }

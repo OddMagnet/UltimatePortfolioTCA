@@ -19,13 +19,16 @@ struct DetailView: View {
 }
 
 #Preview {
-    DetailView(
-        store: Store(
-            initialState: DetailFeature.State(
-                issue: Issue(id: UUID(), title: "Example Issue", detail: "Some details here", modified: nil)
+    withPreviewDependencies {
+        DetailView(store: Store(initialState: DetailFeature.State(
+            issue: Issue(
+                id: UUID(),
+                title: "Example Issue",
+                detail: "Some details here",
+                modified: nil
             )
-        ) {
+        )) {
             DetailFeature()
-        }
-    )
+        })
+    }
 }

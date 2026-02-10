@@ -16,9 +16,9 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView(
-        store: Store(initialState: ContentFeature.State(filter: .all)) {
+    withPreviewDependencies {
+        ContentView(store: Store(initialState: ContentFeature.State(filter: .all)) {
             ContentFeature()
-        }
-    )
+        })
+    }
 }

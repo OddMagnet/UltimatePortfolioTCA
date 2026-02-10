@@ -37,14 +37,11 @@ struct FilterRow: View {
 }
 
 #Preview {
-    let _ = prepareDependencies {
-        try! $0.bootstrapDatabase()
-    }
-    NavigationView {
-        SidebarView(
-            store: Store(initialState: SidebarFeature.State()) {
+    withPreviewDependencies {
+        NavigationView {
+            SidebarView(store: Store(initialState: SidebarFeature.State()) {
                 SidebarFeature()
-            }
-        )
+            })
+        }
     }
 }

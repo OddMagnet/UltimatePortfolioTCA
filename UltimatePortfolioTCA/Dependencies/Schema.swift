@@ -79,26 +79,23 @@ extension DependencyValues {
                 CREATE INDEX "index_issueTags_on_tagID" ON "issueTags"("tagID")
                 """)
                 .execute(db)
-
-            try #sql("""
-                CREATE TRIGGER "trigger_issues_update_modified"
-                AFTER UPDATE ON "issues"
-                FOR EACH ROW
-                WHEN OLD."modified" IS NEW."modified"
-                BEGIN
-                    UPDATE "issues" SET "modified" = datetime('subsec')
-                    WHERE "id" = OLD."id";
-                END
-                """)
-                .execute(db)
         }
 
         try migrator.migrate(database)
-        try database.seedSampleData()
         defaultSyncEngine = try SyncEngine(
             for: database,
             tables: Issue.self, Tag.self, IssueTag.self
         )
+        try database.write { db in
+            try Issue.createTemporaryTrigger(
+                after: .update(touch: \.modified) { _, _ in
+                    !SyncEngine.$isSynchronizing
+                }
+            ).execute(db)
+        }
+        #if DEBUG
+            try database.seedSampleData()
+        #endif
         defaultDatabase = database
     }
 }

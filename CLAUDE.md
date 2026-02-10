@@ -35,12 +35,12 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 
 ## Database
 
-- **Setup**: `Schema.swift` in `Dependencies/` — `bootstrapDatabase()` on `DependencyValues` configures the database, runs migrations, seeds sample data, and starts `SyncEngine`.
+- **Setup**: `Schema.swift` in `Dependencies/` — `bootstrapDatabase()` on `DependencyValues` configures the database, runs migrations, starts `SyncEngine`, registers temporary triggers, and seeds sample data (debug only).
 - **Sample data**: `SampleData.swift` in `Dependencies/` — `seedSampleData()` on `DatabaseWriter` provides seed issues (with varied creation/modification dates), tags, and associations for development/previews.
 - **Models**: `Issue`, `Tag`, `IssueTag` (join table) — all use `@Table` with UUID primary keys.
 - **iCloud sync**: `SyncEngine` initialized for all three tables. Entitlements and `CKSharingSupported` are configured. Metadatabase is attached for future sharing support.
 - **Foreign keys**: `configuration.foreignKeysEnabled = true` — enforced at runtime.
-- **`modified` column on `Issue`**: Managed by a SQLite trigger (`AFTER UPDATE ... WHEN OLD."modified" IS NEW."modified"`). The Swift property is `let modified: Date?` to prevent manual updates. Do NOT set `modified` from Swift code.
+- **`modified` column on `Issue`**: Managed by a type-safe temporary trigger (`Issue.createTemporaryTrigger(after: .update(touch: \.modified))`), created after migrations in `bootstrapDatabase()`. The trigger uses `!SyncEngine.$isSynchronizing` to skip SyncEngine's no-op updates. The Swift property is `let modified: Date?` to prevent manual updates. Do NOT set `modified` from Swift code.
 - **Tag names**: Use `COLLATE NOCASE` — case-insensitive by default.
 - **Date precision**: `datetime('subsec')` for sub-second precision.
 - **Debug only**: `eraseDatabaseOnSchemaChange = true`, SQL query tracing via `os.Logger`.

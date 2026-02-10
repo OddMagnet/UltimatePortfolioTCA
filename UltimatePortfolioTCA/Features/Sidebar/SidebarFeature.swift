@@ -1,5 +1,6 @@
 import ComposableArchitecture
 import Foundation
+import SwiftUI
 import SQLiteData
 
 @Selection struct TagWithCount: Identifiable {
@@ -8,10 +9,35 @@ import SQLiteData
     var id: Tag.ID { tag.id }
 }
 
+@Selection struct SmartFilterCounts {
+    var all = 0
+    var completed = 0
+    var recent = 0
+
+    subscript(filter: IssueFilter) -> Int {
+        switch filter {
+        case .all: all
+        case .completed: completed
+        case .recent: recent
+        case .tag: 0
+        }
+    }
+}
+
 @Reducer struct SidebarFeature {
     @ObservableState struct State {
         var selectedFilter: IssueFilter? = .all
-        @Fetch(IssueFilter.smartFilterCounts) var smartFilterCounts = .init()
+        @FetchOne(
+            Issue.select {
+                SmartFilterCounts.Columns(
+                    all: $0.count(),
+                    completed: $0.count(filter: $0.completed),
+                    recent: $0.count(filter: $0.isRecent)
+                )
+            },
+            animation: .default
+        )
+        var smartFilterCounts = SmartFilterCounts()
         @FetchAll(
             Tag
                 .group(by: \.id)
@@ -23,7 +49,8 @@ import SQLiteData
                         tag: tags,
                         activeIssueCount: issues.count(distinct: true, filter: issues.completed.neq(true))
                     )
-                }
+                },
+            animation: .default
         ) var tagRows
     }
 

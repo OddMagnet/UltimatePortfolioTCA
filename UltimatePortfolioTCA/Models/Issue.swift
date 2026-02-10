@@ -20,6 +20,13 @@ import SwiftUI
     let modified: Date?
 }
 
+extension Issue.TableColumns {
+    var isRecent: some QueryExpression<Bool> {
+        self.created.gte(#sql("datetime('now', '-7 days', 'subsec')"))
+        || self.modified.gte(#sql("datetime('now', '-7 days', 'subsec')"))
+    }
+}
+
 extension Issue {
     var priorityColor: Color {
         switch priority {

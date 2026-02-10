@@ -24,9 +24,7 @@ import SwiftUI
                         switch filter {
                         case .all: true
                         case .completed: $0.completed
-                        case .recent:
-                            $0.created.gte(#sql("datetime('now', '-7 days', 'subsec')"))
-                            || $0.modified.gte(#sql("datetime('now', '-7 days', 'subsec')"))
+                        case .recent: $0.isRecent
                         case let .tag(tag):
                             $0.id.in(
                                 IssueTag.select(\.issueID).where { $0.tagID.eq(tag.id) }

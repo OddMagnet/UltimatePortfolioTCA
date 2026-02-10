@@ -11,6 +11,7 @@ import SQLiteData
 @Reducer struct SidebarFeature {
     @ObservableState struct State {
         var selectedFilter: IssueFilter? = .all
+        @Fetch(IssueFilter.smartFilterCounts) var smartFilterCounts = .init()
         @FetchAll(
             Tag
                 .group(by: \.id)

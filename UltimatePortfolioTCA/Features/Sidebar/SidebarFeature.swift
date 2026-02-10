@@ -2,10 +2,28 @@ import ComposableArchitecture
 import Foundation
 import SQLiteData
 
+@Selection struct TagWithCount: Identifiable {
+    var tag: Tag
+    var activeIssueCount: Int
+    var id: Tag.ID { tag.id }
+}
+
 @Reducer struct SidebarFeature {
     @ObservableState struct State {
         var selectedFilter: IssueFilter? = .all
-        @FetchAll(Tag.order(by: \.name)) var tags
+        @FetchAll(
+            Tag
+                .group(by: \.id)
+                .order(by: \.name)
+                .leftJoin(IssueTag.all) { $0.id.eq($1.tagID) }
+                .leftJoin(Issue.all) { $1.issueID.eq($2.id) }
+                .select { tags, _, issues in
+                    TagWithCount.Columns(
+                        tag: tags,
+                        activeIssueCount: issues.count(distinct: true, filter: issues.completed.neq(true))
+                    )
+                }
+        ) var tagRows
     }
 
     enum Action: BindableAction {
@@ -28,7 +46,7 @@ import SQLiteData
             case .delegate:
                 return .none
             case let .deleteTagsSwiped(offsets):
-                let ids = offsets.map { state.tags[$0].id }
+                let ids = offsets.map { state.tagRows[$0].tag.id }
                 let didDeleteSelectedFilter = switch(state.selectedFilter) {
                 case let .tag(tag): ids.contains(tag.id)
                 default: false

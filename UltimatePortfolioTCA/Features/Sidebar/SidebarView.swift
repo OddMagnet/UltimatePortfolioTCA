@@ -13,12 +13,14 @@ struct SidebarView: View {
             }
 
             Section("Tags") {
-                if store.tags.isEmpty {
+                if store.tagRows.isEmpty {
                     Text("No tags yet")
                         .foregroundStyle(.secondary)
                 } else {
-                    ForEach(store.tags) { tag in
-                        FilterRow(filter: .tag(tag))
+                    ForEach(store.tagRows) { row in
+                        Label(row.tag.name, systemImage: "tag")
+                            .badge(row.activeIssueCount)
+                            .tag(IssueFilter.tag(row.tag))
                     }
                     .onDelete { store.send(.deleteTagsSwiped(offsets: $0)) }
                 }

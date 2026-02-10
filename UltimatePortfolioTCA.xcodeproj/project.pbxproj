@@ -10,6 +10,9 @@
 		4C4405012F366C76005052D0 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 4C4405002F366C76005052D0 /* ComposableArchitecture */; };
 		4C4405042F366D76005052D0 /* SQLiteData in Frameworks */ = {isa = PBXBuildFile; productRef = 4C4405032F366D76005052D0 /* SQLiteData */; };
 		4C4405062F366D76005052D0 /* SQLiteDataTestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 4C4405052F366D76005052D0 /* SQLiteDataTestSupport */; };
+		4CAE80DF2F3B53C7006056D0 /* DependenciesTestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 4CAE80DE2F3B53C7006056D0 /* DependenciesTestSupport */; };
+		4CAE80E22F3B53CF006056D0 /* SQLiteDataTestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 4CAE80E12F3B53CF006056D0 /* SQLiteDataTestSupport */; };
+		4CAE80E42F3B53D3006056D0 /* DependenciesTestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 4CAE80E32F3B53D3006056D0 /* DependenciesTestSupport */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -81,6 +84,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4C4405062F366D76005052D0 /* SQLiteDataTestSupport in Frameworks */,
+				4CAE80DF2F3B53C7006056D0 /* DependenciesTestSupport in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -88,6 +92,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4CAE80E22F3B53CF006056D0 /* SQLiteDataTestSupport in Frameworks */,
+				4CAE80E42F3B53D3006056D0 /* DependenciesTestSupport in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -100,6 +106,7 @@
 				4C4404D72F366C21005052D0 /* UltimatePortfolioTCA */,
 				4C4404E52F366C22005052D0 /* UltimatePortfolioTCATests */,
 				4C4404EF2F366C22005052D0 /* UltimatePortfolioTCAUITests */,
+				4CAE80E02F3B53CF006056D0 /* Frameworks */,
 				4C4404D62F366C21005052D0 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -112,6 +119,13 @@
 				4C4404EC2F366C22005052D0 /* UltimatePortfolioTCAUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		4CAE80E02F3B53CF006056D0 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -160,6 +174,7 @@
 			name = UltimatePortfolioTCATests;
 			packageProductDependencies = (
 				4C4405052F366D76005052D0 /* SQLiteDataTestSupport */,
+				4CAE80DE2F3B53C7006056D0 /* DependenciesTestSupport */,
 			);
 			productName = UltimatePortfolioTests;
 			productReference = 4C4404E22F366C22005052D0 /* UltimatePortfolioTCATests.xctest */;
@@ -183,6 +198,8 @@
 			);
 			name = UltimatePortfolioTCAUITests;
 			packageProductDependencies = (
+				4CAE80E12F3B53CF006056D0 /* SQLiteDataTestSupport */,
+				4CAE80E32F3B53D3006056D0 /* DependenciesTestSupport */,
 			);
 			productName = UltimatePortfolioUITests;
 			productReference = 4C4404EC2F366C22005052D0 /* UltimatePortfolioTCAUITests.xctest */;
@@ -223,6 +240,7 @@
 			packageReferences = (
 				4C4404FF2F366C76005052D0 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
 				4C4405022F366D76005052D0 /* XCRemoteSwiftPackageReference "sqlite-data" */,
+				4CAE80DD2F3B53C7006056D0 /* XCRemoteSwiftPackageReference "swift-dependencies" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 4C4404D62F366C21005052D0 /* Products */;
@@ -690,6 +708,14 @@
 				minimumVersion = 1.5.1;
 			};
 		};
+		4CAE80DD2F3B53C7006056D0 /* XCRemoteSwiftPackageReference "swift-dependencies" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-dependencies";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.11.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -707,6 +733,21 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4C4405022F366D76005052D0 /* XCRemoteSwiftPackageReference "sqlite-data" */;
 			productName = SQLiteDataTestSupport;
+		};
+		4CAE80DE2F3B53C7006056D0 /* DependenciesTestSupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4CAE80DD2F3B53C7006056D0 /* XCRemoteSwiftPackageReference "swift-dependencies" */;
+			productName = DependenciesTestSupport;
+		};
+		4CAE80E12F3B53CF006056D0 /* SQLiteDataTestSupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4C4405022F366D76005052D0 /* XCRemoteSwiftPackageReference "sqlite-data" */;
+			productName = SQLiteDataTestSupport;
+		};
+		4CAE80E32F3B53D3006056D0 /* DependenciesTestSupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4CAE80DD2F3B53C7006056D0 /* XCRemoteSwiftPackageReference "swift-dependencies" */;
+			productName = DependenciesTestSupport;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

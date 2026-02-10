@@ -35,7 +35,7 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 ## Database
 
 - **Setup**: `Schema.swift` in `Dependencies/` — `bootstrapDatabase()` on `DependencyValues` configures the database, runs migrations, seeds sample data, and starts `SyncEngine`.
-- **Sample data**: `SampleData.swift` in `Dependencies/` — `seedSampleData()` provides seed issues, tags, and associations for development/previews.
+- **Sample data**: `SampleData.swift` in `Dependencies/` — `seedSampleData()` on `DatabaseWriter` provides seed issues (with varied creation/modification dates), tags, and associations for development/previews.
 - **Models**: `Issue`, `Tag`, `IssueTag` (join table) — all use `@Table` with UUID primary keys.
 - **iCloud sync**: `SyncEngine` initialized for all three tables. Entitlements and `CKSharingSupported` are configured. Metadatabase is attached for future sharing support.
 - **Foreign keys**: `configuration.foreignKeysEnabled = true` — enforced at runtime.
@@ -44,7 +44,7 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 - **Date precision**: `datetime('subsec')` for sub-second precision.
 - **Debug only**: `eraseDatabaseOnSchemaChange = true`, SQL query tracing via `os.Logger`.
 - **Context-aware database**: `SQLiteData.defaultDatabase()` automatically uses in-memory for previews, temporary file for tests, app container for live.
-- **Previews**: Use `withPreviewDependencies { ... }` (in `Dependencies/PreviewDependencies.swift`) to bootstrap dependencies in `#Preview`. This wraps `withDependencies` as a workaround for a `prepareDependencies` bug in swift-dependencies 1.10.1 with `@FetchAll`.
+- **Previews**: Use TCA's `Store(initialState:reducer:withDependencies:)` initializer with `{ try! $0.bootstrapDatabase() }` to bootstrap dependencies in `#Preview`. This is a workaround for a `prepareDependencies` bug in swift-dependencies (since 1.10.1) with `@FetchAll` — revert to `prepareDependencies` once fixed.
 - **App entry point**: `prepareDependencies` must complete before `Store` initialization, since `AppFeature.State()` constructs child states with `@FetchAll` queries that require the database.
 
 ## Key Dependencies
@@ -76,7 +76,7 @@ The Xcode project uses **File System Synchronized Groups** — the on-disk folde
 UltimatePortfolioTCA/
   App/                  — App entry point (UltimatePortfolioTCAApp.swift)
   Assets.xcassets
-  Dependencies/         — Database setup, sample data, preview helpers (Schema.swift, SampleData.swift, PreviewDependencies.swift)
+  Dependencies/         — Database setup, sample data (Schema.swift, SampleData.swift)
   Features/
     App/                — Root AppFeature + AppView (NavigationSplitView)
     Sidebar/            — SidebarFeature + SidebarView + IssueFilter

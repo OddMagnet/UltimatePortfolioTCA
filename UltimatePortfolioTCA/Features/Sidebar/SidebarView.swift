@@ -49,11 +49,11 @@ private struct FilterRow: View {
 }
 
 #Preview {
-    withPreviewDependencies {
-        NavigationView {
-            SidebarView(store: Store(initialState: SidebarFeature.State()) {
-                SidebarFeature()
-            })
-        }
+    NavigationStack {
+        SidebarView(store: Store(
+            initialState: SidebarFeature.State(),
+            reducer: { SidebarFeature() },
+            withDependencies: { try! $0.bootstrapDatabase() }
+        ))
     }
 }

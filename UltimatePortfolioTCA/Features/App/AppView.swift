@@ -24,9 +24,9 @@ struct AppView: View {
 }
 
 #Preview {
-    withPreviewDependencies {
-        AppView(store: Store(initialState: AppFeature.State()) {
-            AppFeature()
-        })
-    }
+    AppView(store: Store(
+        initialState: AppFeature.State(),
+        reducer: { AppFeature() },
+        withDependencies: { try! $0.bootstrapDatabase() }
+    ))
 }

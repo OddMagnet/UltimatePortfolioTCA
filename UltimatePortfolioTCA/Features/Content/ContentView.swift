@@ -59,9 +59,11 @@ private struct IssueRow: View {
 }
 
 #Preview {
-    withPreviewDependencies {
-        ContentView(store: Store(initialState: ContentFeature.State(filter: .all)) {
-            ContentFeature()
-        })
+    NavigationStack {
+        ContentView(store: Store(
+            initialState: ContentFeature.State(filter: .all),
+            reducer: { ContentFeature() },
+            withDependencies: { try! $0.bootstrapDatabase() }
+        ))
     }
 }

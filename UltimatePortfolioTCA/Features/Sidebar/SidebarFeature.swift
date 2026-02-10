@@ -40,6 +40,8 @@ import SQLiteData
     @Dependency(\.defaultDatabase) var database
 
     var body: some Reducer<State, Action> {
+        BindingReducer()
+
         Reduce { state, action in
             switch action {
             case .binding(\.selectedFilter):
@@ -68,6 +70,5 @@ import SQLiteData
                 }
             }
         }
-        BindingReducer()
     }
 }

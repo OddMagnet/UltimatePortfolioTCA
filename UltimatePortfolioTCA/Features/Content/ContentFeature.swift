@@ -19,7 +19,10 @@ import SwiftUI
             _issueRows = FetchAll(
                 Issue
                     .group(by: \.id)
-                    .order { ($0.priority.desc(nulls: .last), $0.modified.desc(nulls: .last), $0.created.desc()) }
+                    .order(by: \.completed)
+                    .order { $0.priority.desc(nulls: .last) }
+                    .order { $0.modified.desc(nulls: .last) }
+                    .order { $0.created.desc() }
                     .where {
                         switch filter {
                         case .all: true
@@ -57,6 +60,8 @@ import SwiftUI
     @Dependency(\.defaultDatabase) var database
 
     var body: some Reducer<State, Action> {
+        BindingReducer()
+
         Reduce { state, action in
             switch action {
             case .binding(\.selectedIssue):
@@ -85,6 +90,5 @@ import SwiftUI
                 }
             }
         }
-        BindingReducer()
     }
 }

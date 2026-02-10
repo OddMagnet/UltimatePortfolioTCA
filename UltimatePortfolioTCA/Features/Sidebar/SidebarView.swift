@@ -20,6 +20,7 @@ struct SidebarView: View {
                     ForEach(store.tags) { tag in
                         FilterRow(filter: .tag(tag))
                     }
+                    .onDelete { store.send(.deleteTagsSwiped(offsets: $0)) }
                 }
             }
         }

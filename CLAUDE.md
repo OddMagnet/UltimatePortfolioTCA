@@ -27,7 +27,7 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 
 - **UI Framework**: SwiftUI with `#Preview` macros
 - **App Architecture**: Composable Architecture (TCA) from pointfreeco — features are `@Reducer` structs with `@ObservableState struct State`, `enum Action`, and `var body: some Reducer<State, Action>`. Views take `StoreOf<Feature>` directly (do NOT use legacy `ViewStore`/`WithViewStore`).
-- **Navigation**: Three-column `NavigationSplitView` — Sidebar (always present), Content (optional, shown when a filter is selected), Detail (optional, shown when an issue is selected). `AppFeature` composes children via `Scope` (sidebar) and `.ifLet` (content/detail). Child-to-parent communication uses `BindableAction` — the parent intercepts binding changes to drive navigation.
+- **Navigation**: Three-column `NavigationSplitView` — Sidebar (always present), Content (optional, shown when a filter is selected), Detail (optional, shown when an issue is selected). `AppFeature` composes children via `Scope` (sidebar) and `.ifLet` (content/detail). Child-to-parent communication uses `BindableAction` for UI-driven changes and delegate actions for programmatic state changes — the parent intercepts both to drive navigation.
 - **Persistence**: SQLiteData (pointfreeco) with StructuredQueries for type-safe SQL (`@Table`, not GRDB's `FetchableRecord`/`PersistableRecord`). The test target links `SQLiteDataTestSupport` for in-memory database testing.
 - **Database observation**: `@FetchAll`/`@FetchOne`/`@Fetch` live in TCA reducer `@ObservableState` (not in views), so the reducer can update queries dynamically for sorting/filtering.
 - **Testing**: Swift Testing framework (`import Testing`, `@Test`, `@Suite`, `#expect`)

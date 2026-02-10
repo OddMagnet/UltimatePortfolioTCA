@@ -13,6 +13,7 @@ struct ContentView: View {
                     IssueRow(issue: issue)
                         .tag(issue)
                 }
+                .onDelete { store.send(.deleteIssuesSwiped(offsets: $0)) }
             }
         }
         .navigationTitle(store.filter.title)

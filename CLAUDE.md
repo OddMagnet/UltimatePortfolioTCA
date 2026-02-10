@@ -45,6 +45,7 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 - **Debug only**: `eraseDatabaseOnSchemaChange = true`, SQL query tracing via `os.Logger`.
 - **Context-aware database**: `SQLiteData.defaultDatabase()` automatically uses in-memory for previews, temporary file for tests, app container for live.
 - **Previews**: Use `withPreviewDependencies { ... }` (in `Dependencies/PreviewDependencies.swift`) to bootstrap dependencies in `#Preview`. This wraps `withDependencies` as a workaround for a `prepareDependencies` bug in swift-dependencies 1.10.1 with `@FetchAll`.
+- **App entry point**: `prepareDependencies` must complete before `Store` initialization, since `AppFeature.State()` constructs child states with `@FetchAll` queries that require the database.
 
 ## Key Dependencies
 

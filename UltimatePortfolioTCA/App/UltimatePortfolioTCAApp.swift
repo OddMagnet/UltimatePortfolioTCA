@@ -11,13 +11,14 @@ import SwiftUI
 
 @main
 struct UltimatePortfolioTCAApp: App {
-    let store = Store(initialState: AppFeature.State()) {
-        AppFeature()
-    }
+    let store: StoreOf<AppFeature>
 
     init() {
         prepareDependencies {
             try! $0.bootstrapDatabase()
+        }
+        store = Store(initialState: AppFeature.State()) {
+            AppFeature()
         }
     }
 

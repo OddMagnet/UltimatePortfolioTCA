@@ -6,11 +6,38 @@ struct ContentView: View {
 
     var body: some View {
         List(selection: $store.selectedIssue) {
-            // Issue rows will be added when DB queries are wired
+            if store.issues.isEmpty {
+                ContentUnavailableView("No Issues", systemImage: "tray")
+            } else {
+                ForEach(store.issues) { issue in
+                    IssueRow(issue: issue)
+                        .tag(issue)
+                }
+            }
         }
         .navigationTitle(store.filter.title)
-        .overlay {
-            ContentUnavailableView("No Issues", systemImage: "tray")
+    }
+}
+
+private struct IssueRow: View {
+    let issue: Issue
+
+    var body: some View {
+        HStack {
+            Circle()
+                .fill(issue.priorityColor)
+                .frame(width: 10, height: 10)
+
+            Text(issue.title)
+                .strikethrough(issue.completed)
+                .foregroundStyle(issue.completed ? .secondary : .primary)
+
+            Spacer()
+
+            if issue.completed {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+            }
         }
     }
 }

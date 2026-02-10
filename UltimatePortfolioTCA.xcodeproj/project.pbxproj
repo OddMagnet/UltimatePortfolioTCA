@@ -11,19 +11,10 @@
 		4C4405042F366D76005052D0 /* SQLiteData in Frameworks */ = {isa = PBXBuildFile; productRef = 4C4405032F366D76005052D0 /* SQLiteData */; };
 		4C4405062F366D76005052D0 /* SQLiteDataTestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 4C4405052F366D76005052D0 /* SQLiteDataTestSupport */; };
 		4CAE80DF2F3B53C7006056D0 /* DependenciesTestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 4CAE80DE2F3B53C7006056D0 /* DependenciesTestSupport */; };
-		4CAE80E22F3B53CF006056D0 /* SQLiteDataTestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 4CAE80E12F3B53CF006056D0 /* SQLiteDataTestSupport */; };
-		4CAE80E42F3B53D3006056D0 /* DependenciesTestSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 4CAE80E32F3B53D3006056D0 /* DependenciesTestSupport */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
 		4C4404E32F366C22005052D0 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 4C4404CD2F366C20005052D0 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 4C4404D42F366C21005052D0;
-			remoteInfo = UltimatePortfolio;
-		};
-		4C4404ED2F366C22005052D0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 4C4404CD2F366C20005052D0 /* Project object */;
 			proxyType = 1;
@@ -35,7 +26,6 @@
 /* Begin PBXFileReference section */
 		4C4404D52F366C21005052D0 /* UltimatePortfolioTCA.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UltimatePortfolioTCA.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4C4404E22F366C22005052D0 /* UltimatePortfolioTCATests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UltimatePortfolioTCATests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		4C4404EC2F366C22005052D0 /* UltimatePortfolioTCAUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UltimatePortfolioTCAUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -62,11 +52,6 @@
 			path = UltimatePortfolioTCATests;
 			sourceTree = "<group>";
 		};
-		4C4404EF2F366C22005052D0 /* UltimatePortfolioTCAUITests */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = UltimatePortfolioTCAUITests;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -88,15 +73,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		4C4404E92F366C22005052D0 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				4CAE80E22F3B53CF006056D0 /* SQLiteDataTestSupport in Frameworks */,
-				4CAE80E42F3B53D3006056D0 /* DependenciesTestSupport in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -105,7 +81,6 @@
 			children = (
 				4C4404D72F366C21005052D0 /* UltimatePortfolioTCA */,
 				4C4404E52F366C22005052D0 /* UltimatePortfolioTCATests */,
-				4C4404EF2F366C22005052D0 /* UltimatePortfolioTCAUITests */,
 				4CAE80E02F3B53CF006056D0 /* Frameworks */,
 				4C4404D62F366C21005052D0 /* Products */,
 			);
@@ -116,7 +91,6 @@
 			children = (
 				4C4404D52F366C21005052D0 /* UltimatePortfolioTCA.app */,
 				4C4404E22F366C22005052D0 /* UltimatePortfolioTCATests.xctest */,
-				4C4404EC2F366C22005052D0 /* UltimatePortfolioTCAUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -180,31 +154,6 @@
 			productReference = 4C4404E22F366C22005052D0 /* UltimatePortfolioTCATests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		4C4404EB2F366C22005052D0 /* UltimatePortfolioTCAUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 4C4404FC2F366C22005052D0 /* Build configuration list for PBXNativeTarget "UltimatePortfolioTCAUITests" */;
-			buildPhases = (
-				4C4404E82F366C22005052D0 /* Sources */,
-				4C4404E92F366C22005052D0 /* Frameworks */,
-				4C4404EA2F366C22005052D0 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				4C4404EE2F366C22005052D0 /* PBXTargetDependency */,
-			);
-			fileSystemSynchronizedGroups = (
-				4C4404EF2F366C22005052D0 /* UltimatePortfolioTCAUITests */,
-			);
-			name = UltimatePortfolioTCAUITests;
-			packageProductDependencies = (
-				4CAE80E12F3B53CF006056D0 /* SQLiteDataTestSupport */,
-				4CAE80E32F3B53D3006056D0 /* DependenciesTestSupport */,
-			);
-			productName = UltimatePortfolioUITests;
-			productReference = 4C4404EC2F366C22005052D0 /* UltimatePortfolioTCAUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -219,10 +168,6 @@
 						CreatedOnToolsVersion = 26.3;
 					};
 					4C4404E12F366C22005052D0 = {
-						CreatedOnToolsVersion = 26.3;
-						TestTargetID = 4C4404D42F366C21005052D0;
-					};
-					4C4404EB2F366C22005052D0 = {
 						CreatedOnToolsVersion = 26.3;
 						TestTargetID = 4C4404D42F366C21005052D0;
 					};
@@ -249,7 +194,6 @@
 			targets = (
 				4C4404D42F366C21005052D0 /* UltimatePortfolioTCA */,
 				4C4404E12F366C22005052D0 /* UltimatePortfolioTCATests */,
-				4C4404EB2F366C22005052D0 /* UltimatePortfolioTCAUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -263,13 +207,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		4C4404E02F366C22005052D0 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		4C4404EA2F366C22005052D0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -293,13 +230,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		4C4404E82F366C22005052D0 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -307,11 +237,6 @@
 			isa = PBXTargetDependency;
 			target = 4C4404D42F366C21005052D0 /* UltimatePortfolioTCA */;
 			targetProxy = 4C4404E32F366C22005052D0 /* PBXContainerItemProxy */;
-		};
-		4C4404EE2F366C22005052D0 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 4C4404D42F366C21005052D0 /* UltimatePortfolioTCA */;
-			targetProxy = 4C4404ED2F366C22005052D0 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -594,62 +519,6 @@
 			};
 			name = Release;
 		};
-		4C4404FD2F366C22005052D0 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = K5ZJLTFVCL;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
-				MACOSX_DEPLOYMENT_TARGET = 26.2;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.oddmagnet.UltimatePortfolioUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_EXISTENTIAL_ANY = YES;
-				SWIFT_UPCOMING_FEATURE_INTERNAL_IMPORTS_BY_DEFAULT = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_TARGET_NAME = UltimatePortfolio;
-				XROS_DEPLOYMENT_TARGET = 26.2;
-			};
-			name = Debug;
-		};
-		4C4404FE2F366C22005052D0 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = K5ZJLTFVCL;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
-				MACOSX_DEPLOYMENT_TARGET = 26.2;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = dev.oddmagnet.UltimatePortfolioUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
-				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_UPCOMING_FEATURE_EXISTENTIAL_ANY = YES;
-				SWIFT_UPCOMING_FEATURE_INTERNAL_IMPORTS_BY_DEFAULT = YES;
-				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_TARGET_NAME = UltimatePortfolio;
-				XROS_DEPLOYMENT_TARGET = 26.2;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -676,15 +545,6 @@
 			buildConfigurations = (
 				4C4404FA2F366C22005052D0 /* Debug */,
 				4C4404FB2F366C22005052D0 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		4C4404FC2F366C22005052D0 /* Build configuration list for PBXNativeTarget "UltimatePortfolioTCAUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				4C4404FD2F366C22005052D0 /* Debug */,
-				4C4404FE2F366C22005052D0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -735,16 +595,6 @@
 			productName = SQLiteDataTestSupport;
 		};
 		4CAE80DE2F3B53C7006056D0 /* DependenciesTestSupport */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 4CAE80DD2F3B53C7006056D0 /* XCRemoteSwiftPackageReference "swift-dependencies" */;
-			productName = DependenciesTestSupport;
-		};
-		4CAE80E12F3B53CF006056D0 /* SQLiteDataTestSupport */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 4C4405022F366D76005052D0 /* XCRemoteSwiftPackageReference "sqlite-data" */;
-			productName = SQLiteDataTestSupport;
-		};
-		4CAE80E32F3B53D3006056D0 /* DependenciesTestSupport */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 4CAE80DD2F3B53C7006056D0 /* XCRemoteSwiftPackageReference "swift-dependencies" */;
 			productName = DependenciesTestSupport;

@@ -2,7 +2,7 @@ import ComposableArchitecture
 import SwiftUI
 
 struct AppView: View {
-    @Bindable var store: StoreOf<AppFeature>
+    let store: StoreOf<AppFeature>
 
     var body: some View {
         NavigationSplitView {

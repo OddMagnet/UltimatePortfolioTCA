@@ -54,13 +54,18 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 | [swift-composable-architecture](https://github.com/pointfreeco/swift-composable-architecture) >= 1.23.1 | `ComposableArchitecture` | App |
 | [sqlite-data](https://github.com/pointfreeco/sqlite-data) >= 1.5.1 | `SQLiteData` | App |
 | [sqlite-data](https://github.com/pointfreeco/sqlite-data) >= 1.5.1 | `SQLiteDataTestSupport` | Tests |
+| [swift-dependencies](https://github.com/pointfreeco/swift-dependencies) >= 1.11.0 | `DependenciesTestSupport` | Tests |
 
 ## Swift Settings
 
 - **Swift 6 language mode**: All targets use Swift 6 (`SWIFT_VERSION = 6.0`).
 - **Strict concurrency**: `SWIFT_STRICT_CONCURRENCY = complete` at the project level.
 - **Default nonisolated**: `SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated` — traditional Swift default. Mark `@MainActor` explicitly when needed.
-- **Member import visibility**: `SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES` — modules must be explicitly imported to use their members.
+- **Approachable concurrency**: `SWIFT_APPROACHABLE_CONCURRENCY = YES` — enables Swift 6.2 approachable concurrency.
+- **Upcoming features**:
+  - `SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES` — modules must be explicitly imported to use their members.
+  - `SWIFT_UPCOMING_FEATURE_INTERNAL_IMPORTS_BY_DEFAULT = YES` — imports are internal by default.
+  - `SWIFT_UPCOMING_FEATURE_EXISTENTIAL_ANY = YES` — requires `any` keyword for existential types.
 - Deployment targets: iOS 26.2, macOS 26.2, visionOS 26.2
 
 ## Project Structure
@@ -79,7 +84,6 @@ UltimatePortfolioTCA/
     Detail/             — DetailFeature + DetailView (single issue)
   Models/               — Data models (Issue.swift, Tag.swift, IssueTag.swift)
 UltimatePortfolioTCATests/    — Unit tests (Swift Testing)
-UltimatePortfolioTCAUITests/  — UI tests
 ```
 
 ## Point-Free Skills (slash commands)

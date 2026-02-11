@@ -38,21 +38,37 @@ import SQLiteData
             animation: .default
         )
         var smartFilterCounts = SmartFilterCounts()
-        // Group → Sort → Join → Select
-        @FetchAll(
+        @Shared(.appStorage("tagSortOrder")) var sortOrder: TagSortOrder = .name
+        @Shared(.appStorage("tagSortAscending")) var sortAscending = TagSortOrder.name.defaultAscending
+        @FetchAll var tagRows: [TagWithCount] = []
+
+        init(selectedFilter: IssueFilter? = .all) {
+            self.selectedFilter = selectedFilter
+            _tagRows = FetchAll(tagQuery, animation: .default)
+        }
+
+        // Group → Join → Sort → Select
+        var tagQuery: some Statement<TagWithCount> {
             Tag
                 .group(by: \.id)
-                .order(by: \.name)
                 .leftJoin(IssueTag.all) { $0.id.eq($1.tagID) }
                 .leftJoin(Issue.all) { $1.issueID.eq($2.id) }
+                .order { tags, _, issues in
+                    switch (sortOrder, sortAscending) {
+                    case (.name, true): tags.name.asc()
+                    case (.name, false): tags.name.desc()
+                    case (.issueCount, true): issues.count(distinct: true, filter: issues.isCompleted.neq(true)).asc()
+                    case (.issueCount, false): issues.count(distinct: true, filter: issues.isCompleted.neq(true)).desc()
+                    }
+                }
+                .order { tags, _, _ in tags.name }
                 .select { tags, _, issues in
                     TagWithCount.Columns(
                         tag: tags,
                         activeIssueCount: issues.count(distinct: true, filter: issues.isCompleted.neq(true))
                     )
-                },
-            animation: .default
-        ) var tagRows
+                }
+        }
     }
 
     enum Action: BindableAction, ViewAction {
@@ -66,6 +82,7 @@ import SQLiteData
 
         enum View {
             case deleteTagsSwiped(offsets: IndexSet)
+            case didSelectOrder(TagSortOrder)
         }
     }
 
@@ -99,6 +116,17 @@ import SQLiteData
                         }
                     }
                     if didDeleteSelectedFilter { await send(.delegate(.selectedFilterChanged(nil))) }
+                }
+
+            case let .view(.didSelectOrder(order)):
+                if state.sortOrder == order {
+                    state.$sortAscending.withLock { $0.toggle() }
+                } else {
+                    state.$sortAscending.withLock { $0 = order.defaultAscending }
+                    state.$sortOrder.withLock { $0 = order }
+                }
+                return .run { [state] _ in
+                    try await state.$tagRows.load(state.tagQuery, animation: .default)
                 }
             }
         }

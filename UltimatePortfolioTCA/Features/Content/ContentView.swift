@@ -24,15 +24,29 @@ struct ContentView: View {
         .toolbar {
             if store.filter != .completed {
                 Button {
-                    withAnimation {
-                        $store.showCompleted.wrappedValue.toggle()
-                    }
+                    store.showCompleted.toggle()
                 } label: {
                     Label(
                         store.showCompleted ? "Hide Completed" : "Show Completed",
                         systemImage: store.showCompleted ? "eye" : "eye.slash"
                     )
                 }
+            }
+
+            Menu {
+                ForEach(IssueSortOrder.allCases) { order in
+                    Button {
+                        send(.didSelectOrder(order))
+                    } label: {
+                        if order == store.sortOrder {
+                            Label(order.label, systemImage: store.sortAscending ? "chevron.up" : "chevron.down")
+                        } else {
+                            Text(order.label)
+                        }
+                    }
+                }
+            } label: {
+                Label("Sort", systemImage: "arrow.up.arrow.down")
             }
         }
     }

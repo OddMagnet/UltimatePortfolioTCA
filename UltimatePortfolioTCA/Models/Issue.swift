@@ -21,9 +21,12 @@ import SwiftUI
 }
 
 extension Issue.TableColumns {
+    var lastActivity: some QueryExpression<Date> {
+        self.modified.ifnull(self.created)
+    }
+
     var isRecent: some QueryExpression<Bool> {
-        self.created.gte(#sql("datetime('now', '-7 days', 'subsec')"))
-        || self.modified.gte(#sql("datetime('now', '-7 days', 'subsec')"))
+        self.lastActivity.gte(#sql("datetime('now', '-7 days', 'subsec')"))
     }
 }
 

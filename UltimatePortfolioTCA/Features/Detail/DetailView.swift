@@ -5,21 +5,23 @@ struct DetailView: View {
     let store: StoreOf<DetailFeature>
 
     var body: some View {
-        if let issue = store.issue {
-            Form {
-                Section("Title") {
-                    Text(issue.title)
-                }
+        Group {
+            if let issue = store.issue {
+                Form {
+                    Section("Title") {
+                        Text(issue.title)
+                    }
 
-                Section("Detail") {
-                    Text(issue.detail)
+                    Section("Detail") {
+                        Text(issue.detail)
+                    }
                 }
+            } else {
+                ContentUnavailableView("Issue Not Found", systemImage: "exclamationmark.triangle")
             }
-            .navigationTitle(issue.title)
-            .navigationBarTitleDisplayMode(.large)
-        } else {
-            ContentUnavailableView("Issue Not Found", systemImage: "exclamationmark.triangle")
         }
+        .navigationTitle("Details")
+        .toolbarTitleDisplayMode(.inlineLarge)
     }
 }
 

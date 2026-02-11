@@ -6,19 +6,21 @@ struct ContentView: View {
     @Bindable var store: StoreOf<ContentFeature>
 
     var body: some View {
-        List(selection: $store.selectedIssue) {
+        Group {
             if store.issueRows.isEmpty {
                 ContentUnavailableView("No Issues", systemImage: "tray")
             } else {
-                ForEach(store.issueRows) { row in
-                    IssueRow(row)
-                        .tag(row.issue)
+                List(selection: $store.selectedIssue) {
+                    ForEach(store.issueRows) { row in
+                        IssueRow(row)
+                            .tag(row.issue)
+                    }
+                    .onDelete { send(.deleteIssuesSwiped(offsets: $0)) }
                 }
-                .onDelete { send(.deleteIssuesSwiped(offsets: $0)) }
             }
         }
         .navigationTitle(store.filter.title)
-        .navigationBarTitleDisplayMode(.large)
+        .toolbarTitleDisplayMode(.inlineLarge)
         .toolbar {
             if store.filter != .completed {
                 Button {

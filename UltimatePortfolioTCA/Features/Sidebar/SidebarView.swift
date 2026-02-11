@@ -24,7 +24,7 @@ struct SidebarView: View {
             }
         }
         .navigationTitle("Filters")
-        .navigationBarTitleDisplayMode(.large)
+        .toolbarTitleDisplayMode(.inlineLarge)
     }
 }
 

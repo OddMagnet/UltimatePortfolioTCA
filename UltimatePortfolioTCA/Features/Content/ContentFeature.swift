@@ -12,21 +12,22 @@ import SwiftUI
     @ObservableState struct State {
         var filter: IssueFilter
         var selectedIssue: Issue?
+        @Shared(.appStorage("showCompleted")) var showCompleted = false
         @FetchAll var issueRows: [IssueWithTags] = []
 
         init(filter: IssueFilter) {
             self.filter = filter
+            updateIssueQuery()
+        }
+
+        // Filter → Group → Sort → Join → Select
+        mutating func updateIssueQuery() {
             _issueRows = FetchAll(
                 Issue
-                    .group(by: \.id)
-                    .order(by: \.completed)
-                    .order { $0.priority.desc(nulls: .last) }
-                    .order { $0.modified.desc(nulls: .last) }
-                    .order { $0.created.desc() }
                     .where {
                         switch filter {
                         case .all: true
-                        case .completed: $0.completed
+                        case .completed: $0.isCompleted
                         case .recent: $0.isRecent
                         case let .tag(tag):
                             $0.id.in(
@@ -34,6 +35,16 @@ import SwiftUI
                             )
                         }
                     }
+                    .where {
+                        if !showCompleted && filter != .completed {
+                            !$0.isCompleted
+                        }
+                    }
+                    .group(by: \.id)
+                    .order(by: \.isCompleted)
+                    .order { $0.priority.desc(nulls: .last) }
+                    .order { $0.modified.desc(nulls: .last) }
+                    .order { $0.created.desc() }
                     .leftJoin(IssueTag.all) { $0.id.eq($1.issueID) }
                     .leftJoin(Tag.all) { $1.tagID.eq($2.id) }
                     .select { issues, _, tags in
@@ -70,6 +81,10 @@ import SwiftUI
             switch action {
             case .binding(\.selectedIssue):
                 return .send(.delegate(.selectedIssueChanged(state.selectedIssue)))
+
+            case .binding(\.showCompleted):
+                state.updateIssueQuery()
+                return .none
 
             case .binding:
                 return .none

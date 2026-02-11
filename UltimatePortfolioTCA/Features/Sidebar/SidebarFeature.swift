@@ -31,13 +31,14 @@ import SQLiteData
             Issue.select {
                 SmartFilterCounts.Columns(
                     all: $0.count(),
-                    completed: $0.count(filter: $0.completed),
+                    completed: $0.count(filter: $0.isCompleted),
                     recent: $0.count(filter: $0.isRecent)
                 )
             },
             animation: .default
         )
         var smartFilterCounts = SmartFilterCounts()
+        // Group → Sort → Join → Select
         @FetchAll(
             Tag
                 .group(by: \.id)
@@ -47,7 +48,7 @@ import SQLiteData
                 .select { tags, _, issues in
                     TagWithCount.Columns(
                         tag: tags,
-                        activeIssueCount: issues.count(distinct: true, filter: issues.completed.neq(true))
+                        activeIssueCount: issues.count(distinct: true, filter: issues.isCompleted.neq(true))
                     )
                 },
             animation: .default

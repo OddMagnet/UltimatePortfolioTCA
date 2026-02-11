@@ -1,10 +1,3 @@
-//
-//  UltimatePortfolioTCAApp.swift
-//  UltimatePortfolioTCA
-//
-//  Created by Michael Brünen on 06.02.26.
-//
-
 import ComposableArchitecture
 import Dependencies
 import SwiftUI

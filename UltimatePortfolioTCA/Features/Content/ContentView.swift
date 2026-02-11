@@ -19,6 +19,20 @@ struct ContentView: View {
         }
         .navigationTitle(store.filter.title)
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            if store.filter != .completed {
+                Button {
+                    withAnimation {
+                        $store.showCompleted.wrappedValue.toggle()
+                    }
+                } label: {
+                    Label(
+                        store.showCompleted ? "Hide Completed" : "Show Completed",
+                        systemImage: store.showCompleted ? "eye" : "eye.slash"
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -39,8 +53,8 @@ private struct IssueRow: View {
 
             VStack(alignment: .leading) {
                 Text(issue.title)
-                    .strikethrough(issue.completed)
-                    .foregroundStyle(issue.completed ? .secondary : .primary)
+                    .strikethrough(issue.isCompleted)
+                    .foregroundStyle(issue.isCompleted ? .secondary : .primary)
 
                 if let tagNames {
                     Text(tagNames)
@@ -51,7 +65,7 @@ private struct IssueRow: View {
 
             Spacer()
 
-            if issue.completed {
+            if issue.isCompleted {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundStyle(.green)
             }

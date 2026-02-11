@@ -1,10 +1,3 @@
-//
-//  UltimatePortfolioTCATests.swift
-//  UltimatePortfolioTCATests
-//
-//  Created by Michael Brünen on 06.02.26.
-//
-
 import Testing
 
 struct UltimatePortfolioTCATests {

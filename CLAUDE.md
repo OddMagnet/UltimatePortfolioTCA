@@ -31,6 +31,7 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 - **ViewAction**: Features with view-sent actions use the `ViewAction` protocol to separate view actions (`enum View`) from internal actions (`delegate`, `binding`). Views use `@ViewAction(for:)` to send view actions via `send()` instead of `store.send()`.
 - **Persistence**: SQLiteData (pointfreeco) with StructuredQueries for type-safe SQL (`@Table`, not GRDB's `FetchableRecord`/`PersistableRecord`). The test target links `SQLiteDataTestSupport` for in-memory database testing.
 - **Database observation**: `@FetchAll`/`@FetchOne` live in TCA reducer `@ObservableState` (not in views), so the reducer can update queries dynamically for sorting/filtering. `@Selection` structs are used for custom row types when queries involve joins or aggregations (e.g., `TagWithCount`, `IssueWithTags`, `SmartFilterCounts`).
+- **User preferences**: `@Shared(.appStorage("key"))` from the Sharing library (re-exported by TCA) persists user preferences like view toggles across feature state changes and app launches.
 - **Testing**: Swift Testing framework (`import Testing`, `@Test`, `@Suite`, `#expect`)
 
 ## Database
@@ -46,6 +47,7 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 - **Debug only**: `eraseDatabaseOnSchemaChange = true`, SQL query tracing via `os.Logger`.
 - **Context-aware database**: `SQLiteData.defaultDatabase()` automatically uses in-memory for previews, temporary file for tests, app container for live.
 - **Previews**: Use TCA's `Store(initialState:reducer:withDependencies:)` initializer with `{ try! $0.bootstrapDatabase() }` to bootstrap dependencies in `#Preview`. This is a workaround for a `prepareDependencies` bug in swift-dependencies (since 1.10.1) with `@FetchAll` — revert to `prepareDependencies` once fixed.
+- **Query operation ordering**: Use `Filter → Group → Sort → Join → Select` ordering in StructuredQueries chains. Operations that don't need join tables should come before joins (per StructuredQueries convention), and within the pre-join operations, filter first, then group, then sort — matching the logical data pipeline.
 - **App entry point**: `prepareDependencies` must complete before `Store` initialization, since `AppFeature.State()` constructs child states with `@FetchAll` queries that require the database.
 
 ## Key Dependencies

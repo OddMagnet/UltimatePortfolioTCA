@@ -15,7 +15,7 @@ import SwiftUI
     var title = ""
     var detail = ""
     var priority: Priority?
-    var completed = false
+    var isCompleted = false
     var created: Date = Date()
     let modified: Date?
 }

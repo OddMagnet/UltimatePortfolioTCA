@@ -91,7 +91,7 @@ import SQLiteData
     var body: some Reducer<State, Action> {
         BindingReducer()
 
-        Reduce { state, action in
+        Reduce<State, Action> { state, action in
             switch action {
             case .binding(\.selectedFilter):
                 return .send(.delegate(.selectedFilterChanged(state.selectedFilter)))

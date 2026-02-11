@@ -31,7 +31,7 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 - **ViewAction**: Features with view-sent actions use the `ViewAction` protocol to separate view actions (`enum View`) from internal actions (`delegate`, `binding`). Views use `@ViewAction(for:)` to send view actions via `send()` instead of `store.send()`.
 - **Persistence**: SQLiteData (pointfreeco) with StructuredQueries for type-safe SQL (`@Table`, not GRDB's `FetchableRecord`/`PersistableRecord`). The test target links `SQLiteDataTestSupport` for in-memory database testing.
 - **Database observation**: `@FetchAll`/`@FetchOne` live in TCA reducer `@ObservableState` (not in views), so the reducer can update queries dynamically for sorting/filtering. `@Selection` structs are used for custom row types when queries involve joins or aggregations (e.g., `TagWithCount`, `IssueWithTags`, `SmartFilterCounts`).
-- **User preferences**: `@Shared(.appStorage("key"))` from the Sharing library (re-exported by TCA) persists user preferences like view toggles across feature state changes and app launches.
+- **User preferences**: `@Shared(.appStorage("key"))` from the Sharing library (re-exported by TCA) persists user preferences like view toggles and sort preferences across feature state changes and app launches.
 - **Testing**: Swift Testing framework (`import Testing`, `@Test`, `@Suite`, `#expect`)
 
 ## Database

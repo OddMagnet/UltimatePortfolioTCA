@@ -22,7 +22,7 @@ import ComposableArchitecture
             SidebarFeature()
         }
 
-        Reduce { state, action in
+        Reduce<State, Action> { state, action in
             switch action {
             case let .sidebar(.delegate(.selectedFilterChanged(newFilter))):
                 // Nothing to do if filter didn't change

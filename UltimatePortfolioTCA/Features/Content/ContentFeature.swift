@@ -64,7 +64,7 @@ import SwiftUI
         case view(View)
 
         enum Delegate {
-            case selectedIssueChanged(Issue?)
+            case selectedIssueChanged(Issue.ID?)
         }
 
         enum View {
@@ -80,7 +80,7 @@ import SwiftUI
         Reduce { state, action in
             switch action {
             case .binding(\.selectedIssue):
-                return .send(.delegate(.selectedIssueChanged(state.selectedIssue)))
+                return .send(.delegate(.selectedIssueChanged(state.selectedIssue?.id)))
 
             case .binding(\.showCompleted):
                 state.updateIssueQuery()

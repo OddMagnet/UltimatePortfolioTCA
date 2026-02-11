@@ -41,16 +41,16 @@ import ComposableArchitecture
             case .sidebar:
                 return .none
 
-            case let .content(.delegate(.selectedIssueChanged(newIssue))):
+            case let .content(.delegate(.selectedIssueChanged(newIssueID))):
                 // Nothing to do if issue didn't change
-                guard newIssue != state.detail?.issue else { return .none }
+                guard newIssueID != state.detail?.issueID else { return .none }
                 // Reset detail if the new issue is nil
-                guard let newIssue else {
+                guard let newIssueID else {
                     state.detail = nil
                     return .none
                 }
                 // If not nil, the issue has changed
-                state.detail = DetailFeature.State(issue: newIssue)
+                state.detail = DetailFeature.State(issueID: newIssueID)
                 return .none
 
             case .content:

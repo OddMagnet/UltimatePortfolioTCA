@@ -92,7 +92,7 @@ private struct IssueRow: View {
 #Preview {
     NavigationStack {
         ContentView(store: Store(
-            initialState: ContentFeature.State(filter: .all),
+            initialState: ContentFeature.State(filter: .open),
             reducer: { ContentFeature() },
             withDependencies: { try! $0.bootstrapDatabase() }
         ))

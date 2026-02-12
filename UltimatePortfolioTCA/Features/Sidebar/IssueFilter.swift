@@ -3,18 +3,18 @@ import SQLiteData
 enum IssueFilter: Hashable, Identifiable {
     var id: Self { self }
 
-    case all
+    case open
     case completed
     case recent
     case tag(Tag)
 
     static var smartFilters: [Self] {
-        [.all, .completed, .recent]
+        [.open, .completed, .recent]
     }
 
     var systemImage: String {
         switch self {
-        case .all: "tray"
+        case .open: "tray"
         case .completed: "checkmark"
         case .recent: "clock"
         case .tag: "tag"
@@ -23,7 +23,7 @@ enum IssueFilter: Hashable, Identifiable {
 
     var title: String {
         switch self {
-        case .all: "All Issues"
+        case .open: "Open"
         case .completed: "Completed"
         case .recent: "Recent"
         case let .tag(tag): tag.name

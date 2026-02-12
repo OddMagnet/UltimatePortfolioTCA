@@ -5,18 +5,18 @@ import SQLiteData
 
 @Selection struct TagWithCount: Identifiable {
     var tag: Tag
-    var activeIssueCount: Int
+    var issueCount: Int
     var id: Tag.ID { tag.id }
 }
 
 @Selection struct SmartFilterCounts {
-    var all = 0
+    var open = 0
     var completed = 0
     var recent = 0
 
     subscript(filter: IssueFilter) -> Int {
         switch filter {
-        case .all: all
+        case .open: open
         case .completed: completed
         case .recent: recent
         case .tag: 0
@@ -26,25 +26,27 @@ import SQLiteData
 
 @Reducer struct SidebarFeature {
     @ObservableState struct State {
-        var selectedFilter: IssueFilter? = .all
-        @FetchOne(
-            Issue.select {
-                SmartFilterCounts.Columns(
-                    all: $0.count(),
-                    completed: $0.count(filter: $0.isCompleted),
-                    recent: $0.count(filter: $0.isRecent)
-                )
-            },
-            animation: .default
-        )
-        var smartFilterCounts = SmartFilterCounts()
+        var selectedFilter: IssueFilter? = .open
+        @Shared(.appStorage("showCompleted")) var showCompleted = false
         @Shared(.appStorage("tagSortOrder")) var sortOrder: TagSortOrder = .name
         @Shared(.appStorage("tagSortAscending")) var sortAscending = TagSortOrder.name.defaultAscending
+        @FetchOne var smartFilterCounts = SmartFilterCounts()
         @FetchAll var tagRows: [TagWithCount] = []
 
-        init(selectedFilter: IssueFilter? = .all) {
+        init(selectedFilter: IssueFilter? = .open) {
             self.selectedFilter = selectedFilter
+            _smartFilterCounts = FetchOne(wrappedValue: SmartFilterCounts(), smartFilterQuery, animation: .default)
             _tagRows = FetchAll(tagQuery, animation: .default)
+        }
+
+        var smartFilterQuery: some Statement<SmartFilterCounts> {
+            Issue.select {
+                SmartFilterCounts.Columns(
+                    open: $0.count(filter: showCompleted.or(!$0.isCompleted)),
+                    completed: $0.count(filter: $0.isCompleted),
+                    recent: $0.count(filter: $0.isRecent.and(showCompleted.or(!$0.isCompleted)))
+                )
+            }
         }
 
         // Group → Join → Sort → Select
@@ -57,15 +59,17 @@ import SQLiteData
                     switch (sortOrder, sortAscending) {
                     case (.name, true): tags.name.asc()
                     case (.name, false): tags.name.desc()
-                    case (.issueCount, true): issues.count(distinct: true, filter: issues.isCompleted.neq(true)).asc()
-                    case (.issueCount, false): issues.count(distinct: true, filter: issues.isCompleted.neq(true)).desc()
+                    case (.issueCount, true):
+                        issues.count(distinct: true, filter: showCompleted.or(issues.isCompleted.neq(true))).asc()
+                    case (.issueCount, false):
+                        issues.count(distinct: true, filter: showCompleted.or(issues.isCompleted.neq(true))).desc()
                     }
                 }
                 .order { tags, _, _ in tags.name }
                 .select { tags, _, issues in
                     TagWithCount.Columns(
                         tag: tags,
-                        activeIssueCount: issues.count(distinct: true, filter: issues.isCompleted.neq(true))
+                        issueCount: issues.count(distinct: true, filter: showCompleted.or(issues.isCompleted.neq(true)))
                     )
                 }
         }
@@ -83,6 +87,7 @@ import SQLiteData
         enum View {
             case deleteTagsSwiped(offsets: IndexSet)
             case didSelectOrder(TagSortOrder)
+            case showCompletedChanged
         }
     }
 
@@ -108,7 +113,7 @@ import SQLiteData
                 case let .tag(tag): ids.contains(tag.id)
                 default: false
                 }
-                if didDeleteSelectedFilter { state.selectedFilter = .all }
+                if didDeleteSelectedFilter { state.selectedFilter = .open }
                 return .run { [database] send in
                     await withErrorReporting {
                         try await database.write { db in
@@ -127,6 +132,14 @@ import SQLiteData
                 }
                 return .run { [state] _ in
                     try await state.$tagRows.load(state.tagQuery, animation: .default)
+                }
+
+            case .view(.showCompletedChanged):
+                return .run { [state] _ in
+                    _ = try await (
+                        state.$smartFilterCounts.load(state.smartFilterQuery, animation: .default),
+                        state.$tagRows.load(state.tagQuery, animation: .default)
+                    )
                 }
             }
         }

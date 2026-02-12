@@ -7,7 +7,7 @@ import ComposableArchitecture
         var detail: DetailFeature.State?
 
         init() {
-            self.content = ContentFeature.State(filter: .all)
+            self.content = ContentFeature.State(filter: .open)
         }
     }
 

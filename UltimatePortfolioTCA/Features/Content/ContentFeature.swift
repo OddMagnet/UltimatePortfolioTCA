@@ -27,7 +27,7 @@ import SwiftUI
             Issue
                 .where {
                     switch filter {
-                    case .all: true
+                    case .open: true
                     case .completed: $0.isCompleted
                     case .recent: $0.isRecent
                     case let .tag(tag):

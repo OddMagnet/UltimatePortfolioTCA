@@ -42,6 +42,9 @@ struct SidebarView: View {
                 Label("Sort", systemImage: "arrow.up.arrow.down")
             }
         }
+        .onChange(of: store.showCompleted) {
+            send(.showCompletedChanged)
+        }
     }
 }
 
@@ -56,7 +59,7 @@ private struct FilterRow: View {
 
     init(row: TagWithCount) {
         self.filter = .tag(row.tag)
-        self.count = row.activeIssueCount
+        self.count = row.issueCount
     }
 
     var body: some View {

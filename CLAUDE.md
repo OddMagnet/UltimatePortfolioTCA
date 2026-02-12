@@ -47,7 +47,12 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 - **Debug only**: `eraseDatabaseOnSchemaChange = true`, SQL query tracing via `os.Logger`.
 - **Context-aware database**: `SQLiteData.defaultDatabase()` automatically uses in-memory for previews, temporary file for tests, app container for live.
 - **Previews**: Use TCA's `Store(initialState:reducer:withDependencies:)` initializer with `{ try! $0.bootstrapDatabase() }` to bootstrap dependencies in `#Preview`. This is a workaround for a `prepareDependencies` bug in swift-dependencies (since 1.10.1) with `@FetchAll` — revert to `prepareDependencies` once fixed.
-- **Query operation ordering**: Use `Filter → Group → Sort → Join → Select` ordering in StructuredQueries chains. Operations that don't need join tables should come before joins (per StructuredQueries convention), and within the pre-join operations, filter first, then group, then sort — matching the logical data pipeline.
+- **Query operation ordering**: Use `Where → Group → Order → Join → Select` ordering in StructuredQueries chains. Operations that don't need join tables should come before joins (per StructuredQueries convention), and within the pre-join operations, filter first, then group, then sort — matching the logical data pipeline.
+- **Query convenience properties**: `Issue.TableColumns` has reusable computed properties (`lastActivity`, `isNotCompleted`, `isRecent`) available as `$0.property` inside StructuredQueries closures. Note: custom `TableColumns` computed properties cannot be accessed via the static shorthand (`Issue.lastActivity`) — only real `@Table` columns support `@dynamicMemberLookup` on the static subscript.
+- **Extracted query helpers**: Common filter/ordering logic is extracted into model file extensions:
+  - `Issue.filter(with:)` returns `Where<Issue>` for an `IssueFilter` predicate
+  - `extension Select where From == Issue, Joins == ()` adds `.order(by:ascending:)` for `IssueSortOrder` (pre-join only)
+  - `extension Select where From == Tag, Joins == (IssueTag?, Issue?)` adds `.order(by:ascending:showCompleted:)` for `TagSortOrder` (post-join — `leftJoin` produces optional `Joins` types)
 - **App entry point**: `prepareDependencies` must complete before `Store` initialization, since `AppFeature.State()` constructs child states with `@FetchAll` queries that require the database.
 
 ## Key Dependencies
@@ -81,11 +86,11 @@ UltimatePortfolioTCA/
   Assets.xcassets
   Dependencies/         — Database setup, sample data (Schema.swift, SampleData.swift)
   Features/
-    App/                — Root AppFeature + AppView (NavigationSplitView)
+    App/                — Root AppFeature + AppView (NavigationSplitView) + Common/ (SortMenu)
     Sidebar/            — SidebarFeature + SidebarView + IssueFilter
     Content/            — ContentFeature + ContentView (issue list)
     Detail/             — DetailFeature + DetailView (single issue)
-  Models/               — Data models (Issue.swift, Tag.swift, IssueTag.swift)
+  Models/               — Data models (Issue.swift, Tag.swift, IssueTag.swift) + SortOrder/
 UltimatePortfolioTCATests/    — Unit tests (Swift Testing)
 ```
 

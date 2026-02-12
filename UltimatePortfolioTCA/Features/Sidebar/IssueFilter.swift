@@ -1,5 +1,10 @@
 import SQLiteData
 
+/// Filter criteria for issues in the sidebar and content list.
+///
+/// Smart filters (`.open`, `.completed`, `.recent`) appear in the sidebar's "Smart Filters" section.
+/// `.tag` filters by a specific tag via a subquery on ``IssueTag``.
+/// Use ``smartFilters`` to get the array excluding `.tag`.
 enum IssueFilter: Hashable, Identifiable {
     var id: Self { self }
 

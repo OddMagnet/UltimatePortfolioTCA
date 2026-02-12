@@ -1,4 +1,6 @@
-enum IssueSortOrder: String, CaseIterable, Identifiable {
+/// Sort order options for issues in the content list.
+/// The ordering logic lives in `extension Select where From == Issue` in `Issue.swift`.
+enum IssueSortOrder: String, SortOrderProtocol {
     case date, priority, title
     var label: String {
         switch self {

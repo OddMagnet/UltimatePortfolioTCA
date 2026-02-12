@@ -2,6 +2,8 @@ import ComposableArchitecture
 import SQLiteData
 import SwiftUI
 
+/// Query result combining an ``Issue`` with its comma-separated tag names from a grouped left join.
+/// Produced by ``ContentFeature/State/issueQuery``.
 @Selection struct IssueWithTags: Identifiable {
     var issue: Issue
     var tagNames: String?
@@ -17,43 +19,24 @@ import SwiftUI
         @Shared(.appStorage("issueSortAscending")) var sortAscending = IssueSortOrder.priority.defaultAscending
         @FetchAll var issueRows: [IssueWithTags] = []
 
+        /// Sets up the issue list observation (`@FetchAll`) for the given filter.
         init(filter: IssueFilter) {
             self.filter = filter
             _issueRows = FetchAll(issueQuery, animation: .default)
         }
 
-        // Filter → Group → Sort → Join → Select
+        /// Filters issues by the active filter, hides completed (unless `showCompleted`
+        /// or browsing the "Completed" smart filter), groups by issue ID, sorts by
+        /// completion then user preference, joins with tags, and selects each issue
+        /// with comma-separated tag names.
+        /// Pipeline: Where → Group → Order → Join → Select
         var issueQuery: some Statement<IssueWithTags> {
             Issue
-                .where {
-                    switch filter {
-                    case .open: true
-                    case .completed: $0.isCompleted
-                    case .recent: $0.isRecent
-                    case let .tag(tag):
-                        $0.id.in(
-                            IssueTag.select(\.issueID).where { $0.tagID.eq(tag.id) }
-                        )
-                    }
-                }
-                .where {
-                    if !showCompleted && filter != .completed {
-                        !$0.isCompleted
-                    }
-                }
+                .filter(with: filter)
+                .where { (showCompleted || filter == .completed).or($0.isNotCompleted) }
                 .group(by: \.id)
                 .order(by: \.isCompleted)
-                .order {
-                    switch (sortOrder, sortAscending) {
-                    // TODO: extract $0.property.desc(...) into conveniences
-                    case (.priority, false): $0.priority.desc(nulls: .last)
-                    case (.priority, true): $0.priority.asc(nulls: .last)
-                    case (.date, false): $0.lastActivity.desc()
-                    case (.date, true): $0.lastActivity.asc()
-                    case (.title, false): $0.title.desc()
-                    case (.title, true): $0.title.asc()
-                    }
-                }
+                .order(by: sortOrder, ascending: sortAscending)
                 .order(by: \.lastActivity)
                 .leftJoin(IssueTag.all) { $0.id.eq($1.issueID) }
                 .leftJoin(Tag.all) { $1.tagID.eq($2.id) }

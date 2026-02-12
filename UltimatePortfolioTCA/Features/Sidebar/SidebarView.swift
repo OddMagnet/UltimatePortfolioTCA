@@ -26,20 +26,8 @@ struct SidebarView: View {
         .navigationTitle("Filters")
         .toolbarTitleDisplayMode(.inlineLarge)
         .toolbar {
-            Menu {
-                ForEach(TagSortOrder.allCases) { order in
-                    Button {
-                        send(.didSelectOrder(order))
-                    } label: {
-                        if order == store.sortOrder {
-                            Label(order.label, systemImage: store.sortAscending ? "chevron.up" : "chevron.down")
-                        } else {
-                            Text(order.label)
-                        }
-                    }
-                }
-            } label: {
-                Label("Sort", systemImage: "arrow.up.arrow.down")
+            SortMenu(currentOrder: store.sortOrder, ascending: store.sortAscending) { order in
+                send(.didSelectOrder(order))
             }
         }
         .onChange(of: store.showCompleted) {

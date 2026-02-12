@@ -8,6 +8,8 @@ private nonisolated let logger = Logger(
 )
 
 extension DependencyValues {
+    /// Configures the SQLite database: enables foreign keys, attaches the metadatabase for
+    /// iCloud sharing support, and sets up SQL query tracing in debug builds.
     private func databaseConfiguration() -> Configuration {
         var configuration = Configuration()
         configuration.foreignKeysEnabled = true
@@ -33,6 +35,9 @@ extension DependencyValues {
         return configuration
     }
 
+    /// Sets up the full database stack: creates or opens the database, runs migrations,
+    /// initializes ``SyncEngine`` for iCloud sync, registers the `modified` trigger,
+    /// and seeds sample data (debug only). Must be called via `prepareDependencies` at app launch.
     mutating func bootstrapDatabase() throws {
         let database = try SQLiteData.defaultDatabase(configuration: databaseConfiguration())
 

@@ -126,3 +126,9 @@ Invoke skills with the Skill tool (e.g., `/pfw-composable-architecture`). **ALWA
 | `/pfw-macro-testing` | Testing Swift macros with MacroTesting |
 | `/pfw-perception` | Back-porting Swift Observation to older platforms |
 | `/pfw-spm` | Modifying Package.swift — adding targets, dependencies, etc. |
+
+### Other skills
+
+| Skill | Use when... |
+|-------|-------------|
+| `/swiftui-expert-skill` | Broad SwiftUI best practices — state management, performance, animations, Liquid Glass (iOS 26+), lists, navigation, modern API migrations. Complementary to `/pfw-modern-swiftui` (which focuses on action closures and custom bindings) |

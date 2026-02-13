@@ -54,6 +54,7 @@ private struct IssueRow: View {
             Circle()
                 .fill(issue.priorityColor)
                 .frame(width: 10, height: 10)
+                .accessibilityLabel("Priority: \(issue.priority?.label ?? "None")")
 
             VStack(alignment: .leading) {
                 Text(issue.title)

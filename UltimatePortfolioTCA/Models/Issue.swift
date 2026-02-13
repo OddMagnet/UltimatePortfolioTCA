@@ -7,6 +7,14 @@ import SwiftUI
         case low = 0
         case medium = 1
         case high = 2
+
+        var label: String {
+            switch self {
+            case .low: "Low"
+            case .medium: "Medium"
+            case .high: "High"
+            }
+        }
     }
 
     typealias ID = UUID

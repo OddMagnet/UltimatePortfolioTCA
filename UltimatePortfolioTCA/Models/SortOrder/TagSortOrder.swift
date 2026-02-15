@@ -1,18 +1,23 @@
 /// Sort order options for tags in the sidebar.
 /// The ordering logic lives in `extension Select where From == Tag` in `Tag.swift`.
-enum TagSortOrder: String, SortOrderProtocol {
-    case name, issueCount
-    var label: String {
-        switch self {
-        case .name: "Name"
-        case .issueCount: "Issue Count"
-        }
-    }
-    var defaultAscending: Bool {
-        switch self {
+struct TagSortOrder: SortOrderProtocol {
+    enum Field: CaseIterable, Codable { case name, issueCount }
+
+    var field: Field
+    var isAscending: Bool
+
+    init(_ field: Field) {
+        self.field = field
+        self.isAscending = switch field {
         case .name: true
         case .issueCount: false
         }
     }
-    var id: Self { self }
+
+    var label: String {
+        switch field {
+        case .name: "Name"
+        case .issueCount: "Issue Count"
+        }
+    }
 }

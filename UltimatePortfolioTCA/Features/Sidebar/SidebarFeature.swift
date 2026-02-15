@@ -32,8 +32,7 @@ import SQLiteData
     @ObservableState struct State {
         var selectedFilter: IssueFilter? = .open
         @Shared(.appStorage("showCompleted")) var showCompleted = false
-        @Shared(.appStorage("tagSortOrder")) var sortOrder: TagSortOrder = .name
-        @Shared(.appStorage("tagSortAscending")) var sortAscending = TagSortOrder.name.defaultAscending
+        @Shared(.appStorage("tagSortOrder")) var sortOrder = TagSortOrder(.name)
         @FetchOne var smartFilterCounts = SmartFilterCounts()
         @FetchAll var tagRows: [TagWithCount] = []
 
@@ -66,7 +65,7 @@ import SQLiteData
                 .group(by: \.id)
                 .leftJoin(IssueTag.all) { $0.id.eq($1.tagID) }
                 .leftJoin(Issue.all) { $1.issueID.eq($2.id) }
-                .order(by: sortOrder, ascending: sortAscending, showCompleted: showCompleted)
+                .order(by: sortOrder, showCompleted: showCompleted)
                 .order { tags, _, _ in tags.name }
                 .select { tags, _, issues in
                     let isVisible = showCompleted.or(issues.isCompleted.neq(true))
@@ -127,10 +126,9 @@ import SQLiteData
                 }
 
             case let .view(.didSelectOrder(order)):
-                if state.sortOrder == order {
-                    state.$sortAscending.withLock { $0.toggle() }
+                if state.sortOrder.id == order.id {
+                    state.$sortOrder.withLock { $0.toggle() }
                 } else {
-                    state.$sortAscending.withLock { $0 = order.defaultAscending }
                     state.$sortOrder.withLock { $0 = order }
                 }
                 return .run { [state] _ in

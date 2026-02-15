@@ -56,20 +56,20 @@ extension Issue {
 /// Ordering extension for pre-join issue queries (`Joins == ()`).
 /// Must be called before any `.leftJoin` in the query chain.
 extension Select where From == Issue, Joins == () {
-    /// Appends an ORDER BY clause for the given ``IssueSortOrder``.
+    /// Appends an ORDER BY clause for the given ``IssueSortOrder`` field and direction.
     ///
-    /// - `priority`: sorts by priority column (nulls last in both directions)
-    /// - `date`: sorts by ``Issue/TableColumns/lastActivity`` (`modified ?? created`)
-    /// - `title`: sorts by title
-    func order(by sortOrder: IssueSortOrder, ascending: Bool) -> Self {
+    /// - `.priority`: sorts by priority column (nulls last in both directions)
+    /// - `.date`: sorts by ``Issue/TableColumns/lastActivity`` (`modified ?? created`)
+    /// - `.title`: sorts by title
+    func order(by sortOrder: IssueSortOrder) -> Self {
         self.order {
-            switch (sortOrder, ascending) {
-            case (.priority, false): $0.priority.desc(nulls: .last)
-            case (.priority, true): $0.priority.asc(nulls: .last)
-            case (.date, false): $0.lastActivity.desc()
-            case (.date, true): $0.lastActivity.asc()
-            case (.title, false): $0.title.desc()
-            case (.title, true): $0.title.asc()
+            switch sortOrder.field {
+            case .priority:
+                if sortOrder.isAscending { $0.priority.asc(nulls: .last) } else { $0.priority.desc(nulls: .last) }
+            case .date:
+                if sortOrder.isAscending { $0.lastActivity.asc() } else { $0.lastActivity.desc() }
+            case .title:
+                if sortOrder.isAscending { $0.title.asc() } else { $0.title.desc() }
             }
         }
     }

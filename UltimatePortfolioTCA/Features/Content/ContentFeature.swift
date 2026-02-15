@@ -15,8 +15,7 @@ import SwiftUI
         var filter: IssueFilter
         var selectedIssue: Issue?
         @Shared(.appStorage("showCompleted")) var showCompleted = false
-        @Shared(.appStorage("issueSortOrder")) var sortOrder: IssueSortOrder = .priority
-        @Shared(.appStorage("issueSortAscending")) var sortAscending = IssueSortOrder.priority.defaultAscending
+        @Shared(.appStorage("issueSortOrder")) var sortOrder = IssueSortOrder(.priority)
         @FetchAll var issueRows: [IssueWithTags] = []
 
         /// Sets up the issue list observation (`@FetchAll`) for the given filter.
@@ -36,7 +35,7 @@ import SwiftUI
                 .where { (showCompleted || filter == .completed).or($0.isNotCompleted) }
                 .group(by: \.id)
                 .order(by: \.isCompleted)
-                .order(by: sortOrder, ascending: sortAscending)
+                .order(by: sortOrder)
                 .order(by: \.lastActivity)
                 .leftJoin(IssueTag.all) { $0.id.eq($1.issueID) }
                 .leftJoin(Tag.all) { $1.tagID.eq($2.id) }
@@ -106,10 +105,9 @@ import SwiftUI
                 }
 
             case let .view(.didSelectOrder(order)):
-                if state.sortOrder == order {
-                    state.$sortAscending.withLock { $0.toggle() }
+                if state.sortOrder.id == order.id {
+                    state.$sortOrder.withLock { $0.toggle() }
                 } else {
-                    state.$sortAscending.withLock { $0 = order.defaultAscending }
                     state.$sortOrder.withLock { $0 = order }
                 }
                 return .send(.updateIssueRows)

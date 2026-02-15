@@ -26,7 +26,7 @@ struct SidebarView: View {
         .navigationTitle("Filters")
         .toolbarTitleDisplayMode(.inlineLarge)
         .toolbar {
-            SortMenu(currentOrder: store.sortOrder, ascending: store.sortAscending) { order in
+            SortMenu(currentOrder: store.sortOrder) { order in
                 send(.didSelectOrder(order))
             }
         }

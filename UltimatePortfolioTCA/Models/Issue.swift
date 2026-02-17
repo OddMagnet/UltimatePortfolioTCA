@@ -3,7 +3,9 @@ import StructuredQueries
 import SwiftUI
 
 @Table struct Issue: Hashable, Identifiable {
-    enum Priority: Int, QueryBindable {
+    enum Priority: Int, QueryBindable, CaseIterable, Identifiable {
+        var id: Self { self }
+
         case low = 0
         case medium = 1
         case high = 2
@@ -22,7 +24,7 @@ import SwiftUI
     let id: ID
     var title = ""
     var detail = ""
-    var priority: Priority?
+    var priority: Priority = .low
     var isCompleted = false
     var created: Date = Date()
     /// Automatically updated by a temporary trigger on issue updates. Read-only (`let`) to prevent manual writes.
@@ -58,14 +60,14 @@ extension Issue {
 extension Select where From == Issue, Joins == () {
     /// Appends an ORDER BY clause for the given ``IssueSortOrder`` field and direction.
     ///
-    /// - `.priority`: sorts by priority column (nulls last in both directions)
+    /// - `.priority`: sorts by priority column
     /// - `.date`: sorts by ``Issue/TableColumns/lastActivity`` (`modified ?? created`)
     /// - `.title`: sorts by title
     func order(by sortOrder: IssueSortOrder) -> Self {
         self.order {
             switch sortOrder.field {
             case .priority:
-                if sortOrder.isAscending { $0.priority.asc(nulls: .last) } else { $0.priority.desc(nulls: .last) }
+                if sortOrder.isAscending { $0.priority.asc() } else { $0.priority.desc() }
             case .date:
                 if sortOrder.isAscending { $0.lastActivity.asc() } else { $0.lastActivity.desc() }
             case .title:
@@ -100,13 +102,14 @@ extension Issue.TableColumns {
     }
 }
 
+extension Issue.Draft: Equatable {}
+
 extension Issue {
     var priorityColor: Color {
         switch priority {
         case .high: .red
         case .medium: .orange
         case .low: .green
-        case nil: .gray
         }
     }
 }

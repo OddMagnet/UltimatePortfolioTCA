@@ -52,7 +52,7 @@ extension DependencyValues {
                     "id" TEXT PRIMARY KEY NOT NULL ON CONFLICT REPLACE DEFAULT (uuid()),
                     "title" TEXT NOT NULL DEFAULT '',
                     "detail" TEXT NOT NULL DEFAULT '',
-                    "priority" INTEGER,
+                    "priority" INTEGER NOT NULL DEFAULT 0,
                     "isCompleted" INTEGER NOT NULL DEFAULT 0,
                     "created" TEXT NOT NULL DEFAULT (datetime('subsec')),
                     "modified" TEXT

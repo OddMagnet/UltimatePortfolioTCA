@@ -56,6 +56,11 @@ import ComposableArchitecture
             case .content:
                 return .none
 
+            case .detail(.delegate(.issueDeleted)):
+                state.detail = nil
+                state.content?.selectedIssue = nil
+                return .none
+
             case .detail:
                 return .none
             }

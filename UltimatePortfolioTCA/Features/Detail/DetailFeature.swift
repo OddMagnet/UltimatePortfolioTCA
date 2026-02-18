@@ -16,6 +16,7 @@ import SwiftUI
         @FetchOne var issue: Issue?
         @FetchAll var tagRows: [TagRow] = []
 
+        @Presents var alert: AlertState<Action.Alert>?
         var isEditing: Bool = false
         var draft: Issue.Draft = Issue.Draft()
         var selectedTagIDs: Set<Tag.ID> = []
@@ -43,9 +44,14 @@ import SwiftUI
     }
 
     enum Action: BindableAction, ViewAction {
+        case alert(PresentationAction<Alert>)
         case binding(BindingAction<State>)
         case delegate(Delegate)
         case view(View)
+
+        enum Alert {
+            case confirmDeletion
+        }
 
         enum Delegate {
             case issueDeleted
@@ -103,7 +109,18 @@ import SwiftUI
                 }
 
             case .view(.deleteButtonTapped):
-                resetDraftState(&state)
+                state.alert = AlertState {
+                    TextState("Delete Issue")
+                } actions: {
+                    ButtonState(role: .destructive, action: .confirmDeletion) {
+                        TextState("Delete")
+                    }
+                } message: {
+                    TextState("Are you sure you want to delete this issue? This action cannot be undone.")
+                }
+                return .none
+
+            case .alert(.presented(.confirmDeletion)):
                 let issueID = state.issueID
                 return .run { [database] send in
                     await withErrorReporting {
@@ -113,8 +130,12 @@ import SwiftUI
                     }
                     await send(.delegate(.issueDeleted))
                 }
+
+            case .alert:
+                return .none
             }
         }
+        .ifLet(\.$alert, action: \.alert)
     }
 
     private func resetDraftState(_ state: inout State) {

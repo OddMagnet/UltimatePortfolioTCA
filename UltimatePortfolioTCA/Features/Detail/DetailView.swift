@@ -13,6 +13,7 @@ struct DetailView: View {
                     selectedTagIDs: $store.selectedTagIDs,
                     tags: store.tagRows.map(\.tag)
                 )
+                .alert($store.scope(state: \.alert, action: \.alert))
                 .navigationTitle("Edit Issue")
             } else if let issue = store.issue {
                 IssueView(

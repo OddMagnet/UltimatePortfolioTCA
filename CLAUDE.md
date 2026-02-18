@@ -27,12 +27,13 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 
 - **UI Framework**: SwiftUI with `#Preview` macros
 - **App Architecture**: Composable Architecture (TCA) from pointfreeco — features are `@Reducer` structs with `@ObservableState struct State`, `enum Action`, and `var body: some Reducer<State, Action>`. Views take `StoreOf<Feature>` directly (do NOT use legacy `ViewStore`/`WithViewStore`).
-- **Navigation**: Three-column `NavigationSplitView` — Sidebar (always present), Content (optional, shown when a filter is selected), Detail (optional, shown when an issue is selected). `AppFeature` composes children via `Scope` (sidebar) and `.ifLet` (content/detail). Child reducers intercept their own binding changes and forward them as delegate actions with associated values (e.g., `selectedFilterChanged(IssueFilter?)`), so the parent only handles delegate actions to drive navigation.
+- **Navigation**: Three-column `NavigationSplitView` — Sidebar (always present), Content (optional, shown when a filter is selected), Detail (optional, shown when an issue is selected). `AppFeature` composes children via `Scope` (sidebar) and `.ifLet` (content/detail). Child reducers intercept their own binding changes and forward them as delegate actions with associated values (e.g., `selectedFilterChanged(IssueFilter?)`), so the parent only handles delegate actions to drive navigation. Content list selection uses `selectedIssueID: Issue.ID?` (not `Issue?`) so that `@FetchAll` reloads (which produce new `Issue` values with updated `modified` timestamps) don't break SwiftUI's `List(selection:)` matching.
 - **Child-to-parent communication**: Child reducers in the `NavigationSplitView` columns use **delegate actions** (not `@Dependency(\.dismiss)`) to communicate back to `AppFeature`. This is because `AppFeature` must coordinate multiple children simultaneously — e.g., clearing both the detail column and the content list's selection when an issue is deleted. `dismiss` only removes the child's own state and can't carry semantic context (deleted vs. navigated away). Reserve `@Dependency(\.dismiss)` for modally-presented features (sheets, popovers) where the parent doesn't need to react.
 - **ViewAction**: Features with view-sent actions use the `ViewAction` protocol to separate view actions (`enum View`) from internal actions (`delegate`, `binding`). Views use `@ViewAction(for:)` to send view actions via `send()` instead of `store.send()`.
 - **Persistence**: SQLiteData (pointfreeco) with StructuredQueries for type-safe SQL (`@Table`, not GRDB's `FetchableRecord`/`PersistableRecord`). The test target links `SQLiteDataTestSupport` for in-memory database testing.
-- **Database observation**: `@FetchAll`/`@FetchOne` live in TCA reducer `@ObservableState` (not in views), so the reducer can update queries dynamically for sorting/filtering. `@Selection` structs are used for custom row types when queries involve joins or aggregations (e.g., `TagWithCount`, `IssueWithTags`, `SmartFilterCounts`).
-- **User preferences**: `@Shared(.appStorage("key"))` from the Sharing library (re-exported by TCA) persists user preferences like view toggles and sort preferences across feature state changes and app launches.
+- **Database observation**: `@FetchAll`/`@FetchOne` live in TCA reducer `@ObservableState` (not in views), so the reducer can update queries dynamically for sorting/filtering. `@Selection` structs are used for custom row types when queries involve joins or aggregations (e.g., `TagWithCount`, `TagRow`, `IssueWithTags`, `SmartFilterCounts`).
+- **User preferences**: `@Shared(.appStorage(AppStorageKeys.key))` from the Sharing library (re-exported by TCA) persists user preferences. Keys are centralized in `AppStorageKeys` enum (`Dependencies/AppStorageKeys.swift`) to prevent typos. Current keys: `showCompleted`, `issueSortOrder`, `tagSortOrder`.
+- **Alerts**: `DetailFeature` uses TCA's `AlertState` via `@Presents var alert` and `.ifLet(\.$alert, action: \.alert)` for the delete confirmation dialog. The view uses `.alert($store.scope(state: \.alert, action: \.alert))`.
 - **Testing**: Swift Testing framework (`import Testing`, `@Test`, `@Suite`, `#expect`)
 
 ## Database
@@ -52,8 +53,8 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 - **Query convenience properties**: `Issue.TableColumns` has reusable computed properties (`lastActivity`, `isNotCompleted`, `isRecent`) available as `$0.property` inside StructuredQueries closures. Note: custom `TableColumns` computed properties cannot be accessed via the static shorthand (`Issue.lastActivity`) — only real `@Table` columns support `@dynamicMemberLookup` on the static subscript.
 - **Extracted query helpers**: Common filter/ordering logic is extracted into model file extensions:
   - `Issue.filter(with:)` returns `Where<Issue>` for an `IssueFilter` predicate
-  - `extension Select where From == Issue, Joins == ()` adds `.order(by:ascending:)` for `IssueSortOrder` (pre-join only)
-  - `extension Select where From == Tag, Joins == (IssueTag?, Issue?)` adds `.order(by:ascending:showCompleted:)` for `TagSortOrder` (post-join — `leftJoin` produces optional `Joins` types)
+  - `extension Select where From == Issue, Joins == ()` adds `.order(by:)` for `IssueSortOrder` (pre-join only)
+  - `extension Select where From == Tag, Joins == (IssueTag?, Issue?)` adds `.order(by:showCompleted:)` for `TagSortOrder` (post-join — `leftJoin` produces optional `Joins` types)
 - **App entry point**: `prepareDependencies` must complete before `Store` initialization, since `AppFeature.State()` constructs child states with `@FetchAll` queries that require the database.
 
 ## Key Dependencies
@@ -85,15 +86,22 @@ The Xcode project uses **File System Synchronized Groups** — the on-disk folde
 UltimatePortfolioTCA/
   App/                  — App entry point (UltimatePortfolioTCAApp.swift)
   Assets.xcassets
-  Dependencies/         — Database setup, sample data (Schema.swift, SampleData.swift)
+  Dependencies/         — Database setup, sample data, constants (Schema.swift, SampleData.swift, AppStorageKeys.swift)
   Features/
-    App/                — Root AppFeature + AppView (NavigationSplitView) + Common/ (SortMenu)
+    App/                — Root AppFeature + AppView (NavigationSplitView) + Common/
     Sidebar/            — SidebarFeature + SidebarView + IssueFilter
     Content/            — ContentFeature + ContentView (issue list)
-    Detail/             — DetailFeature + DetailView (single issue)
+    Detail/             — DetailFeature + DetailView + Subviews/ (IssueView, EditIssueView)
   Models/               — Data models (Issue.swift, Tag.swift, IssueTag.swift) + SortOrder/
 UltimatePortfolioTCATests/    — Unit tests (Swift Testing)
 ```
+
+## Shared UI Components (`Features/App/Common/`)
+
+- **`SortMenu`** + **`SortOrderProtocol`**: Generic toolbar sort menu. `SortOrderProtocol` pairs a `Field` enum with `isAscending`; `apply(_:)` toggles direction for the same field or replaces with a new field's default. Conforming types: `IssueSortOrder`, `TagSortOrder` (in `Models/SortOrder/`).
+- **`FlowLayout`**: Custom SwiftUI `Layout` that arranges children left-to-right, wrapping to the next line. Configurable `horizontalSpacing`/`verticalSpacing` (default 6). Used for tag chips.
+- **`TagChip`**: Capsule-shaped tag label. Assigned = white text on tint background; unassigned = secondary text on tertiary fill. Uses `.geometryGroup()` to keep text and background animations in sync.
+- **`PriorityIndicator`**: 10pt colored circle for `Issue.Priority` with an accessibility label. Color is defined on `Issue.Priority.color`.
 
 ## Point-Free Skills (slash commands)
 

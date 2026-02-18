@@ -13,7 +13,7 @@ import SwiftUI
 @Reducer struct ContentFeature {
     @ObservableState struct State {
         var filter: IssueFilter
-        var selectedIssue: Issue?
+        var selectedIssueID: Issue.ID?
         @Shared(.appStorage("showCompleted")) var showCompleted = false
         @Shared(.appStorage("issueSortOrder")) var sortOrder = IssueSortOrder(.priority)
         @FetchAll var issueRows: [IssueWithTags] = []
@@ -71,8 +71,8 @@ import SwiftUI
 
         Reduce<State, Action> { state, action in
             switch action {
-            case .binding(\.selectedIssue):
-                return .send(.delegate(.selectedIssueChanged(state.selectedIssue?.id)))
+            case .binding(\.selectedIssueID):
+                return .send(.delegate(.selectedIssueChanged(state.selectedIssueID)))
 
             case .binding(\.showCompleted):
                 return .send(.updateIssueRows)
@@ -90,11 +90,11 @@ import SwiftUI
 
             case let .view(.deleteIssuesSwiped(offsets)):
                 let ids = offsets.map { state.issueRows[$0].issue.id }
-                let didDeleteSelectedIssue = switch(state.selectedIssue) {
-                case let .some(selectedIssue): ids.contains(selectedIssue.id)
+                let didDeleteSelectedIssue = switch(state.selectedIssueID) {
+                case let .some(selectedIssueID): ids.contains(selectedIssueID)
                 default: false
                 }
-                if didDeleteSelectedIssue { state.selectedIssue = nil }
+                if didDeleteSelectedIssue { state.selectedIssueID = nil }
                 return .run { [database] send in
                     await withErrorReporting {
                         try await database.write { db in

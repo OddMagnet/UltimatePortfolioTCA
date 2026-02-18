@@ -10,10 +10,10 @@ struct ContentView: View {
             if store.issueRows.isEmpty {
                 ContentUnavailableView("No Issues", systemImage: "tray")
             } else {
-                List(selection: $store.selectedIssue) {
+                List(selection: $store.selectedIssueID) {
                     ForEach(store.issueRows) { row in
                         IssueRow(row)
-                            .tag(row.issue)
+                            .tag(row.issue.id)
                     }
                     .onDelete { send(.deleteIssuesSwiped(offsets: $0)) }
                 }

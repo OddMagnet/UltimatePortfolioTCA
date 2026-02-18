@@ -58,7 +58,7 @@ import ComposableArchitecture
 
             case .detail(.delegate(.issueDeleted)):
                 state.detail = nil
-                state.content?.selectedIssue = nil
+                state.content?.selectedIssueID = nil
                 return .none
 
             case .detail:

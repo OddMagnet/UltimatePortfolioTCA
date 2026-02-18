@@ -84,7 +84,6 @@ import SwiftUI
                 return .none
 
             case .view(.saveButtonTapped):
-                // TODO: Why does the selected issue in content feature get reset?
                 let issueID = state.issueID
                 let selectedTagIDs = state.selectedTagIDs
                 let draft = state.draft

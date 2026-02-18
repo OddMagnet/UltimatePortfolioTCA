@@ -5,6 +5,10 @@ import SwiftUI
 /// Conforming structs pair a `Field` enum (the sortable columns) with an `ascending` flag.
 /// The `init(field:)` initializer sets each field's natural default direction.
 ///
+/// Default implementations provided via extension:
+/// - `apply(_:)`: Same field toggles direction; different field replaces with the selected value
+/// - `allFields`: All fields with their default direction (via `init(_:)`)
+///
 /// Required conformances:
 /// - `Codable`: Persists the user's choice to `UserDefaults` via `@Shared(.appStorage(...))`
 /// - `Equatable`: Enables full-value comparison (field + isAscending)
@@ -16,13 +20,22 @@ protocol SortOrderProtocol: Codable, Equatable, Identifiable where ID == Field {
     var isAscending: Bool { get set }
     var label: String { get }
     init(_ field: Field)
+    mutating func apply(_ selected: Self)
 }
 
 extension SortOrderProtocol {
     var id: Field { field }
 
-    mutating func toggle() {
-        isAscending.toggle()
+    /// Applies a sort order selection.
+    ///
+    /// - Same field: toggles the current direction (asc ↔ desc).
+    /// - Different field: replaces `self` with `selected`, carrying its direction as-is.
+    mutating func apply(_ selected: Self) {
+        if id == selected.id {
+            isAscending.toggle()
+        } else {
+            self = selected
+        }
     }
 
     /// All fields with their default ascending direction.
@@ -34,7 +47,9 @@ extension SortOrderProtocol {
 /// A reusable toolbar menu that lists all fields of a ``SortOrderProtocol`` type.
 ///
 /// The currently active sort field shows a chevron indicating direction.
-/// Selecting any field calls `onSelect`; the consumer decides whether to toggle or switch.
+/// Selecting any field calls `onSelect` with an order built from ``allFields`` (via `init(_:)`),
+/// so it carries each field's default direction. Use ``SortOrderProtocol/apply(_:)`` in the
+/// reducer to toggle same-field selections and switch with the default direction otherwise.
 struct SortMenu<Order: SortOrderProtocol>: View {
     let currentOrder: Order
     let onSelect: (Order) -> Void

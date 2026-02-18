@@ -51,10 +51,7 @@ private struct IssueRow: View {
 
     var body: some View {
         HStack {
-            Circle()
-                .fill(issue.priorityColor)
-                .frame(width: 10, height: 10)
-                .accessibilityLabel("Priority: \(issue.priority.label)")
+            PriorityIndicator(priority: issue.priority)
 
             VStack(alignment: .leading) {
                 Text(issue.title)

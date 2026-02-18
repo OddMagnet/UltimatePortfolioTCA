@@ -14,8 +14,8 @@ import SwiftUI
     @ObservableState struct State {
         var filter: IssueFilter
         var selectedIssueID: Issue.ID?
-        @Shared(.appStorage("showCompleted")) var showCompleted = false
-        @Shared(.appStorage("issueSortOrder")) var sortOrder = IssueSortOrder(.priority)
+        @Shared(.appStorage(AppStorageKeys.showCompleted)) var showCompleted = false
+        @Shared(.appStorage(AppStorageKeys.issueSortOrder)) var sortOrder = IssueSortOrder(.priority)
         @FetchAll var issueRows: [IssueWithTags] = []
 
         /// Sets up the issue list observation (`@FetchAll`) for the given filter.
@@ -105,11 +105,7 @@ import SwiftUI
                 }
 
             case let .view(.didSelectOrder(order)):
-                if state.sortOrder.id == order.id {
-                    state.$sortOrder.withLock { $0.toggle() }
-                } else {
-                    state.$sortOrder.withLock { $0 = order }
-                }
+                state.$sortOrder.withLock { $0.apply(order) }
                 return .send(.updateIssueRows)
             }
         }

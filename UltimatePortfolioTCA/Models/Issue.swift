@@ -104,12 +104,16 @@ extension Issue.TableColumns {
 
 extension Issue.Draft: Equatable {}
 
-extension Issue {
-    var priorityColor: Color {
-        switch priority {
+extension Issue.Priority {
+    var color: Color {
+        switch self {
         case .high: .red
         case .medium: .orange
         case .low: .green
         }
     }
+}
+
+extension Issue {
+    var priorityColor: Color { priority.color }
 }

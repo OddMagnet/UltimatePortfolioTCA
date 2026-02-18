@@ -31,8 +31,8 @@ import SQLiteData
 @Reducer struct SidebarFeature {
     @ObservableState struct State {
         var selectedFilter: IssueFilter? = .open
-        @Shared(.appStorage("showCompleted")) var showCompleted = false
-        @Shared(.appStorage("tagSortOrder")) var sortOrder = TagSortOrder(.name)
+        @Shared(.appStorage(AppStorageKeys.showCompleted)) var showCompleted = false
+        @Shared(.appStorage(AppStorageKeys.tagSortOrder)) var sortOrder = TagSortOrder(.name)
         @FetchOne var smartFilterCounts = SmartFilterCounts()
         @FetchAll var tagRows: [TagWithCount] = []
 
@@ -126,11 +126,7 @@ import SQLiteData
                 }
 
             case let .view(.didSelectOrder(order)):
-                if state.sortOrder.id == order.id {
-                    state.$sortOrder.withLock { $0.toggle() }
-                } else {
-                    state.$sortOrder.withLock { $0 = order }
-                }
+                state.$sortOrder.withLock { $0.apply(order) }
                 return .run { [state] _ in
                     try await state.$tagRows.load(state.tagQuery, animation: .default)
                 }

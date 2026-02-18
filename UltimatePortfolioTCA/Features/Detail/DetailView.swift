@@ -111,8 +111,11 @@ struct DetailView: View {
                         Text("No tags")
                             .foregroundStyle(.secondary)
                     } else {
-                        // TODO: instead of a list, maybe show them in a more tag-like fashion?
-                        Text(assignedTags.map(\.name).joined(separator: ", "))
+                        FlowLayout {
+                            ForEach(assignedTags) { tag in
+                                TagChip(name: tag.name)
+                            }
+                        }
                     }
                 }
             }
@@ -154,36 +157,96 @@ struct DetailView: View {
                     Toggle("Completed", isOn: $draft.isCompleted)
                 }
 
-                // TODO: Tags would look better in a scrollable horizontal stack
-                // Tapping a tag would toggle it, so it would jump between lists
-                // TODO: Animation for tag moving between lists
-                if !assignedTags.isEmpty {
-                    Section("Assigned Tags") {
-                        ForEach(assignedTags) { tag in
+                Section("Tags") {
+                    FlowLayout {
+                        ForEach(assignedTags + unassignedTags) { tag in
                             Button {
-                                selectedTagIDs.remove(tag.id)
+                                withAnimation {
+                                    if selectedTagIDs.contains(tag.id) { selectedTagIDs.remove(tag.id) }
+                                    else { selectedTagIDs.insert(tag.id) }
+                                }
                             } label: {
-                                Label(tag.name, systemImage: "checkmark.circle.fill")
-                                    .foregroundStyle(.primary)
+                                TagChip(
+                                    name: tag.name,
+                                    isAssigned: selectedTagIDs.contains(tag.id)
+                                )
                             }
-                        }
-                    }
-                }
-
-                if !unassignedTags.isEmpty {
-                    Section("Other Tags") {
-                        ForEach(unassignedTags) { tag in
-                            Button {
-                                selectedTagIDs.insert(tag.id)
-                            } label: {
-                                Label(tag.name, systemImage: "circle")
-                                    .foregroundStyle(.primary)
-                            }
+                            .buttonStyle(.plain)
                         }
                     }
                 }
             }
         }
+    }
+}
+
+// MARK: - Tag Chip
+
+private struct TagChip: View {
+    let name: String
+    var isAssigned: Bool = true
+
+    var body: some View {
+        Text(name)
+            .font(.subheadline)
+            .bold()
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .foregroundStyle(isAssigned ? .white : .secondary)
+            .background(isAssigned ? AnyShapeStyle(.tint) : AnyShapeStyle(.fill.tertiary), in: .capsule)
+            .geometryGroup()
+    }
+}
+
+// MARK: - Flow Layout
+
+private struct FlowLayout: Layout {
+    var horizontalSpacing: CGFloat = 6
+    var verticalSpacing: CGFloat = 6
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        let result = arrange(proposal: proposal, subviews: subviews)
+        return result.size
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        let result = arrange(proposal: ProposedViewSize(bounds.size), subviews: subviews)
+        for (index, position) in result.positions.enumerated() {
+            subviews[index].place(
+                at: CGPoint(x: bounds.minX + position.x, y: bounds.minY + position.y),
+                proposal: .unspecified
+            )
+        }
+    }
+
+    private struct ArrangeResult {
+        var size: CGSize
+        var positions: [CGPoint]
+    }
+
+    private func arrange(proposal: ProposedViewSize, subviews: Subviews) -> ArrangeResult {
+        let maxWidth = proposal.width ?? .infinity
+        var positions: [CGPoint] = []
+        var x: CGFloat = 0
+        var y: CGFloat = 0
+        var rowHeight: CGFloat = 0
+        var totalSize: CGSize = .zero
+
+        for subview in subviews {
+            let size = subview.sizeThatFits(.unspecified)
+            if x + size.width > maxWidth, x > 0 {
+                x = 0
+                y += rowHeight + verticalSpacing
+                rowHeight = 0
+            }
+            positions.append(CGPoint(x: x, y: y))
+            rowHeight = max(rowHeight, size.height)
+            x += size.width + horizontalSpacing
+            totalSize.width = max(totalSize.width, x - horizontalSpacing)
+            totalSize.height = max(totalSize.height, y + rowHeight)
+        }
+
+        return ArrangeResult(size: totalSize, positions: positions)
     }
 }
 

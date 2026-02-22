@@ -51,7 +51,7 @@ import SwiftUI
     enum Action: BindableAction, ViewAction {
         case binding(BindingAction<State>)
         case delegate(Delegate)
-        case updateIssueRows
+        case issue​Query​Changed
         case view(View)
 
         enum Delegate {
@@ -60,7 +60,7 @@ import SwiftUI
 
         enum View {
             case deleteIssuesSwiped(offsets: IndexSet)
-            case didSelectOrder(IssueSortOrder)
+            case sortOrderSelected(IssueSortOrder)
         }
     }
 
@@ -75,7 +75,7 @@ import SwiftUI
                 return .send(.delegate(.selectedIssueChanged(state.selectedIssueID)))
 
             case .binding(\.showCompleted):
-                return .send(.updateIssueRows)
+                return .send(.issue​Query​Changed)
 
             case .binding:
                 return .none
@@ -83,7 +83,7 @@ import SwiftUI
             case .delegate:
                 return .none
 
-            case .updateIssueRows:
+            case .issue​Query​Changed:
                 return .run { [state] _ in
                     try await state.$issueRows.load(state.issueQuery, animation: .default)
                 }
@@ -104,9 +104,9 @@ import SwiftUI
                     if didDeleteSelectedIssue { await send(.delegate(.selectedIssueChanged(nil))) }
                 }
 
-            case let .view(.didSelectOrder(order)):
+            case let .view(.sortOrderSelected(order)):
                 state.$sortOrder.withLock { $0.apply(order) }
-                return .send(.updateIssueRows)
+                return .send(.issue​Query​Changed)
             }
         }
     }

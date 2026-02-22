@@ -14,11 +14,7 @@ struct AppView: View {
                 ContentUnavailableView("Select a Filter", systemImage: "line.3.horizontal.decrease.circle")
             }
         } detail: {
-            if let detailStore = store.scope(state: \.detail, action: \.detail) {
-                DetailView(store: detailStore)
-            } else {
-                ContentUnavailableView("Select an Issue", systemImage: "doc.text")
-            }
+            DetailView(store: store.scope(state: \.detail, action: \.detail))
         }
     }
 }

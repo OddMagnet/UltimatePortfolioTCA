@@ -88,8 +88,8 @@ import SwiftUI
 
         enum View {
             case deleteTagsSwiped(offsets: IndexSet)
-            case didSelectOrder(TagSortOrder)
-            case showCompletedChanged
+            case sortOrderSelected(TagSortOrder)
+            case showCompletedToggled
         }
     }
 
@@ -125,13 +125,13 @@ import SwiftUI
                     if didDeleteSelectedFilter { await send(.delegate(.selectedFilterChanged(.open))) }
                 }
 
-            case let .view(.didSelectOrder(order)):
+            case let .view(.sortOrderSelected(order)):
                 state.$sortOrder.withLock { $0.apply(order) }
                 return .run { [state] _ in
                     try await state.$tagRows.load(state.tagQuery, animation: .default)
                 }
 
-            case .view(.showCompletedChanged):
+            case .view(.showCompletedToggled):
                 return .run { [state] _ in
                     _ = try await (
                         state.$smartFilterCounts.load(state.smartFilterQuery, animation: .default),

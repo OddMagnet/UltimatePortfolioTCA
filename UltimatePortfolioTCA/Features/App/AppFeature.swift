@@ -4,10 +4,11 @@ import ComposableArchitecture
     @ObservableState struct State {
         var sidebar = SidebarFeature.State()
         var content: ContentFeature.State?
-        var detail: DetailFeature.State?
+        var detail: DetailFeature.State
 
         init() {
             content = ContentFeature.State(filter: .open)
+            detail = DetailFeature.State(issueID: nil)
         }
     }
 
@@ -22,6 +23,10 @@ import ComposableArchitecture
             SidebarFeature()
         }
 
+        Scope(state: \.detail, action: \.detail) {
+            DetailFeature()
+        }
+
         Reduce<State, Action> { state, action in
             switch action {
             case let .sidebar(.delegate(.selectedFilterChanged(newFilter))):
@@ -30,12 +35,12 @@ import ComposableArchitecture
                 // Reset content and detail if the new filter is nil
                 guard let newFilter else {
                     state.content = nil
-                    state.detail = nil
+                    state.detail = DetailFeature.State(issueID: nil)
                     return .none
                 }
                 // If not nil, the filter has changed
                 state.content = ContentFeature.State(filter: newFilter)
-                state.detail = nil
+                state.detail = DetailFeature.State(issueID: nil)
                 return .none
 
             case .sidebar:
@@ -43,10 +48,10 @@ import ComposableArchitecture
 
             case let .content(.delegate(.selectedIssueChanged(newIssueID))):
                 // Nothing to do if issue didn't change
-                guard newIssueID != state.detail?.issueID else { return .none }
+                guard newIssueID != state.detail.issueID else { return .none }
                 // Reset detail if the new issue is nil
                 guard let newIssueID else {
-                    state.detail = nil
+                    state.detail = DetailFeature.State(issueID: nil)
                     return .none
                 }
                 // If not nil, the issue has changed
@@ -57,7 +62,7 @@ import ComposableArchitecture
                 return .none
 
             case .detail(.delegate(.issueDeleted)):
-                state.detail = nil
+                state.detail = DetailFeature.State(issueID: nil)
                 state.content?.selectedIssueID = nil
                 return .none
 
@@ -67,9 +72,6 @@ import ComposableArchitecture
         }
         .ifLet(\.content, action: \.content) {
             ContentFeature()
-        }
-        .ifLet(\.detail, action: \.detail) {
-            DetailFeature()
         }
     }
 }

@@ -12,7 +12,7 @@ import SwiftUI
 
 @Reducer struct DetailFeature {
     @ObservableState struct State {
-        let issueID: Issue.ID
+        let issueID: Issue.ID?
         @FetchOne var issue: Issue?
         @FetchAll var tagRows: [TagRow] = []
 
@@ -22,9 +22,13 @@ import SwiftUI
         var selectedTagIDs: Set<Tag.ID> = []
 
         /// Sets up database observations (`@FetchOne`, `@FetchAll`) for the issue and its tags.
-        init(issueID: Issue.ID) {
+        init(issueID: Issue.ID?) {
             self.issueID = issueID
-            _issue = FetchOne(Issue.find(issueID), animation: .default)
+            if let issueID {
+                _issue = FetchOne(Issue.find(issueID), animation: .default)
+            } else {
+                _issue = FetchOne(Issue.none)
+            }
             _tagRows = FetchAll(tagQuery, animation: .default)
         }
 
@@ -36,7 +40,7 @@ import SwiftUI
                     TagRow.Columns(
                         tag: $0,
                         isAssigned: $0.id.in(
-                            IssueTag.select(\.tagID).where { $0.issueID.eq(issueID) }
+                            IssueTag.select(\.tagID).where { $0.issueID.eq(issueID ?? UUID()) }
                         )
                     )
                 }
@@ -58,6 +62,7 @@ import SwiftUI
         }
 
         enum View {
+            case createNewIssueButtonTapped
             case editButtonTapped
             case cancelEditButtonTapped
             case saveButtonTapped
@@ -66,6 +71,7 @@ import SwiftUI
     }
 
     @Dependency(\.defaultDatabase) var database
+    @Dependency(\.uuid) var uuid
 
     var body: some Reducer<State, Action> {
         BindingReducer()
@@ -76,6 +82,12 @@ import SwiftUI
                 return .none
 
             case .delegate:
+                return .none
+
+            case .view(.createNewIssueButtonTapped):
+                state.draft = Issue.Draft(id: uuid())
+                state.selectedTagIDs = []
+                state.isEditing = true
                 return .none
 
             case .view(.editButtonTapped):
@@ -92,7 +104,10 @@ import SwiftUI
             case .view(.saveButtonTapped):
                 defer { resetDraftState(&state) }
                 guard userDidModifyDraft(state) else { return .none }
-                let issueID = state.issueID
+                // For new issue creation, the draft was assigned a uuid at creation
+                // For editing an issue, the id of the draft comes from Issue.Draft(state.issue)
+                // If it's nil, we need to abort early
+                guard let issueID = state.draft.id else { return .none }
                 let selectedTagIDs = state.selectedTagIDs
                 let draft = state.draft
                 return .run { [database] _ in
@@ -122,7 +137,7 @@ import SwiftUI
                 return .none
 
             case .alert(.presented(.confirmDeletion)):
-                let issueID = state.issueID
+                guard let issueID = state.issueID else { return .none }
                 return .run { [database] send in
                     await withErrorReporting {
                         try await database.write { db in

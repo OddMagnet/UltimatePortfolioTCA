@@ -34,7 +34,7 @@ struct ContentView: View {
             }
 
             SortMenu(currentOrder: store.sortOrder) { order in
-                send(.didSelectOrder(order))
+                send(.sortOrderSelected(order))
             }
         }
     }

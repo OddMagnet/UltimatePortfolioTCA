@@ -27,11 +27,11 @@ struct SidebarView: View {
         .toolbarTitleDisplayMode(.inlineLarge)
         .toolbar {
             SortMenu(currentOrder: store.sortOrder) { order in
-                send(.didSelectOrder(order))
+                send(.sortOrderSelected(order))
             }
         }
         .onChange(of: store.showCompleted) {
-            send(.showCompletedChanged)
+            send(.showCompletedToggled)
         }
     }
 }

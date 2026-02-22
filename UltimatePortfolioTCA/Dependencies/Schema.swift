@@ -17,10 +17,7 @@ extension DependencyValues {
             try db.attachMetadatabase()
             #if DEBUG
                 db.trace(options: .profile) {
-                    guard
-                        !SyncEngine.isSynchronizing,
-                        !$0.expandedDescription.hasPrefix("--")
-                    else { return }
+                    guard !SyncEngine.isSynchronizing, !$0.expandedDescription.hasPrefix("--") else { return }
                     switch context {
                     case .live:
                         logger.debug("\($0.expandedDescription)")
@@ -48,42 +45,42 @@ extension DependencyValues {
 
         migrator.registerMigration("Create 'issues', 'tags', and 'issueTags' tables") { db in
             try #sql("""
-                CREATE TABLE "issues" (
-                    "id" TEXT PRIMARY KEY NOT NULL ON CONFLICT REPLACE DEFAULT (uuid()),
-                    "title" TEXT NOT NULL DEFAULT '',
-                    "detail" TEXT NOT NULL DEFAULT '',
-                    "priority" INTEGER NOT NULL DEFAULT 0,
-                    "isCompleted" INTEGER NOT NULL DEFAULT 0,
-                    "created" TEXT NOT NULL DEFAULT (datetime('subsec')),
-                    "modified" TEXT
-                ) STRICT
-                """)
-                .execute(db)
+            CREATE TABLE "issues" (
+                "id" TEXT PRIMARY KEY NOT NULL ON CONFLICT REPLACE DEFAULT (uuid()),
+                "title" TEXT NOT NULL DEFAULT '',
+                "detail" TEXT NOT NULL DEFAULT '',
+                "priority" INTEGER NOT NULL DEFAULT 0,
+                "isCompleted" INTEGER NOT NULL DEFAULT 0,
+                "created" TEXT NOT NULL DEFAULT (datetime('subsec')),
+                "modified" TEXT
+            ) STRICT
+            """)
+            .execute(db)
 
             try #sql("""
-                CREATE TABLE "tags" (
-                    "id" TEXT PRIMARY KEY NOT NULL ON CONFLICT REPLACE DEFAULT (uuid()),
-                    "name" TEXT NOT NULL DEFAULT '' COLLATE NOCASE
-                ) STRICT
-                """)
-                .execute(db)
+            CREATE TABLE "tags" (
+                "id" TEXT PRIMARY KEY NOT NULL ON CONFLICT REPLACE DEFAULT (uuid()),
+                "name" TEXT NOT NULL DEFAULT '' COLLATE NOCASE
+            ) STRICT
+            """)
+            .execute(db)
 
             try #sql("""
-                CREATE TABLE "issueTags" (
-                    "id" TEXT PRIMARY KEY NOT NULL ON CONFLICT REPLACE DEFAULT (uuid()),
-                    "issueID" TEXT NOT NULL REFERENCES "issues"("id") ON DELETE CASCADE,
-                    "tagID" TEXT NOT NULL REFERENCES "tags"("id") ON DELETE CASCADE
-                ) STRICT
-                """)
-                .execute(db)
+            CREATE TABLE "issueTags" (
+                "id" TEXT PRIMARY KEY NOT NULL ON CONFLICT REPLACE DEFAULT (uuid()),
+                "issueID" TEXT NOT NULL REFERENCES "issues"("id") ON DELETE CASCADE,
+                "tagID" TEXT NOT NULL REFERENCES "tags"("id") ON DELETE CASCADE
+            ) STRICT
+            """)
+            .execute(db)
             try #sql("""
-                CREATE INDEX "index_issueTags_on_issueID" ON "issueTags"("issueID")
-                """)
-                .execute(db)
+            CREATE INDEX "index_issueTags_on_issueID" ON "issueTags"("issueID")
+            """)
+            .execute(db)
             try #sql("""
-                CREATE INDEX "index_issueTags_on_tagID" ON "issueTags"("tagID")
-                """)
-                .execute(db)
+            CREATE INDEX "index_issueTags_on_tagID" ON "issueTags"("tagID")
+            """)
+            .execute(db)
         }
 
         try migrator.migrate(database)

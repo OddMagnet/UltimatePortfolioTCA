@@ -110,6 +110,7 @@
 			buildConfigurationList = 4C4404F62F366C22005052D0 /* Build configuration list for PBXNativeTarget "UltimatePortfolioTCA" */;
 			buildPhases = (
 				4C4404D12F366C21005052D0 /* Sources */,
+				52B1D098852D7BA7AE67B2AE /* ShellScript */,
 				4C4404D22F366C21005052D0 /* Frameworks */,
 				4C4404D32F366C21005052D0 /* Resources */,
 			);
@@ -215,6 +216,27 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		52B1D098852D7BA7AE67B2AE /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ -x /opt/homebrew/bin/swiftlint ]; then\n  /opt/homebrew/bin/swiftlint lint --config \"${SRCROOT}/.swiftlint.yml\" --quiet\nelif [ -x /usr/local/bin/swiftlint ]; then\n  /usr/local/bin/swiftlint lint --config \"${SRCROOT}/.swiftlint.yml\" --quiet\nelse\n  echo \"warning: SwiftLint not installed. Run 'brew bundle' to install.\"\nfi\n\nif [ -x /opt/homebrew/bin/swiftformat ]; then\n  /opt/homebrew/bin/swiftformat --lint \"${SRCROOT}/UltimatePortfolioTCA\" \"${SRCROOT}/UltimatePortfolioTCATests\" --config \"${SRCROOT}/.swiftformat\" --lenient\nelif [ -x /usr/local/bin/swiftformat ]; then\n  /usr/local/bin/swiftformat --lint \"${SRCROOT}/UltimatePortfolioTCA\" \"${SRCROOT}/UltimatePortfolioTCATests\" --config \"${SRCROOT}/.swiftformat\" --lenient\nelse\n  echo \"warning: SwiftFormat not installed. Run 'brew bundle' to install.\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		4C4404D12F366C21005052D0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -279,7 +301,7 @@
 				DEVELOPMENT_TEAM = K5ZJLTFVCL;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -345,7 +367,7 @@
 				DEVELOPMENT_TEAM = K5ZJLTFVCL;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;

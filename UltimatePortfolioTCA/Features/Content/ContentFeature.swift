@@ -90,7 +90,7 @@ import SwiftUI
 
             case let .view(.deleteIssuesSwiped(offsets)):
                 let ids = offsets.map { state.issueRows[$0].issue.id }
-                let didDeleteSelectedIssue = switch(state.selectedIssueID) {
+                let didDeleteSelectedIssue = switch state.selectedIssueID {
                 case let .some(selectedIssueID): ids.contains(selectedIssueID)
                 default: false
                 }

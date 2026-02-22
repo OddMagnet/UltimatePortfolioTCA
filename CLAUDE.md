@@ -107,6 +107,15 @@ UltimatePortfolioTCATests/    — Unit tests (Swift Testing)
 - **`PriorityIndicator`**: 10pt colored circle for `Issue.Priority` with an accessibility label. Color is defined on `Issue.Priority.color`.
 - **`Date.compactRelative(to:)`** (in `Extensions/Date+CompactRelative.swift`): Compact relative date string — "< 1 hour" / "> N hours" (today), "> N days" (this week), locale-aware day+month (this year), "> N years" (older). Used in issue row trailing labels.
 
+## Code Quality Tools
+
+- **SwiftLint** + **SwiftFormat**: Both run on every Xcode build via a Run Script phase (report-only — no file modifications). SwiftLint handles safety, complexity, and semantic rules; SwiftFormat `--lint` checks formatting. All style rules in SwiftLint are disabled to avoid conflicts.
+- **SwiftFormat pre-commit hook**: Auto-formats staged `.swift` files before each commit. Run `./scripts/install-hooks.sh` to install.
+- **Manual formatting**: `swiftformat UltimatePortfolioTCA/ UltimatePortfolioTCATests/` to format all source.
+- **Tool installation**: `brew bundle` from the project root (or `brew install swiftlint swiftformat`).
+- **Config files**: `.swiftlint.yml` (lint rules), `.swiftformat` (format rules), `.swift-version` (Swift version for tools). All rules are listed explicitly with comments — toggle rules directly in the config files.
+- **Rule philosophy**: SwiftFormat owns all formatting/style. SwiftLint owns safety, correctness, and complexity. If a new rule is style-related, disable it in `.swiftlint.yml` and add the SwiftFormat equivalent instead.
+
 ## Point-Free Skills (slash commands)
 
 This project has Point-Free skills installed that provide up-to-date API guidance for the libraries used here. **Always invoke the relevant skill before writing code that uses these libraries** — they contain correct patterns, API usage, and best practices that may differ from what you learned in training.

@@ -64,7 +64,7 @@ extension Select where From == Issue, Joins == () {
     /// - `.date`: sorts by ``Issue/TableColumns/lastActivity`` (`modified ?? created`)
     /// - `.title`: sorts by title
     func order(by sortOrder: IssueSortOrder) -> Self {
-        self.order {
+        order {
             switch sortOrder.field {
             case .priority:
                 if sortOrder.isAscending { $0.priority.asc() } else { $0.priority.desc() }
@@ -87,18 +87,18 @@ extension Issue.TableColumns {
     /// `IFNULL(modified, created)` — the most recent date the issue was touched.
     /// Used for date-based sorting and for computing ``isRecent``.
     var lastActivity: some QueryExpression<Date> {
-        self.modified.ifnull(self.created)
+        modified.ifnull(created)
     }
 
     /// `isCompleted != 1` — filters or counts non-completed issues.
     /// Uses `.neq(true)` so it works identically in both pre-join and post-join contexts.
     var isNotCompleted: some QueryExpression<Bool> {
-        self.isCompleted.neq(true)
+        isCompleted.neq(true)
     }
 
     /// `lastActivity >= datetime('now', '-7 days', 'subsec')` — true for issues active in the last 7 days.
     var isRecent: some QueryExpression<Bool> {
-        self.lastActivity.gte(#sql("datetime('now', '-7 days', 'subsec')"))
+        lastActivity.gte(#sql("datetime('now', '-7 days', 'subsec')"))
     }
 }
 

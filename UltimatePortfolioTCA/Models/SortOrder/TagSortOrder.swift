@@ -8,7 +8,7 @@ struct TagSortOrder: SortOrderProtocol {
 
     init(_ field: Field) {
         self.field = field
-        self.isAscending = switch field {
+        isAscending = switch field {
         case .name: true
         case .issueCount: false
         }

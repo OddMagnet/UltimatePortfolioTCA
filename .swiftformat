@@ -1,0 +1,189 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║  SwiftFormat Configuration                                                  ║
+# ║  All rules listed explicitly. Disabled rules have reasoning in comments.    ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+# ── Paths ──────────────────────────────────────────────────────────────────────
+--exclude .build,DerivedData,.swiftpm
+
+# ══════════════════════════════════════════════════════════════════════════════
+# DEFAULT RULES (enabled) — listed for visibility and easy toggling
+# ══════════════════════════════════════════════════════════════════════════════
+
+# Formatting & whitespace
+--enable braces                              # K&R brace style
+--enable consecutiveBlankLines               # Collapse multiple blank lines to one
+--enable consecutiveSpaces                   # Collapse multiple spaces to one
+--enable indent                              # Indent code by scope level
+--indent 4
+--xcode-indentation enabled
+--enable leadingDelimiters                   # Move leading . or ? to end of previous line
+--enable linebreakAtEndOfFile                # Ensure newline at end of file
+--enable linebreaks                          # Normalize linebreak characters
+--enable modifierOrder                       # Consistent declaration modifier order
+--enable modifiersOnSameLine                 # Keep modifiers on same line as keyword
+--enable spaceAroundBraces                   # Space around { }
+--enable spaceAroundBrackets                 # Space around [ ]
+--enable spaceAroundComments                 # Space before/after comments
+--enable spaceAroundGenerics                 # Remove space around < >
+--enable spaceAroundOperators                # Space around operators
+--ranges no-space
+--enable spaceAroundParens                   # Space around ( )
+--enable spaceInsideBraces                   # Space inside { }
+--enable spaceInsideBrackets                 # Remove space inside [ ]
+--enable spaceInsideComments                 # Space inside comments
+--enable spaceInsideGenerics                 # Remove space inside < >
+--enable spaceInsideParens                   # Remove space inside ( )
+--enable trailingSpace                       # Remove trailing whitespace
+--enable wrap                                # Wrap lines exceeding maxwidth
+--max-width 140
+--enable wrapArguments                       # Align wrapped arguments
+--wrap-arguments before-first
+--wrap-collections before-first
+--wrap-conditions after-first
+--wrap-parameters after-first
+--wrap-return-type if-multiline
+--wrap-effects if-multiline
+--wrap-type-aliases after-first
+--enable wrapAttributes                      # Wrap @attributes
+--enable wrapMultilineStatementBraces        # Wrap opening brace of multiline statements
+--enable wrapSingleLineComments              # Wrap long single-line comments
+
+# Blank lines
+--enable blankLineAfterImports               # Blank line after imports
+--enable blankLinesAroundMark                # Blank lines around MARK comments
+--enable blankLinesBetweenScopes	     # Add blank lines between scopes
+--enable blankLinesAtEndOfScope              # Remove trailing blank lines in scopes
+--enable blankLinesAtStartOfScope            # Remove leading blank lines in scopes
+--enable blankLinesBetweenChainedFunctions   # Remove blank lines in chained calls
+--enable blankLinesBetweenImports            # Remove blank lines between imports
+
+# Redundancy removal
+--enable redundantAsync                      # Remove redundant async
+--enable redundantBackticks                  # Remove unnecessary backticks
+--enable redundantBreak                      # Remove redundant break in switch
+--enable redundantClosure                    # Remove redundant closures
+--enable redundantEquatable                  # Remove hand-written Equatable when synthesizable
+--enable redundantExtensionACL               # Remove redundant ACL on extension members
+--enable redundantFileprivate                # Prefer private over fileprivate
+--enable redundantGet                        # Remove unneeded get clause
+--enable redundantInit                       # Remove explicit .init
+--enable redundantInternal                   # Remove redundant internal modifier
+--enable redundantLet                        # Remove redundant let in bindings
+--enable redundantLetError                   # Remove redundant let error in catch
+--enable redundantMemberwiseInit             # Remove explicit memberwise init matching synthesized
+--enable redundantNilInit                    # Remove explicit nil init of optionals
+--enable redundantObjc                       # Remove redundant @objc
+--enable redundantOptionalBinding            # Remove redundant identifiers in optional binding
+--enable redundantParens                     # Remove unnecessary parentheses
+--enable redundantPattern                    # Remove redundant patterns
+--enable redundantProperty                   # Simplify redundant property definitions
+--enable redundantPublic                     # Remove redundant public inside internal types
+--enable redundantRawValues                  # Remove redundant raw values matching case name
+--enable redundantReturn                     # Remove return in single-expression bodies
+--enable redundantSelf                       # Remove redundant self
+--enable redundantStaticSelf                 # Remove redundant Self in static context
+--enable redundantThrows                     # Remove redundant throws
+--enable redundantTypedThrows                # Convert throws(any Error) to throws
+--enable redundantViewBuilder                # Remove redundant @ViewBuilder
+--enable redundantVoidReturnType             # Remove explicit -> Void
+
+# Code style
+--enable andOperator                         # Prefer comma over && in conditions
+--enable anyObjectProtocol                   # Prefer AnyObject over class
+--enable applicationMain                     # Replace @UIApplicationMain with @main
+--enable assertionFailures                   # Convert assert(false) to assertionFailure()
+--enable conditionalAssignment               # Use if/switch expressions for assignments
+--enable consistentSwitchCaseSpacing         # Consistent switch case spacing
+--enable docComments			     # Use before declarations (default)
+--enable docCommentsBeforeModifiers	     # place before modifiers, if applicable
+--enable duplicateImports                    # Remove duplicate imports
+--enable elseOnSameLine                      # else/catch on same line as }
+--enable emptyBraces                         # Clean up empty braces
+--enable emptyExtensions                     # Remove empty extension bodies
+--enable enumNamespaces                      # Convert static-only types to enums
+--enable extensionAccessControl              # Extension access control style
+--enable genericExtensions                   # Angle brackets for generic extensions
+--enable hoistAwait                          # Move await to start of expression
+--enable hoistPatternLet                     # Lift let/var out of patterns
+--enable hoistTry                            # Move try to start of expression
+--enable initCoderUnavailable                # Add @available(*, unavailable) to init(coder:)
+--enable numberFormatting                    # Consistent numeric literal grouping
+--enable opaqueGenericParameters             # Prefer some Protocol over generics
+--enable preferCountWhere                    # Prefer count(where:) over filter.count
+--enable preferForLoop                       # Convert forEach to for loops
+--enable preferKeyPath                       # Convert trivial closures to keyPath
+--enable semicolons                          # Remove unnecessary semicolons
+--enable simplifyGenericConstraints          # Inline generic constraints
+--enable sortImports                         # Sort imports alphabetically
+--enable sortTypealiases                     # Sort protocol composition typealiases
+--enable strongOutlets                       # Remove weak from @IBOutlet
+--enable strongifiedSelf                     # Remove backticks around self in guard let
+--enable todos                               # Format TODO/MARK/FIXME comments
+--enable trailingClosures                    # Use trailing closure syntax
+--enable trailingCommas                      # Add trailing commas
+--enable typeSugar                           # Prefer [T] over Array<T>
+--enable unusedArguments                     # Replace unused arguments with _
+--strip-unused-args closure-only
+--enable void                                # Consistent Void usage
+--enable yodaConditions                      # Avoid Yoda conditions
+
+# File/header management
+--enable fileHeader                          # File header (--header ignore = no changes)
+--enable fileMacro                           # Prefer #file or #fileID
+--enable headerFileName                      # Ensure header file name matches
+
+# Swift Testing
+--enable noForceTryInTests                   # Use throws instead of try! in tests
+--enable noForceUnwrapInTests                # Use #require instead of ! in tests
+--enable swiftTestingTestCaseNames           # Remove test prefix from @Test methods
+
+# Sorting
+--enable sortDeclarations                    # Sort declarations alphabetically
+
+# Wrapping (additional)
+--enable environmentEntry                    # Update to @Entry macro
+--enable wrapFunctionBodies                  # Wrap single-line function bodies
+--enable wrapLoopBodies                      # Wrap inline loop bodies
+
+# ══════════════════════════════════════════════════════════════════════════════
+# DEFAULT RULES (disabled) — with reasoning
+# ══════════════════════════════════════════════════════════════════════════════
+
+# Preserve single-line computed properties like `var id: Self { self }`
+--disable wrapPropertyBodies
+
+# Keep explicit types in @Table structs (e.g., `var created: Date = Date()`)
+--disable redundantType
+
+# ══════════════════════════════════════════════════════════════════════════════
+# OPT-IN RULES — listed with enable/disable status
+# ══════════════════════════════════════════════════════════════════════════════
+
+# Enabled opt-in rules
+--enable isEmpty                             # Prefer .isEmpty over .count == 0
+--enable wrapEnumCases                       # One case per line in enums
+
+# Disabled opt-in rules
+--disable acronyms                           # Don't enforce acronym capitalization style
+--disable blankLineAfterSwitchCase           # Don't force blank lines between switch cases
+--disable blankLinesAfterGuardStatements     # Don't force blank lines after guards
+--disable blockComments                      # Allow /* */ block comments
+--disable markTypes                          # Don't auto-add MARK comments to types
+--disable noExplicitOwnership                # Allow borrowing/consuming modifiers
+--disable noGuardInTests                     # Allow guard in tests (not just #require)
+--disable organizeDeclarations               # Don't auto-reorder type members
+--disable preferFinalClasses                 # Don't auto-add final to classes
+--disable preferSwiftTesting                 # Don't auto-migrate XCTest to Swift Testing
+--disable privateStateVariables              # Don't enforce private on @State (TCA uses store)
+--disable propertyTypes                      # Don't enforce inferred vs explicit types
+--disable singlePropertyPerLine              # Allow `let a, b: Int` style
+--disable sortSwitchCases                    # Don't sort switch cases alphabetically
+--disable testSuiteAccessControl             # Don't modify test access control
+--disable unusedPrivateDeclarations          # Leave to compiler warnings
+--disable urlMacro                           # Don't convert URL(string:)! to #URL macro
+--disable validateTestCases                  # Don't validate test method naming
+--disable wrapConditionalBodies              # Wrap inline if/guard bodies onto new line
+--disable wrapMultilineConditionalAssignment # Wrap multiline if/switch assignments
+--disable wrapMultilineFunctionChains        # Preserve chained call formatting
+--disable wrapSwitchCases                    # Allow multiple cases per line if wanted

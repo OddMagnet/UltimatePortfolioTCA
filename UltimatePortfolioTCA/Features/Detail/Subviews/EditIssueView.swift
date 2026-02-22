@@ -9,6 +9,7 @@ struct EditIssueView: View {
     var assignedTags: [Tag] {
         tags.filter { selectedTagIDs.contains($0.id) }
     }
+
     var unassignedTags: [Tag] {
         tags.filter { !selectedTagIDs.contains($0.id) }
     }

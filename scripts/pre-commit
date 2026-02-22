@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Format staged Swift files with SwiftFormat before committing.
+STAGED_SWIFT=$(git diff --cached --name-only --diff-filter=ACM -- '*.swift')
+[ -z "$STAGED_SWIFT" ] && exit 0
+
+if command -v /opt/homebrew/bin/swiftformat >/dev/null 2>&1; then
+    SF=/opt/homebrew/bin/swiftformat
+elif command -v /usr/local/bin/swiftformat >/dev/null 2>&1; then
+    SF=/usr/local/bin/swiftformat
+else
+    echo "warning: SwiftFormat not installed. Skipping pre-commit formatting."
+    exit 0
+fi
+
+echo "$STAGED_SWIFT" | xargs "$SF"
+echo "$STAGED_SWIFT" | xargs git add

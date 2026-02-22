@@ -1,7 +1,7 @@
 import ComposableArchitecture
 import Foundation
-import SwiftUI
 import SQLiteData
+import SwiftUI
 
 /// Query result combining a ``Tag`` with the count of its visible (non-completed, unless `showCompleted`) issues.
 /// Produced by ``SidebarFeature/State/tagQuery`` via a grouped left join through ``IssueTag``.
@@ -111,7 +111,7 @@ import SQLiteData
 
             case let .view(.deleteTagsSwiped(offsets)):
                 let ids = offsets.map { state.tagRows[$0].tag.id }
-                let didDeleteSelectedFilter = switch(state.selectedFilter) {
+                let didDeleteSelectedFilter = switch state.selectedFilter {
                 case let .tag(tag): ids.contains(tag.id)
                 default: false
                 }

@@ -19,7 +19,7 @@ extension Select where From == Tag, Joins == (IssueTag?, Issue?) {
     /// The `showCompleted` flag is bridged into SQL via `Bool.or()` so that when `true`,
     /// all issues count; when `false`, only non-completed issues count.
     func order(by sortOrder: TagSortOrder, showCompleted: Bool) -> Self {
-        self.order { tags, _, issues in
+        order { tags, _, issues in
             let isVisible = showCompleted.or(issues.isCompleted.neq(true))
             let visibleCount = issues.count(distinct: true, filter: isVisible)
             switch sortOrder.field {

@@ -18,7 +18,7 @@ extension Date {
         if years >= 1 {
             return "> \(years) \(years == 1 ? "year" : "years")"
         } else if days >= 7 {
-            return self.formatted(.dateTime.day().month())
+            return formatted(.dateTime.day().month())
         } else if days >= 1 {
             return "> \(days) \(days == 1 ? "day" : "days")"
         } else if hours >= 1 {

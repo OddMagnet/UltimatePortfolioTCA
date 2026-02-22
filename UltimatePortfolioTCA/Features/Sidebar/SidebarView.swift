@@ -46,8 +46,8 @@ private struct FilterRow: View {
     }
 
     init(row: TagWithCount) {
-        self.filter = .tag(row.tag)
-        self.count = row.issueCount
+        filter = .tag(row.tag)
+        count = row.issueCount
     }
 
     var body: some View {

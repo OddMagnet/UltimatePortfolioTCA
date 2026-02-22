@@ -8,7 +8,7 @@ struct IssueSortOrder: SortOrderProtocol {
 
     init(_ field: Field) {
         self.field = field
-        self.isAscending = switch field {
+        isAscending = switch field {
         case .date, .priority: false
         case .title: true
         }

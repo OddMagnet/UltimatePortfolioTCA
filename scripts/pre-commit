@@ -2,8 +2,10 @@
 set -euo pipefail
 
 # Format staged Swift files with SwiftFormat before committing.
-STAGED_SWIFT=$(git diff --cached --name-only --diff-filter=ACM -- '*.swift')
-[ -z "$STAGED_SWIFT" ] && exit 0
+# Uses git-format-staged to only format staged content, preserving unstaged changes.
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+GFS="$REPO_ROOT/scripts/git-format-staged"
 
 if command -v /opt/homebrew/bin/swiftformat >/dev/null 2>&1; then
     SF=/opt/homebrew/bin/swiftformat
@@ -14,5 +16,4 @@ else
     exit 0
 fi
 
-echo "$STAGED_SWIFT" | xargs "$SF"
-echo "$STAGED_SWIFT" | xargs git add
+"$GFS" --formatter "$SF stdin --quiet --stdinpath '{}'" "*.swift"

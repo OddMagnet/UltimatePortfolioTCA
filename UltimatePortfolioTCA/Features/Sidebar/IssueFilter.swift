@@ -34,4 +34,22 @@ enum IssueFilter: Hashable, Identifiable {
         case let .tag(tag): tag.name
         }
     }
+
+    var hasShowCompletedToggle: Bool {
+        switch self {
+        case .open, .completed:
+            false
+        case .recent, .tag:
+            true
+        }
+    }
+
+    func showsCompletedIssues(with toggle: Bool) -> Bool {
+        switch self {
+        case .open: false
+        case .completed: true
+        case .recent, .tag:
+            toggle
+        }
+    }
 }

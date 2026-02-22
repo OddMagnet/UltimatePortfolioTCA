@@ -22,7 +22,7 @@ struct ContentView: View {
         .navigationTitle(store.filter.title)
         .toolbarTitleDisplayMode(.inlineLarge)
         .toolbar {
-            if store.filter != .completed {
+            if store.filter.hasShowCompletedToggle {
                 Button {
                     store.showCompleted.toggle()
                 } label: {
@@ -67,10 +67,9 @@ private struct IssueRow: View {
 
             Spacer()
 
-            if issue.isCompleted {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
-            }
+            Text((issue.modified ?? issue.created).compactRelative())
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
     }
 }

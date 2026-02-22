@@ -90,10 +90,11 @@ import SwiftUI
                 return .none
 
             case .view(.saveButtonTapped):
+                defer { resetDraftState(&state) }
+                guard userDidModifyDraft(state) else { return .none }
                 let issueID = state.issueID
                 let selectedTagIDs = state.selectedTagIDs
                 let draft = state.draft
-                resetDraftState(&state)
                 return .run { [database] _ in
                     await withErrorReporting {
                         try await database.write { db in
@@ -142,5 +143,14 @@ import SwiftUI
         state.draft = Issue.Draft()
         state.selectedTagIDs = []
         state.isEditing = false
+    }
+
+    private func userDidModifyDraft(_ state: State) -> Bool {
+        // No currentIssue should never happen, but if it does that means a draft will contain new data
+        guard let currentIssue = state.issue else { return true }
+        let draftContainsChanges = state.draft != Issue.Draft(currentIssue)
+        let assignedTagIDs = state.tagRows.filter(\.isAssigned).map(\.id)
+        let selectedTagsChanged = Set(assignedTagIDs) != state.selectedTagIDs
+        return draftContainsChanges || selectedTagsChanged
     }
 }

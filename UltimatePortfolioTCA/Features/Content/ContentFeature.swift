@@ -24,15 +24,15 @@ import SwiftUI
             _issueRows = FetchAll(issueQuery, animation: .default)
         }
 
-        /// Filters issues by the active filter, hides completed (unless `showCompleted`
-        /// or browsing the "Completed" smart filter), groups by issue ID, sorts by
-        /// completion then user preference, joins with tags, and selects each issue
-        /// with comma-separated tag names.
+        /// Filters issues by the active filter, includes or excludes completed issues
+        /// based on the filter's ``IssueFilter/showsCompletedIssues(with:)`` rule,
+        /// groups by issue ID, sorts by completion then user preference, joins with
+        /// tags, and selects each issue with comma-separated tag names.
         /// Pipeline: Where → Group → Order → Join → Select
         var issueQuery: some Statement<IssueWithTags> {
             Issue
                 .filter(with: filter)
-                .where { (showCompleted || filter == .completed).or($0.isNotCompleted) }
+                .where { filter.showsCompletedIssues(with: showCompleted).or($0.isNotCompleted) }
                 .group(by: \.id)
                 .order(by: \.isCompleted)
                 .order(by: sortOrder)

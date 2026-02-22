@@ -43,13 +43,13 @@ import SQLiteData
             _tagRows = FetchAll(tagQuery, animation: .default)
         }
 
-        /// Counts issues per smart filter, respecting `showCompleted`.
-        /// Open and Recent counts exclude completed issues unless `showCompleted` is true.
+        /// Counts issues per smart filter.
+        /// Open always excludes completed issues. Recent excludes them unless `showCompleted` is true.
         /// Pipeline: Select (aggregate)
         var smartFilterQuery: some Statement<SmartFilterCounts> {
             Issue.select {
                 SmartFilterCounts.Columns(
-                    open: $0.count(filter: showCompleted.or($0.isNotCompleted)),
+                    open: $0.count(filter: $0.isNotCompleted),
                     completed: $0.count(filter: $0.isCompleted),
                     recent: $0.count(filter: $0.isRecent.and(showCompleted.or($0.isNotCompleted)))
                 )

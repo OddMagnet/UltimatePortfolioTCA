@@ -34,6 +34,8 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 - **Database observation**: `@FetchAll`/`@FetchOne` live in TCA reducer `@ObservableState` (not in views), so the reducer can update queries dynamically for sorting/filtering. `@Selection` structs are used for custom row types when queries involve joins or aggregations (e.g., `TagWithCount`, `TagRow`, `IssueWithTags`, `SmartFilterCounts`).
 - **User preferences**: `@Shared(.appStorage(AppStorageKeys.key))` from the Sharing library (re-exported by TCA) persists user preferences. Keys are centralized in `AppStorageKeys` enum (`Dependencies/AppStorageKeys.swift`) to prevent typos. Current keys: `showCompleted`, `issueSortOrder`, `tagSortOrder`.
 - **Alerts**: `DetailFeature` uses TCA's `AlertState` via `@Presents var alert` and `.ifLet(\.$alert, action: \.alert)` for the delete confirmation dialog. The view uses `.alert($store.scope(state: \.alert, action: \.alert))`.
+- **No-op save prevention**: `DetailFeature` compares the edit draft and tag selection against the current issue before writing. If nothing changed, the database write is skipped entirely, preventing unnecessary `modified` timestamp updates from the trigger.
+- **Completed-issue visibility**: `IssueFilter` centralizes the rules via `hasShowCompletedToggle` (whether the UI shows the toggle) and `showsCompletedIssues(with:)` (whether the query includes completed issues). The "Open" filter never shows completed issues; "Completed" always does; "Recent" and tag filters respect the `showCompleted` user preference.
 - **Testing**: Swift Testing framework (`import Testing`, `@Test`, `@Suite`, `#expect`)
 
 ## Database
@@ -92,6 +94,7 @@ UltimatePortfolioTCA/
     Sidebar/            — SidebarFeature + SidebarView + IssueFilter
     Content/            — ContentFeature + ContentView (issue list)
     Detail/             — DetailFeature + DetailView + Subviews/ (IssueView, EditIssueView)
+    App/Common/Extensions/ — Foundation extensions (Date+CompactRelative)
   Models/               — Data models (Issue.swift, Tag.swift, IssueTag.swift) + SortOrder/
 UltimatePortfolioTCATests/    — Unit tests (Swift Testing)
 ```
@@ -102,6 +105,7 @@ UltimatePortfolioTCATests/    — Unit tests (Swift Testing)
 - **`FlowLayout`**: Custom SwiftUI `Layout` that arranges children left-to-right, wrapping to the next line. Configurable `horizontalSpacing`/`verticalSpacing` (default 6). Used for tag chips.
 - **`TagChip`**: Capsule-shaped tag label. Assigned = white text on tint background; unassigned = secondary text on tertiary fill. Uses `.geometryGroup()` to keep text and background animations in sync.
 - **`PriorityIndicator`**: 10pt colored circle for `Issue.Priority` with an accessibility label. Color is defined on `Issue.Priority.color`.
+- **`Date.compactRelative(to:)`** (in `Extensions/Date+CompactRelative.swift`): Compact relative date string — "< 1 hour" / "> N hours" (today), "> N days" (this week), locale-aware day+month (this year), "> N years" (older). Used in issue row trailing labels.
 
 ## Point-Free Skills (slash commands)
 

@@ -58,11 +58,13 @@ import SwiftUI
         }
 
         enum Delegate {
+            case createTag
             case issueDeleted
         }
 
         enum View {
             case createNewIssueButtonTapped
+            case createTagButtonTapped
             case editButtonTapped
             case cancelEditButtonTapped
             case saveButtonTapped
@@ -89,6 +91,9 @@ import SwiftUI
                 state.selectedTagIDs = []
                 state.isEditing = true
                 return .none
+
+            case .view(.createTagButtonTapped):
+                return .send(.delegate(.createTag))
 
             case .view(.editButtonTapped):
                 guard let issue = state.issue else { return .none }

@@ -15,19 +15,45 @@ struct SidebarView: View {
 
             Section("Tags") {
                 if store.tagRows.isEmpty {
-                    Text("No tags yet")
-                        .foregroundStyle(.secondary)
+                    Button(role: .confirm) {
+                        send(.createTagButtonTapped)
+                    } label: {
+                        Label("Add Tag", systemImage: "plus")
+                    }
                 } else {
-                    ForEach(store.tagRows, content: FilterRow.init)
-                        .onDelete { send(.deleteTagsSwiped(offsets: $0)) }
+                    ForEach(store.tagRows) { row in
+                        FilterRow(row: row)
+                            .swipeActions(edge: .leading) {
+                                Button {
+                                    send(.renameTagSwiped(row.tag))
+                                } label: {
+                                    Label("Rename", systemImage: "pencil")
+                                }
+                            }
+                            .swipeActions(edge: .trailing) {
+                                Button(role: .destructive) {
+                                    send(.deleteTagSwiped(row.tag))
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                            }
+                    }
                 }
             }
         }
         .navigationTitle("Filters")
         .toolbarTitleDisplayMode(.inlineLarge)
         .toolbar {
-            SortMenu(currentOrder: store.sortOrder) { order in
-                send(.sortOrderSelected(order))
+            ToolbarItem(placement: .topBarTrailing) {
+                SortMenu(currentOrder: store.sortOrder) { order in
+                    send(.sortOrderSelected(order))
+                } extraActions: {
+                    Button(role: .confirm) {
+                        send(.createTagButtonTapped)
+                    } label: {
+                        Label("Add Tag", systemImage: "plus")
+                    }
+                }
             }
         }
         .onChange(of: store.showCompleted) {

@@ -1,20 +1,28 @@
 import SwiftUI
 
-/// A capsule-shaped chip for displaying a tag name.
-/// Assigned tags use a solid tint background with white text;
-/// unassigned tags use a tertiary fill with secondary text.
-struct TagChip: View {
-    let name: String
+/// Applies capsule-shaped chip styling to any view.
+/// Assigned style: white text on tint background.
+/// Unassigned style: secondary text on tertiary fill.
+struct ChipStyle: ViewModifier {
     var isAssigned: Bool = true
 
-    var body: some View {
-        Text(name)
+    func body(content: Content) -> some View {
+        content
             .font(.subheadline)
             .bold()
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
             .foregroundStyle(isAssigned ? .white : .secondary)
-            .background(isAssigned ? AnyShapeStyle(.tint) : AnyShapeStyle(.fill.tertiary), in: .capsule)
+            .background {
+                Capsule()
+                    .fill(isAssigned ? AnyShapeStyle(.tint) : AnyShapeStyle(.fill.tertiary))
+            }
             .geometryGroup()
+    }
+}
+
+extension View {
+    func chipStyle(isAssigned: Bool = true) -> some View {
+        modifier(ChipStyle(isAssigned: isAssigned))
     }
 }

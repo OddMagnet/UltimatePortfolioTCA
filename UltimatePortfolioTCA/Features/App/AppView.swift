@@ -2,7 +2,7 @@ import ComposableArchitecture
 import SwiftUI
 
 struct AppView: View {
-    let store: StoreOf<AppFeature>
+    @Bindable var store: StoreOf<AppFeature>
 
     var body: some View {
         NavigationSplitView {
@@ -15,6 +15,13 @@ struct AppView: View {
             }
         } detail: {
             DetailView(store: store.scope(state: \.detail, action: \.detail))
+        }
+        .alert(item: $store.tagDraft) {
+            Text($0.name.isEmpty ? "New Tag" : "Rename Tag")
+        } actions: { tagDraft in
+            TextField("Tag name", text: tagDraft.name)
+            Button("Save") { store.send(.tagAlertConfirmButtonTapped) }
+            Button("Cancel") {}
         }
     }
 }

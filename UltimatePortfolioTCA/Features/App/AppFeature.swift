@@ -1,10 +1,13 @@
 import ComposableArchitecture
+import Foundation
+import SQLiteData
 
 @Reducer struct AppFeature {
     @ObservableState struct State {
         var sidebar = SidebarFeature.State()
         var content: ContentFeature.State?
         var detail: DetailFeature.State
+        var tagDraft: Tag.Draft?
 
         init() {
             content = ContentFeature.State(filter: .open)
@@ -12,13 +15,21 @@ import ComposableArchitecture
         }
     }
 
-    enum Action {
-        case sidebar(SidebarFeature.Action)
+    enum Action: BindableAction {
+        case binding(BindingAction<State>)
         case content(ContentFeature.Action)
         case detail(DetailFeature.Action)
+        case sidebar(SidebarFeature.Action)
+        case selectedTagRenamed(Tag)
+        case tagAlertConfirmButtonTapped
     }
 
+    @Dependency(\.defaultDatabase) var database
+    @Dependency(\.uuid) var uuid
+
     var body: some Reducer<State, Action> {
+        BindingReducer()
+
         Scope(state: \.sidebar, action: \.sidebar) {
             SidebarFeature()
         }
@@ -29,6 +40,18 @@ import ComposableArchitecture
 
         Reduce<State, Action> { state, action in
             switch action {
+            case .binding:
+                return .none
+
+            case .sidebar(.delegate(.createTag)),
+                 .detail(.delegate(.createTag)):
+                state.tagDraft = Tag.Draft(id: uuid())
+                return .none
+
+            case let .sidebar(.delegate(.renameTag(tag))):
+                state.tagDraft = Tag.Draft(tag)
+                return .none
+
             case let .sidebar(.delegate(.selectedFilterChanged(newFilter))):
                 // Nothing to do if filter didn't change
                 guard newFilter != state.content?.filter else { return .none }
@@ -68,6 +91,38 @@ import ComposableArchitecture
 
             case .detail:
                 return .none
+
+            case let .selectedTagRenamed(renamedTag):
+                state.sidebar.selectedFilter = .tag(renamedTag)
+                state.content?.filter = .tag(renamedTag)
+                return .none
+
+            case .tagAlertConfirmButtonTapped:
+                guard let id = state.tagDraft?.id,
+                      let name = state.tagDraft?.name.trimmingCharacters(in: .whitespaces),
+                      !name.isEmpty else { return .none }
+                let tagDraft = Tag.Draft(id: id, name: name)
+                let is​Renaming​Selected​Tag = switch state.sidebar.selectedFilter {
+                case let .tag(selectedTag): selectedTag.id == id
+                default: false
+                }
+                state.tagDraft = nil
+                return .run { [database] send in
+                    await withErrorReporting {
+                        try await database.write { db in
+                            try Tag.upsert { tagDraft }.execute(db)
+                        }
+                    }
+                    if is​Renaming​Selected​Tag {
+                        let renamedTag = await withErrorReporting {
+                            try await database.read { db in
+                                try Tag.find(id).fetchOne(db)
+                            }
+                        }
+                        guard let renamedTag else { return }
+                        await send(.selectedTagRenamed(renamedTag))
+                    }
+                }
             }
         }
         .ifLet(\.content, action: \.content) {

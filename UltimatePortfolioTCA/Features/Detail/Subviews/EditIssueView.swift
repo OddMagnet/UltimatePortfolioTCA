@@ -5,6 +5,7 @@ struct EditIssueView: View {
     @Binding var draft: Issue.Draft
     @Binding var selectedTagIDs: Set<Tag.ID>
     let tags: [Tag]
+    var onCreateTag: () -> Void
 
     var assignedTags: [Tag] {
         tags.filter { selectedTagIDs.contains($0.id) }
@@ -44,14 +45,18 @@ struct EditIssueView: View {
                                 else { selectedTagIDs.insert(tag.id) }
                             }
                         } label: {
-                            TagChip(
-                                name: tag.name,
-                                isAssigned: selectedTagIDs.contains(tag.id)
-                            )
+                            Text(tag.name)
+                                .chipStyle(isAssigned: selectedTagIDs.contains(tag.id))
                         }
-                        .buttonStyle(.plain)
+                    }
+
+                    Button(action: onCreateTag) {
+                        Text("+ Add Tag")
+                            .chipStyle(isAssigned: false)
+                            .overlay { Capsule().strokeBorder(.secondary) }
                     }
                 }
+                .buttonStyle(.plain)
             }
         }
     }

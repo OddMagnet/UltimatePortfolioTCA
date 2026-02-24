@@ -8,6 +8,8 @@ import StructuredQueries
     var name = ""
 }
 
+extension Tag.Draft: Equatable {}
+
 /// Ordering extension for tag queries after `leftJoin(IssueTag).leftJoin(Issue)`.
 /// The `(IssueTag?, Issue?)` constraint matches the optional types produced by `leftJoin`.
 extension Select where From == Tag, Joins == (IssueTag?, Issue?) {

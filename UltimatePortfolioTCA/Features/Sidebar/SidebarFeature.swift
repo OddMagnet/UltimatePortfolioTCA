@@ -81,13 +81,18 @@ import SwiftUI
         case binding(BindingAction<State>)
         case delegate(Delegate)
         case view(View)
+        case updateSelectedFilter(IssueFilter)
 
         enum Delegate {
+            case createTag
+            case renameTag(Tag)
             case selectedFilterChanged(IssueFilter?)
         }
 
         enum View {
-            case deleteTagsSwiped(offsets: IndexSet)
+            case createTagButtonTapped
+            case deleteTagSwiped(Tag)
+            case renameTagSwiped(Tag)
             case sortOrderSelected(TagSortOrder)
             case showCompletedToggled
         }
@@ -109,17 +114,26 @@ import SwiftUI
             case .delegate:
                 return .none
 
-            case let .view(.deleteTagsSwiped(offsets)):
-                let ids = offsets.map { state.tagRows[$0].tag.id }
+            case let .updateSelectedFilter(filter):
+                state.selectedFilter = filter
+                return .none
+
+            case .view(.createTagButtonTapped):
+                return .send(.delegate(.createTag))
+
+            case let .view(.renameTagSwiped(tag)):
+                return .send(.delegate(.renameTag(tag)))
+
+            case let .view(.deleteTagSwiped(tag)):
                 let didDeleteSelectedFilter = switch state.selectedFilter {
-                case let .tag(tag): ids.contains(tag.id)
+                case let .tag(selectedTag): selectedTag.id == tag.id
                 default: false
                 }
                 if didDeleteSelectedFilter { state.selectedFilter = .open }
                 return .run { [database] send in
                     await withErrorReporting {
                         try await database.write { db in
-                            try Tag.find(ids).delete().execute(db)
+                            try Tag.find(tag.id).delete().execute(db)
                         }
                     }
                     if didDeleteSelectedFilter { await send(.delegate(.selectedFilterChanged(.open))) }

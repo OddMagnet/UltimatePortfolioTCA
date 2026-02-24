@@ -50,9 +50,16 @@ extension SortOrderProtocol {
 /// Selecting any field calls `onSelect` with an order built from ``allFields`` (via `init(_:)`),
 /// so it carries each field's default direction. Use ``SortOrderProtocol/apply(_:)`` in the
 /// reducer to toggle same-field selections and switch with the default direction otherwise.
-struct SortMenu<Order: SortOrderProtocol>: View {
+struct SortMenu<Order: SortOrderProtocol, ExtraActions: View>: View {
     let currentOrder: Order
     let onSelect: (Order) -> Void
+    let extraActions: ExtraActions?
+
+    init(currentOrder: Order, onSelect: @escaping (Order) -> Void, @ViewBuilder extraActions: () -> ExtraActions) {
+        self.currentOrder = currentOrder
+        self.onSelect = onSelect
+        self.extraActions = extraActions()
+    }
 
     var body: some View {
         Menu {
@@ -67,8 +74,18 @@ struct SortMenu<Order: SortOrderProtocol>: View {
                     }
                 }
             }
+
+            extraActions
         } label: {
             Label("Sort", systemImage: "arrow.up.arrow.down")
         }
+    }
+}
+
+extension SortMenu where ExtraActions == Never {
+    init(currentOrder: Order, onSelect: @escaping (Order) -> Void) {
+        self.currentOrder = currentOrder
+        self.onSelect = onSelect
+        extraActions = nil
     }
 }

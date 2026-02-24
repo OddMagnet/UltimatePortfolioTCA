@@ -49,7 +49,8 @@ struct IssueView: View {
                 } else {
                     FlowLayout {
                         ForEach(assignedTags) { tag in
-                            TagChip(name: tag.name)
+                            Text(tag.name)
+                                .chipStyle()
                         }
                     }
                 }

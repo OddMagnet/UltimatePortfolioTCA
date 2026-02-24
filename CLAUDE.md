@@ -33,7 +33,7 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 - **Persistence**: SQLiteData (pointfreeco) with StructuredQueries for type-safe SQL (`@Table`, not GRDB's `FetchableRecord`/`PersistableRecord`). The test target links `SQLiteDataTestSupport` for in-memory database testing.
 - **Database observation**: `@FetchAll`/`@FetchOne` live in TCA reducer `@ObservableState` (not in views), so the reducer can update queries dynamically for sorting/filtering. `@Selection` structs are used for custom row types when queries involve joins or aggregations (e.g., `TagWithCount`, `TagRow`, `IssueWithTags`, `SmartFilterCounts`).
 - **User preferences**: `@Shared(.appStorage(AppStorageKeys.key))` from the Sharing library (re-exported by TCA) persists user preferences. Keys are centralized in `AppStorageKeys` enum (`Dependencies/AppStorageKeys.swift`) to prevent typos. Current keys: `showCompleted`, `issueSortOrder`, `tagSortOrder`.
-- **Alerts**: `DetailFeature` uses TCA's `AlertState` via `@Presents var alert` and `.ifLet(\.$alert, action: \.alert)` for the delete confirmation dialog. The view uses `.alert($store.scope(state: \.alert, action: \.alert))`.
+- **Alerts**: `DetailFeature` uses TCA's `AlertState` via `@Presents var alert` and `.ifLet(\.$alert, action: \.alert)` for the delete confirmation dialog. The view uses `.alert($store.scope(state: \.alert, action: \.alert))`. `AppFeature` uses native SwiftUI `.alert(item:)` with `Tag.Draft?` state for tag creation/renaming, since TCA's `AlertState` does not support text fields.
 - **No-op save prevention**: `DetailFeature` compares the edit draft and tag selection against the current issue before writing. If nothing changed, the database write is skipped entirely, preventing unnecessary `modified` timestamp updates from the trigger. New issues (where `issueID` is `nil`) always save since there is no existing issue to compare against.
 - **Completed-issue visibility**: `IssueFilter` centralizes the rules via `hasShowCompletedToggle` (whether the UI shows the toggle) and `showsCompletedIssues(with:)` (whether the query includes completed issues). The "Open" filter never shows completed issues; "Completed" always does; "Recent" and tag filters respect the `showCompleted` user preference.
 - **Testing**: Swift Testing framework (`import Testing`, `@Test`, `@Suite`, `#expect`)
@@ -42,7 +42,7 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 
 - **Setup**: `Schema.swift` in `Dependencies/` — `bootstrapDatabase()` on `DependencyValues` configures the database, runs migrations, starts `SyncEngine`, registers temporary triggers, and seeds sample data (debug only).
 - **Sample data**: `SampleData.swift` in `Dependencies/` — `seedSampleData()` on `DatabaseWriter` provides seed issues (with varied creation/modification dates), tags, and associations for development/previews.
-- **Models**: `Issue`, `Tag`, `IssueTag` (join table) — all use `@Table` with UUID primary keys.
+- **Models**: `Issue`, `Tag`, `IssueTag` (join table) — all use `@Table` with UUID primary keys. `Tag.Draft` conforms to `Equatable` (required for SwiftUI's `.alert(item:)`).
 - **iCloud sync**: `SyncEngine` initialized for all three tables. Entitlements and `CKSharingSupported` are configured. Metadatabase is attached for future sharing support.
 - **Foreign keys**: `configuration.foreignKeysEnabled = true` — enforced at runtime.
 - **`modified` column on `Issue`**: Managed by a type-safe temporary trigger (`Issue.createTemporaryTrigger(after: .update(touch: \.modified))`), created after migrations in `bootstrapDatabase()`. The trigger uses `!SyncEngine.$isSynchronizing` to skip SyncEngine's no-op updates. The Swift property is `let modified: Date?` to prevent manual updates. Do NOT set `modified` from Swift code.
@@ -103,7 +103,7 @@ UltimatePortfolioTCATests/    — Unit tests (Swift Testing)
 
 - **`SortMenu`** + **`SortOrderProtocol`**: Generic toolbar sort menu. `SortOrderProtocol` pairs a `Field` enum with `isAscending`; `apply(_:)` toggles direction for the same field or replaces with a new field's default. Conforming types: `IssueSortOrder`, `TagSortOrder` (in `Models/SortOrder/`).
 - **`FlowLayout`**: Custom SwiftUI `Layout` that arranges children left-to-right, wrapping to the next line. Configurable `horizontalSpacing`/`verticalSpacing` (default 6). Used for tag chips.
-- **`TagChip`**: Capsule-shaped tag label. Assigned = white text on tint background; unassigned = secondary text on tertiary fill. Uses `.geometryGroup()` to keep text and background animations in sync.
+- **`ChipStyle`** + **`.chipStyle(isAssigned:)`**: A `ViewModifier` applying capsule-shaped chip styling to any view. Assigned = white text on tint background; unassigned = secondary text on tertiary fill. Uses `.geometryGroup()` to keep text and background animations in sync. `TagChip` is a convenience wrapper applying `.chipStyle()` to a `Text` view.
 - **`PriorityIndicator`**: 10pt colored circle for `Issue.Priority` with an accessibility label. Color is defined on `Issue.Priority.color`.
 - **`Date.compactRelative(to:)`** (in `Extensions/Date+CompactRelative.swift`): Compact relative date string — "< 1 hour" / "> N hours" (today), "> N days" (this week), locale-aware day+month (this year), "> N years" (older). Used in issue row trailing labels.
 
@@ -115,6 +115,10 @@ UltimatePortfolioTCATests/    — Unit tests (Swift Testing)
 - **Tool installation**: `brew bundle` from the project root (or `brew install swiftlint swiftformat`).
 - **Config files**: `.swiftlint.yml` (lint rules), `.swiftformat` (format rules), `.swift-version` (Swift version for tools). All rules are listed explicitly with comments — toggle rules directly in the config files.
 - **Rule philosophy**: SwiftFormat owns all formatting/style. SwiftLint owns safety, correctness, and complexity. If a new rule is style-related, disable it in `.swiftlint.yml` and add the SwiftFormat equivalent instead.
+
+## Debugging
+
+- **Evidence over theory**: When the user provides debug output, logs, or test results, treat that as the primary evidence. If the evidence contradicts your current hypothesis, discard the hypothesis and re-evaluate from the evidence — do not rationalize the evidence to fit the theory.
 
 ## Point-Free Skills (slash commands)
 

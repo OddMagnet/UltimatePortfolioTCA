@@ -18,7 +18,8 @@ struct DetailView: View {
                 EditIssueView(
                     draft: $store.draft,
                     selectedTagIDs: $store.selectedTagIDs,
-                    tags: store.tagRows.map(\.tag)
+                    tags: store.tagRows.map(\.tag),
+                    onCreateTag: { send(.createTagButtonTapped) }
                 )
                 .alert($store.scope(state: \.alert, action: \.alert))
                 .navigationTitle(title)

@@ -84,7 +84,7 @@ import SwiftUI
         case updateSelectedFilter(IssueFilter)
 
         enum Delegate {
-            case createTag
+            case createTag(Tag.ID)
             case renameTag(Tag)
             case selectedFilterChanged(IssueFilter?)
         }
@@ -99,6 +99,7 @@ import SwiftUI
     }
 
     @Dependency(\.defaultDatabase) var database
+    @Dependency(\.uuid) var uuid
 
     var body: some Reducer<State, Action> {
         BindingReducer()
@@ -119,7 +120,7 @@ import SwiftUI
                 return .none
 
             case .view(.createTagButtonTapped):
-                return .send(.delegate(.createTag))
+                return .send(.delegate(.createTag(uuid())))
 
             case let .view(.renameTagSwiped(tag)):
                 return .send(.delegate(.renameTag(tag)))

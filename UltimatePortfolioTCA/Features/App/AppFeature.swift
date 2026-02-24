@@ -25,7 +25,6 @@ import SQLiteData
     }
 
     @Dependency(\.defaultDatabase) var database
-    @Dependency(\.uuid) var uuid
 
     var body: some Reducer<State, Action> {
         BindingReducer()
@@ -43,9 +42,9 @@ import SQLiteData
             case .binding:
                 return .none
 
-            case .sidebar(.delegate(.createTag)),
-                 .detail(.delegate(.createTag)):
-                state.tagDraft = Tag.Draft(id: uuid())
+            case let .sidebar(.delegate(.createTag(tagID))),
+                 let .detail(.delegate(.createTag(tagID))):
+                state.tagDraft = Tag.Draft(id: tagID)
                 return .none
 
             case let .sidebar(.delegate(.renameTag(tag))):

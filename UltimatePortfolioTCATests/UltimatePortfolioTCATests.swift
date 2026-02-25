@@ -1,8 +1,15 @@
+import DependenciesTestSupport
+import Foundation
+import SQLiteData
 import Testing
+@testable import UltimatePortfolioTCA
 
-struct UltimatePortfolioTCATests {
-    @Test
-    func example() {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
+@Suite(
+    .dependency(\.date.now, Date(timeIntervalSince1970: 1_234_567_890)),
+    .dependency(\.uuid, .incrementing),
+    .dependencies {
+        try $0.bootstrapDatabase()
+        try $0.defaultDatabase.seedSampleData()
     }
-}
+)
+struct BaseTestSuite {}

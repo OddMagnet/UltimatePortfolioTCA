@@ -30,18 +30,18 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 - **Navigation**: Three-column `NavigationSplitView` — Sidebar (always present), Content (optional, shown when a filter is selected), Detail (always present — shows issue details, the edit/create form, or an empty state with a "Create New Issue" button). `AppFeature` composes children via `Scope` (sidebar, detail) and `.ifLet` (content). Child reducers intercept their own binding changes and forward them as delegate actions with associated values (e.g., `selectedFilterChanged(IssueFilter?)`), so the parent only handles delegate actions to drive navigation. Content list selection uses `selectedIssueID: Issue.ID?` (not `Issue?`) so that `@FetchAll` reloads (which produce new `Issue` values with updated `modified` timestamps) don't break SwiftUI's `List(selection:)` matching.
 - **Child-to-parent communication**: Child reducers in the `NavigationSplitView` columns use **delegate actions** (not `@Dependency(\.dismiss)`) to communicate back to `AppFeature`. This is because `AppFeature` must coordinate multiple children simultaneously — e.g., clearing both the detail column and the content list's selection when an issue is deleted. `dismiss` only removes the child's own state and can't carry semantic context (deleted vs. navigated away). Reserve `@Dependency(\.dismiss)` for modally-presented features (sheets, popovers) where the parent doesn't need to react.
 - **ViewAction**: Features with view-sent actions use the `ViewAction` protocol to separate view actions (`enum View`) from internal actions (`delegate`, `binding`). Views use `@ViewAction(for:)` to send view actions via `send()` instead of `store.send()`.
-- **Persistence**: SQLiteData (pointfreeco) with StructuredQueries for type-safe SQL (`@Table`, not GRDB's `FetchableRecord`/`PersistableRecord`). The test target links `SQLiteDataTestSupport` for in-memory database testing.
+- **Persistence**: SQLiteData (pointfreeco) with StructuredQueries for type-safe SQL (`@Table`, not GRDB's `FetchableRecord`/`PersistableRecord`).
 - **Database observation**: `@FetchAll`/`@FetchOne` live in TCA reducer `@ObservableState` (not in views), so the reducer can update queries dynamically for sorting/filtering. `@Selection` structs are used for custom row types when queries involve joins or aggregations (e.g., `TagWithCount`, `TagRow`, `IssueWithTags`, `SmartFilterCounts`).
 - **User preferences**: `@Shared(.appStorage(AppStorageKeys.key))` from the Sharing library (re-exported by TCA) persists user preferences. Keys are centralized in `AppStorageKeys` enum (`Dependencies/AppStorageKeys.swift`) to prevent typos. Current keys: `showCompleted`, `issueSortOrder`, `tagSortOrder`.
 - **Alerts**: `DetailFeature` uses TCA's `AlertState` via `@Presents var alert` and `.ifLet(\.$alert, action: \.alert)` for the delete confirmation dialog. The view uses `.alert($store.scope(state: \.alert, action: \.alert))`. `AppFeature` uses native SwiftUI `.alert(item:)` with `Tag.Draft?` state for tag creation/renaming, since TCA's `AlertState` does not support text fields.
 - **No-op save prevention**: `DetailFeature` compares the edit draft and tag selection against the current issue before writing. If nothing changed, the database write is skipped entirely, preventing unnecessary `modified` timestamp updates from the trigger. New issues (where `issueID` is `nil`) always save since there is no existing issue to compare against.
 - **Completed-issue visibility**: `IssueFilter` centralizes the rules via `hasShowCompletedToggle` (whether the UI shows the toggle) and `showsCompletedIssues(with:)` (whether the query includes completed issues). The "Open" filter never shows completed issues; "Completed" always does; "Recent" and tag filters respect the `showCompleted` user preference.
-- **Testing**: Swift Testing framework (`import Testing`, `@Test`, `@Suite`, `#expect`)
+- **Testing**: Swift Testing framework — see the dedicated **Testing** section below for conventions, patterns, and linking rules.
 
 ## Database
 
 - **Setup**: `Schema.swift` in `Dependencies/` — `bootstrapDatabase()` on `DependencyValues` configures the database, runs migrations, starts `SyncEngine`, registers temporary triggers, and seeds sample data (debug only).
-- **Sample data**: `SampleData.swift` in `Dependencies/` — `seedSampleData()` on `DatabaseWriter` provides seed issues (with varied creation/modification dates), tags, and associations for development/previews.
+- **Sample data**: `SampleData.swift` in `Dependencies/` — `seedSampleData()` on `DatabaseWriter` provides seed issues, tags, and associations for development/previews. Issue dates are computed relative to `@Dependency(\.date.now)` via `daysAgo(_:)`, making them deterministic in tests when the date dependency is pinned.
 - **Models**: `Issue`, `Tag`, `IssueTag` (join table) — all use `@Table` with UUID primary keys. `Tag.Draft` conforms to `Equatable` (required for SwiftUI's `.alert(item:)`).
 - **iCloud sync**: `SyncEngine` initialized for all three tables. Entitlements and `CKSharingSupported` are configured. Metadatabase is attached for future sharing support.
 - **Foreign keys**: `configuration.foreignKeysEnabled = true` — enforced at runtime.
@@ -57,7 +57,7 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
   - `Issue.filter(with:)` returns `Where<Issue>` for an `IssueFilter` predicate
   - `extension Select where From == Issue, Joins == ()` adds `.order(by:)` for `IssueSortOrder` (pre-join only)
   - `extension Select where From == Tag, Joins == (IssueTag?, Issue?)` adds `.order(by:showCompleted:)` for `TagSortOrder` (post-join — `leftJoin` produces optional `Joins` types)
-- **App entry point**: `prepareDependencies` must complete before `Store` initialization, since `AppFeature.State()` constructs child states with `@FetchAll` queries that require the database.
+- **App entry point**: `prepareDependencies` must complete before `Store` initialization, since `AppFeature.State()` constructs child states with `@FetchAll` queries that require the database. The app body guards with `if !isTesting` (from IssueReporting, re-exported via ComposableArchitecture) to skip UI during test runs.
 
 ## Key Dependencies
 
@@ -65,8 +65,8 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 |---------|-----------|--------|
 | [swift-composable-architecture](https://github.com/pointfreeco/swift-composable-architecture) >= 1.23.1 | `ComposableArchitecture` | App |
 | [sqlite-data](https://github.com/pointfreeco/sqlite-data) >= 1.5.1 | `SQLiteData` | App |
-| [sqlite-data](https://github.com/pointfreeco/sqlite-data) >= 1.5.1 | `SQLiteDataTestSupport` | Tests |
 | [swift-dependencies](https://github.com/pointfreeco/swift-dependencies) >= 1.11.0 | `DependenciesTestSupport` | Tests |
+| [swift-snapshot-testing](https://github.com/pointfreeco/swift-snapshot-testing) >= 1.18.9 | `InlineSnapshotTesting`, `SnapshotTesting`, `SnapshotTestingCustomDump` | Tests |
 
 ## Swift Settings
 
@@ -78,6 +78,7 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
   - `SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES` — modules must be explicitly imported to use their members.
   - `SWIFT_UPCOMING_FEATURE_INTERNAL_IMPORTS_BY_DEFAULT = YES` — imports are internal by default.
   - `SWIFT_UPCOMING_FEATURE_EXISTENTIAL_ANY = YES` — requires `any` keyword for existential types.
+- **Import minimization**: Only import the modules you directly use. `ComposableArchitecture` re-exports `Dependencies`, `Sharing`, `CasePaths`, `IssueReporting`, and others via `@_exported import`. `SQLiteData` re-exports `StructuredQueries` and `Dependencies`. Do not add redundant explicit imports for these transitive modules. The `MEMBER_IMPORT_VISIBILITY` upcoming feature enforces this at compile time.
 - Deployment targets: iOS 26.2, macOS 26.2, visionOS 26.2
 
 ## Project Structure
@@ -120,6 +121,59 @@ UltimatePortfolioTCATests/    — Unit tests (Swift Testing)
 
 - **Evidence over theory**: When the user provides debug output, logs, or test results, treat that as the primary evidence. If the evidence contradicts your current hypothesis, discard the hypothesis and re-evaluate from the evidence — do not rationalize the evidence to fit the theory.
 
+## Testing
+
+Uses the Swift Testing framework (`import Testing`, `@Test`, `@Suite`, `#expect`). Test files live in `UltimatePortfolioTCATests/`.
+
+### Base test suite
+
+`UltimatePortfolioTCATests.swift` defines `BaseTestSuite` — a `@Suite` with pinned dependencies and a seeded database:
+
+```swift
+@Suite(
+    .dependency(\.date.now, Date(timeIntervalSince1970: 1_234_567_890)),
+    .dependency(\.uuid, .incrementing),
+    .dependencies {
+        try $0.bootstrapDatabase()
+        try $0.defaultDatabase.seedSampleData()
+    }
+)
+struct BaseTestSuite {}
+```
+
+All feature test suites are nested via `extension BaseTestSuite { @MainActor struct FeatureTests { ... } }` to inherit these traits. `@MainActor` must be applied to each nested suite individually — it is **not** inherited from the base suite.
+
+### TestStore conventions
+
+- Use `TestStoreOf<Feature>` for isolated feature testing.
+- Features under test require `Equatable` on their `State` and any `@Selection` types used in state (e.g., `TagWithCount`, `SmartFilterCounts`).
+- **Action key path syntax**: Use case key paths for `send` and `receive`:
+  ```swift
+  await store.send(\.view.createTagButtonTapped)
+  await store.send(\.view.deleteTagSwiped, tag)
+  await store.receive(\.delegate.createTag, UUID(0))
+  ```
+  This requires `@CasePathable` on `Action` sub-enums (`Delegate`, `View`). The top-level `Action` already gets `@CasePathable` from `@Reducer`, but nested enums need it explicitly.
+- **DO NOT** conform `Action` enums to `Equatable`.
+
+### Inline snapshots
+
+Use `assertInlineSnapshot(of:as:.customDump)` from `InlineSnapshotTesting` + `SnapshotTestingCustomDump` to capture full state snapshots (e.g., initial state after database seeding). Never hand-write or hand-edit snapshot content — run the test in record mode to generate or update snapshots.
+
+### Test target linking
+
+Do **not** link transitive dependencies to the test target — they come through `@testable import UltimatePortfolioTCA`. Only link test-specific products:
+- `DependenciesTestSupport`
+- `InlineSnapshotTesting`
+- `SnapshotTesting`
+- `SnapshotTestingCustomDump`
+
+Linking a product to both the app target and the test target causes duplicate class warnings and potential runtime issues.
+
+### Sample data in tests
+
+`seedSampleData()` uses `@Dependency(\.date.now)` internally, so all dates in sample data are relative to the pinned test date (`1_234_567_890` / 2009-02-13). This ensures deterministic query results — e.g., no issues fall within the "recent" window because the pinned date makes all sample dates older than 7 days.
+
 ## Point-Free Skills (slash commands)
 
 This project has Point-Free skills installed that provide up-to-date API guidance for the libraries used here. **Always invoke the relevant skill before writing code that uses these libraries** — they contain correct patterns, API usage, and best practices that may differ from what you learned in training.
@@ -142,13 +196,13 @@ Invoke skills with the Skill tool (e.g., `/pfw-composable-architecture`). **ALWA
 | `/pfw-custom-dump` | Using `customDump`, `diff`, `expectNoDifference` for debugging/testing. Prefer `expectDifference` over `expectNoDifference` when asserting mutations |
 | `/pfw-swift-navigation` | State-driven navigation with enum domain modeling. Always also invoke `/pfw-case-paths` for enum navigation patterns |
 | `/pfw-issue-reporting` | Using `reportIssue` and `withErrorReporting` for error handling |
+| `/pfw-snapshot-testing` | Inline snapshot testing of TCA feature state with `assertInlineSnapshot(of:as:.customDump)` |
 
 ### Also available
 
 | Skill | Purpose |
 |-------|---------|
 | `/pfw-observable-models` | `@Observable` models outside of TCA. Also invoke `/pfw-dependencies` when using or adding dependencies to the model |
-| `/pfw-snapshot-testing` | Snapshot testing with the SnapshotTesting library |
 | `/pfw-macro-testing` | Testing Swift macros with MacroTesting |
 | `/pfw-perception` | Back-porting Swift Observation to older platforms |
 | `/pfw-spm` | Modifying Package.swift — adding targets, dependencies, etc. |

@@ -5,7 +5,7 @@ import SwiftUI
 
 /// Query result combining a ``Tag`` with the count of its visible (non-completed, unless `showCompleted`) issues.
 /// Produced by ``SidebarFeature/State/tagQuery`` via a grouped left join through ``IssueTag``.
-@Selection struct TagWithCount: Identifiable {
+@Selection struct TagWithCount: Equatable, Identifiable {
     var tag: Tag
     var issueCount: Int
     var id: Tag.ID { tag.id }
@@ -13,7 +13,7 @@ import SwiftUI
 
 /// Aggregated issue counts for the three smart filters (Open, Completed, Recent).
 /// The subscript provides type-safe access by ``IssueFilter``; `.tag` always returns 0.
-@Selection struct SmartFilterCounts {
+@Selection struct SmartFilterCounts: Equatable {
     var open = 0
     var completed = 0
     var recent = 0
@@ -29,7 +29,7 @@ import SwiftUI
 }
 
 @Reducer struct SidebarFeature {
-    @ObservableState struct State {
+    @ObservableState struct State: Equatable {
         var selectedFilter: IssueFilter? = .open
         @Shared(.appStorage(AppStorageKeys.showCompleted)) var showCompleted = false
         @Shared(.appStorage(AppStorageKeys.tagSortOrder)) var sortOrder = TagSortOrder(.name)
@@ -83,12 +83,14 @@ import SwiftUI
         case view(View)
         case updateSelectedFilter(IssueFilter)
 
+        @CasePathable
         enum Delegate {
             case createTag(Tag.ID)
             case renameTag(Tag)
             case selectedFilterChanged(IssueFilter?)
         }
 
+        @CasePathable
         enum View {
             case createTagButtonTapped
             case deleteTagSwiped(Tag)

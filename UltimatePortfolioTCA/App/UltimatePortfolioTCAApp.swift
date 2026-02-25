@@ -1,5 +1,4 @@
 import ComposableArchitecture
-import Dependencies
 import SwiftUI
 
 @main
@@ -17,7 +16,9 @@ struct UltimatePortfolioTCAApp: App {
 
     var body: some Scene {
         WindowGroup {
-            AppView(store: store)
+            if !isTesting {
+                AppView(store: store)
+            }
         }
     }
 }

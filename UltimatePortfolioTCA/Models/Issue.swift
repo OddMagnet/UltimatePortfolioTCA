@@ -1,3 +1,4 @@
+import Dependencies
 import Foundation
 import StructuredQueries
 import SwiftUI
@@ -96,9 +97,11 @@ extension Issue.TableColumns {
         isCompleted.neq(true)
     }
 
-    /// `lastActivity >= datetime('now', '-7 days', 'subsec')` — true for issues active in the last 7 days.
+    /// `lastActivity >= now.addingTimeInterval(-7 * 86400)` — true for issues active in the last 7 days.
     var isRecent: some QueryExpression<Bool> {
-        lastActivity.gte(#sql("datetime('now', '-7 days', 'subsec')"))
+        @Dependency(\.date.now) var now
+        let cutoff = now.addingTimeInterval(-7 * 86400)
+        return lastActivity.gte(cutoff)
     }
 }
 

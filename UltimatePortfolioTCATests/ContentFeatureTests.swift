@@ -15,6 +15,8 @@ extension BaseTestSuite {
             }
         }
 
+        // MARK: - State snapshots
+
         @Test func defaultContentStoreState() {
             assertInlineSnapshot(of: store.state, as: .customDump) {
                 """
@@ -69,6 +71,8 @@ extension BaseTestSuite {
             }
         }
 
+        // MARK: - Filters
+
         @Test func completedFilterShowsCompletedIssues() {
             let store = TestStore(initialState: ContentFeature.State(filter: .completed)) {
                 ContentFeature()
@@ -106,6 +110,7 @@ extension BaseTestSuite {
         }
 
         @Test func openFilterIgnoresShowCompleted() async {
+            // The open filter never shows completed issues regardless of the toggle
             let count = store.state.issueRows.count
             await store.send(\.binding.showCompleted, true) {
                 $0.$showCompleted.withLock { $0 = true }
@@ -116,7 +121,7 @@ extension BaseTestSuite {
         }
 
         @Test func tagFilterShowsIssuesForTag() {
-            // NB: Uses the default `showCompleted = false`
+            // NB: Uses the default showCompleted = false, so only open issues for this tag
             let testTag = Tag(id: UUID(5), name: "Bug")
             let store = TestStore(initialState: ContentFeature.State(filter: .tag(testTag))) {
                 ContentFeature()
@@ -141,6 +146,8 @@ extension BaseTestSuite {
             }
         }
 
+        // MARK: - Selection
+
         @Test func selectedIssueChanged() async {
             #expect(store.state.selectedIssueID == nil)
             let selectedID = UUID(-1)
@@ -153,6 +160,8 @@ extension BaseTestSuite {
             }
             await store.receive(\.delegate.selectedIssueChanged, nil)
         }
+
+        // MARK: - Sort order
 
         @Test func sortOrderSelected() async {
             #expect(store.state.sortOrder == IssueSortOrder(.priority))
@@ -172,6 +181,8 @@ extension BaseTestSuite {
             await store.finish()
             #expect(store.state.issueRows.map(\.issue.title) == initialOrdering.reversed())
         }
+
+        // MARK: - Delete
 
         @Test func deleteIssuesSwipedOnUnselectedIssue() async throws {
             let unselectedIssueRow = try #require(store.state.issueRows.first)
@@ -211,8 +222,10 @@ extension BaseTestSuite {
             #expect(!store.state.issueRows.isEmpty)
         }
 
+        // MARK: - Show completed
+
         @Test func showCompletedToggled() async {
-            // Can't use the store from init here, since open filter never shows completed
+            // Uses .recent filter since .open never shows completed issues
             let store = TestStore(initialState: ContentFeature.State(filter: .recent)) {
                 ContentFeature()
             }

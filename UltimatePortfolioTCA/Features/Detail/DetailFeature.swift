@@ -4,21 +4,21 @@ import SwiftUI
 
 /// Query result combining a ``Tag`` with a Bool indicating whether it is assigned to the current issue.
 /// Produced by ``DetailFeature/State/tagQuery`` via a subquery on ``IssueTag``.
-@Selection struct TagRow: Identifiable {
+@Selection struct TagRow: Equatable, Identifiable {
     var tag: Tag
     var isAssigned: Bool
     var id: Tag.ID { tag.id }
 }
 
 @Reducer struct DetailFeature {
-    @ObservableState struct State {
+    @ObservableState struct State: Equatable {
         let issueID: Issue.ID?
         @FetchOne var issue: Issue?
         @FetchAll var tagRows: [TagRow] = []
 
         @Presents var alert: AlertState<Action.Alert>?
         var isEditing: Bool = false
-        var draft: Issue.Draft = Issue.Draft()
+        var draft: Issue.Draft
         var selectedTagIDs: Set<Tag.ID> = []
 
         /// Sets up database observations (`@FetchOne`, `@FetchAll`) for the issue and its tags.
@@ -29,6 +29,8 @@ import SwiftUI
             } else {
                 _issue = FetchOne(Issue.none)
             }
+            @Dependency(\.date.now) var now
+            draft = Issue.Draft(created: now)
             _tagRows = FetchAll(tagQuery, animation: .default)
         }
 
@@ -53,15 +55,18 @@ import SwiftUI
         case delegate(Delegate)
         case view(View)
 
+        @CasePathable
         enum Alert {
             case confirmDeletion
         }
 
+        @CasePathable
         enum Delegate {
             case createTag(Tag.ID)
             case issueDeleted
         }
 
+        @CasePathable
         enum View {
             case createNewIssueButtonTapped
             case createTagButtonTapped
@@ -72,6 +77,7 @@ import SwiftUI
         }
     }
 
+    @Dependency(\.date.now) var now
     @Dependency(\.defaultDatabase) var database
     @Dependency(\.uuid) var uuid
 
@@ -87,7 +93,7 @@ import SwiftUI
                 return .none
 
             case .view(.createNewIssueButtonTapped):
-                state.draft = Issue.Draft(id: uuid())
+                state.draft = Issue.Draft(id: uuid(), created: now)
                 state.selectedTagIDs = []
                 state.isEditing = true
                 return .none
@@ -162,7 +168,7 @@ import SwiftUI
     }
 
     private func resetDraftState(_ state: inout State) {
-        state.draft = Issue.Draft()
+        state.draft = Issue.Draft(created: now)
         state.selectedTagIDs = []
         state.isEditing = false
     }

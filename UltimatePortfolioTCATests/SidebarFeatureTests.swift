@@ -16,6 +16,8 @@ extension BaseTestSuite {
             }
         }
 
+        // MARK: - State snapshots
+
         @Test func defaultSidebarStoreState() {
             assertInlineSnapshot(of: store.state, as: .customDump) {
                 """
@@ -73,11 +75,15 @@ extension BaseTestSuite {
             }
         }
 
+        // MARK: - Selection
+
         @Test func updateSelectedFilter() async {
             await store.send(\.updateSelectedFilter, .tag(testTag)) {
                 $0.selectedFilter = .tag(testTag)
             }
         }
+
+        // MARK: - Tag management
 
         @Test func createTagButtonTapped() async {
             await store.send(\.view.createTagButtonTapped)
@@ -98,6 +104,7 @@ extension BaseTestSuite {
         }
 
         @Test func deleteTagSwipedOnSelectedFilter() async throws {
+            // Deleting the tag backing the current filter resets selection to .open
             let selectedTagRow = try #require(store.state.tagRows.first)
             let selectedTag = selectedTagRow.tag
             await store.send(\.updateSelectedFilter, .tag(selectedTag)) {
@@ -109,6 +116,8 @@ extension BaseTestSuite {
             await store.receive(\.delegate.selectedFilterChanged, .open)
             #expect(!store.state.tagRows.contains(selectedTagRow))
         }
+
+        // MARK: - Sort order
 
         @Test func sortOrderSelected() async {
             #expect(store.state.sortOrder == TagSortOrder(.name))
@@ -124,6 +133,8 @@ extension BaseTestSuite {
             }
             await store.finish()
         }
+
+        // MARK: - Show completed
 
         @Test func showCompletedToggled() async {
             #expect(!store.state.showCompleted)

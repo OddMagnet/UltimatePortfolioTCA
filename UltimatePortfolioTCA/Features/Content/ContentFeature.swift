@@ -4,14 +4,14 @@ import SwiftUI
 
 /// Query result combining an ``Issue`` with its comma-separated tag names from a grouped left join.
 /// Produced by ``ContentFeature/State/issueQuery``.
-@Selection struct IssueWithTags: Identifiable {
+@Selection struct IssueWithTags: Equatable, Identifiable {
     var issue: Issue
     var tagNames: String?
     var id: Issue.ID { issue.id }
 }
 
 @Reducer struct ContentFeature {
-    @ObservableState struct State {
+    @ObservableState struct State: Equatable {
         var filter: IssueFilter
         var selectedIssueID: Issue.ID?
         @Shared(.appStorage(AppStorageKeys.showCompleted)) var showCompleted = false
@@ -54,10 +54,12 @@ import SwiftUI
         case issue​Query​Changed
         case view(View)
 
+        @CasePathable
         enum Delegate {
             case selectedIssueChanged(Issue.ID?)
         }
 
+        @CasePathable
         enum View {
             case deleteIssuesSwiped(offsets: IndexSet)
             case sortOrderSelected(IssueSortOrder)

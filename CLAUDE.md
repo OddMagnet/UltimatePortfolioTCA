@@ -108,6 +108,10 @@ UltimatePortfolioTCATests/    — Unit tests (Swift Testing)
 - **`PriorityIndicator`**: 10pt colored circle for `Issue.Priority` with an accessibility label. Color is defined on `Issue.Priority.color`.
 - **`Date.compactRelative(to:)`** (in `Extensions/Date+CompactRelative.swift`): Compact relative date string — "< 1 hour" / "> N hours" (today), "> N days" (this week), locale-aware day+month (this year), "> N years" (older). Used in issue row trailing labels.
 
+## Commits
+
+- **No `Co-Authored-By`**: Do not add `Co-Authored-By` trailers to commit messages. Claude's role in this project is scaffolding, idea exploration, and commit message authoring — the developer reviews and revises all code before committing, so the trailer doesn't reflect the actual workflow.
+
 ## Code Quality Tools
 
 - **SwiftLint** + **SwiftFormat**: Both run on every Xcode build via a Run Script phase (report-only — no file modifications). SwiftLint handles safety, complexity, and semantic rules; SwiftFormat `--lint` checks formatting. All style rules in SwiftLint are disabled to avoid conflicts.
@@ -173,6 +177,10 @@ Linking a product to both the app target and the test target causes duplicate cl
 ### Sample data in tests
 
 `seedSampleData()` uses `@Dependency(\.date.now)` internally, so all dates in sample data are relative to the pinned test date (`1_234_567_890` / 2009-02-13). This ensures deterministic query results — e.g., no issues fall within the "recent" window because the pinned date makes all sample dates older than 7 days.
+
+### Pre-commit test coverage check
+
+Before creating any commit, review the staged diff for new or changed reducer logic (new actions, state properties, effects, or modified behavior) and verify that corresponding tests exist. If feature code is staged without tests, flag the gap and propose what tests are needed — do not commit until coverage is addressed. Pure test-infrastructure changes (adding `Equatable`, `@CasePathable` for testability) and view-only changes (SwiftUI layout, styling) do not require new tests.
 
 ## Point-Free Skills (slash commands)
 

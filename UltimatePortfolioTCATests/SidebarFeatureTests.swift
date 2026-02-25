@@ -115,7 +115,7 @@ extension BaseTestSuite {
             let sortOrder = TagSortOrder(.issueCount)
             // New sort order -> set default value
             await store.send(\.view.sortOrderSelected, sortOrder) {
-                $0.$sortOrder.withLock { $0 = TagSortOrder(.issueCount) }
+                $0.$sortOrder.withLock { $0 = sortOrder }
             }
             await store.finish()
             // Same sort order -> change direction

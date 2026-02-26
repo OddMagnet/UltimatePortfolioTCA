@@ -3,7 +3,7 @@ import Foundation
 import SQLiteData
 
 @Reducer struct AppFeature {
-    @ObservableState struct State {
+    @ObservableState struct State: Equatable {
         var sidebar = SidebarFeature.State()
         var content: ContentFeature.State?
         var detail: DetailFeature.State
@@ -97,6 +97,7 @@ import SQLiteData
                 return .none
 
             case .tagAlertConfirmButtonTapped:
+                defer { state.tagDraft = nil }
                 guard let id = state.tagDraft?.id,
                       let name = state.tagDraft?.name.trimmingCharacters(in: .whitespaces),
                       !name.isEmpty else { return .none }
@@ -105,7 +106,6 @@ import SQLiteData
                 case let .tag(selectedTag): selectedTag.id == id
                 default: false
                 }
-                state.tagDraft = nil
                 return .run { [database] send in
                     await withErrorReporting {
                         try await database.write { db in

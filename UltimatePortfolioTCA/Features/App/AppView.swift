@@ -26,10 +26,80 @@ struct AppView: View {
     }
 }
 
-#Preview {
-    AppView(store: Store(
-        initialState: AppFeature.State(),
-        reducer: { AppFeature() },
-        withDependencies: { try! $0.bootstrapDatabase() }
-    ))
+#Preview("Open (Default)") {
+    withPreviewDependencies {
+        AppView(store: Store(initialState: AppFeature.State()) {
+            AppFeature()
+        })
+    }
+}
+
+#Preview("Open / Selected") {
+    withPreviewDependencies {
+        AppView(store: Store(initialState: AppFeature.State(
+            selectedFilter: .open,
+            selectedIssueID: .issueLoginLayout
+        )) {
+            AppFeature()
+        })
+    }
+}
+
+#Preview("Completed") {
+    withPreviewDependencies {
+        AppView(store: Store(initialState: AppFeature.State(selectedFilter: .completed)) {
+            AppFeature()
+        })
+    }
+}
+
+#Preview("Completed / Selected") {
+    withPreviewDependencies {
+        AppView(store: Store(initialState: AppFeature.State(
+            selectedFilter: .completed,
+            selectedIssueID: .issueIPadCrash
+        )) {
+            AppFeature()
+        })
+    }
+}
+
+#Preview("Recent") {
+    withPreviewDependencies {
+        AppView(store: Store(initialState: AppFeature.State(selectedFilter: .recent)) {
+            AppFeature()
+        })
+    }
+}
+
+#Preview("Recent / Selected") {
+    withPreviewDependencies {
+        AppView(store: Store(initialState: AppFeature.State(
+            selectedFilter: .recent,
+            selectedIssueID: .issueLoginLayout
+        )) {
+            AppFeature()
+        })
+    }
+}
+
+#Preview("Tag") {
+    withPreviewDependencies {
+        let tag = Tag(id: .tagSwiftUI, name: "SwiftUI")
+        return AppView(store: Store(initialState: AppFeature.State(selectedFilter: .tag(tag))) {
+            AppFeature()
+        })
+    }
+}
+
+#Preview("Tag / Selected") {
+    withPreviewDependencies {
+        let tag = Tag(id: .tagSwiftUI, name: "SwiftUI")
+        return AppView(store: Store(initialState: AppFeature.State(
+            selectedFilter: .tag(tag),
+            selectedIssueID: .issuePushNotifications
+        )) {
+            AppFeature()
+        })
+    }
 }

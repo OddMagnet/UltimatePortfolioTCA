@@ -74,12 +74,54 @@ private struct IssueRow: View {
     }
 }
 
-#Preview {
-    NavigationStack {
-        ContentView(store: Store(
-            initialState: ContentFeature.State(filter: .open),
-            reducer: { ContentFeature() },
-            withDependencies: { try! $0.bootstrapDatabase() }
-        ))
+#Preview("Open") {
+    withPreviewDependencies {
+        NavigationStack {
+            ContentView(store: Store(initialState: ContentFeature.State(filter: .open)) {
+                ContentFeature()
+            })
+        }
+    }
+}
+
+#Preview("Completed") {
+    withPreviewDependencies {
+        NavigationStack {
+            ContentView(store: Store(initialState: ContentFeature.State(filter: .completed)) {
+                ContentFeature()
+            })
+        }
+    }
+}
+
+#Preview("Recent") {
+    withPreviewDependencies {
+        NavigationStack {
+            ContentView(store: Store(initialState: ContentFeature.State(filter: .recent)) {
+                ContentFeature()
+            })
+        }
+    }
+}
+
+#Preview("Tag") {
+    withPreviewDependencies {
+        let tag = Tag(id: .tagSwiftUI, name: "SwiftUI")
+        return NavigationStack {
+            ContentView(store: Store(initialState: ContentFeature.State(filter: .tag(tag))) {
+                ContentFeature()
+            })
+        }
+    }
+}
+
+#Preview("Tag (Empty)") {
+    withPreviewDependencies {
+        let tag = Tag(id: .tagCoreData, name: "Core Data")
+        return NavigationStack {
+            ContentView(store: Store(initialState: ContentFeature.State(filter: .tag(tag))) {
+                ContentFeature()
+            })
+        }
     }
 }

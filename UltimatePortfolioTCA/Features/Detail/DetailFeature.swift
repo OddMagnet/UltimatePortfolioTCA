@@ -17,13 +17,14 @@ import SwiftUI
         @FetchAll var tagRows: [TagRow] = []
 
         @Presents var alert: AlertState<Action.Alert>?
-        var isEditing: Bool = false
+        var isEditing: Bool
         var draft: Issue.Draft
         var selectedTagIDs: Set<Tag.ID> = []
 
         /// Sets up database observations (`@FetchOne`, `@FetchAll`) for the issue and its tags.
-        init(issueID: Issue.ID?) {
+        init(issueID: Issue.ID?, isEditing: Bool = false) {
             self.issueID = issueID
+            self.isEditing = isEditing
             if let issueID {
                 _issue = FetchOne(Issue.find(issueID), animation: .default)
             } else {

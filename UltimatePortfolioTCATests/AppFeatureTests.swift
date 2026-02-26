@@ -6,6 +6,7 @@ import Testing
 @testable import UltimatePortfolioTCA
 
 extension BaseTestSuite {
+    // swiftlint:disable:next type_body_length
     @MainActor struct AppFeatureTests {
         let store: TestStoreOf<AppFeature>
 
@@ -30,45 +31,52 @@ extension BaseTestSuite {
                       isAscending: true
                     ),
                     _smartFilterCounts: SmartFilterCounts(
-                      open: 3,
+                      open: 5,
                       completed: 2,
-                      recent: 2
+                      recent: 4
                     ),
                     _tagRows: [
                       [0]: TagWithCount(
+                        tag: Tag(
+                          id: UUID(00000000-0000-0000-0000-000000000006),
+                          name: "Accessibility & VoiceOver"
+                        ),
+                        issueCount: 1
+                      ),
+                      [1]: TagWithCount(
                         tag: Tag(
                           id: UUID(00000000-0000-0000-0000-000000000005),
                           name: "Bug"
                         ),
                         issueCount: 1
                       ),
-                      [1]: TagWithCount(
+                      [2]: TagWithCount(
                         tag: Tag(
                           id: UUID(00000000-0000-0000-0000-000000000003),
                           name: "Core Data"
                         ),
                         issueCount: 0
                       ),
-                      [2]: TagWithCount(
+                      [3]: TagWithCount(
                         tag: Tag(
                           id: UUID(00000000-0000-0000-0000-000000000002),
                           name: "Networking"
                         ),
-                        issueCount: 0
+                        issueCount: 1
                       ),
-                      [3]: TagWithCount(
+                      [4]: TagWithCount(
                         tag: Tag(
                           id: UUID(00000000-0000-0000-0000-000000000001),
                           name: "SwiftUI"
                         ),
-                        issueCount: 3
+                        issueCount: 4
                       ),
-                      [4]: TagWithCount(
+                      [5]: TagWithCount(
                         tag: Tag(
                           id: UUID(00000000-0000-0000-0000-000000000004),
                           name: "UI Design"
                         ),
-                        issueCount: 2
+                        issueCount: 3
                       )
                     ]
                   ),
@@ -95,6 +103,18 @@ extension BaseTestSuite {
                       ),
                       [1]: IssueWithTags(
                         issue: Issue(
+                          id: UUID(00000000-0000-0000-0000-000000000010),
+                          title: "Implement comprehensive push notification system with background delivery and rich media attachments",
+                          detail: "We need a full push notification system that handles foreground, background, and terminated states. This should include support for rich media attachments (images, video thumbnails), notification actions (reply, mark as read, snooze), and a notification service extension for decrypting end-to-end encrypted payloads. The system should also integrate with the existing badge count logic and group notifications by conversation thread using the thread-id field.",
+                          priority: .medium,
+                          isCompleted: false,
+                          created: Date(2009-02-05T23:31:30.000Z),
+                          modified: Date(2009-02-09T23:31:30.000Z)
+                        ),
+                        tagNames: "SwiftUI, Networking, UI Design, Accessibility & VoiceOver"
+                      ),
+                      [2]: IssueWithTags(
+                        issue: Issue(
                           id: UUID(00000000-0000-0000-0000-00000000000B),
                           title: "Add dark mode support",
                           detail: "Implement dark mode across all screens using asset catalogs",
@@ -105,7 +125,7 @@ extension BaseTestSuite {
                         ),
                         tagNames: "SwiftUI, UI Design"
                       ),
-                      [2]: IssueWithTags(
+                      [3]: IssueWithTags(
                         issue: Issue(
                           id: UUID(00000000-0000-0000-0000-00000000000D),
                           title: "Update onboarding flow",
@@ -116,6 +136,18 @@ extension BaseTestSuite {
                           modified: nil
                         ),
                         tagNames: "SwiftUI, UI Design"
+                      ),
+                      [4]: IssueWithTags(
+                        issue: Issue(
+                          id: UUID(00000000-0000-0000-0000-00000000000F),
+                          title: "Audit VoiceOver labels and traits across the entire application for WCAG 2.1 AA compliance",
+                          detail: "",
+                          priority: .low,
+                          isCompleted: false,
+                          created: Date(2009-02-08T23:31:30.000Z),
+                          modified: nil
+                        ),
+                        tagNames: nil
                       )
                     ]
                   ),
@@ -125,33 +157,40 @@ extension BaseTestSuite {
                     _tagRows: [
                       [0]: TagRow(
                         tag: Tag(
+                          id: UUID(00000000-0000-0000-0000-000000000006),
+                          name: "Accessibility & VoiceOver"
+                        ),
+                        isAssigned: false
+                      ),
+                      [1]: TagRow(
+                        tag: Tag(
                           id: UUID(00000000-0000-0000-0000-000000000005),
                           name: "Bug"
                         ),
                         isAssigned: false
                       ),
-                      [1]: TagRow(
+                      [2]: TagRow(
                         tag: Tag(
                           id: UUID(00000000-0000-0000-0000-000000000003),
                           name: "Core Data"
                         ),
                         isAssigned: false
                       ),
-                      [2]: TagRow(
+                      [3]: TagRow(
                         tag: Tag(
                           id: UUID(00000000-0000-0000-0000-000000000002),
                           name: "Networking"
                         ),
                         isAssigned: false
                       ),
-                      [3]: TagRow(
+                      [4]: TagRow(
                         tag: Tag(
                           id: UUID(00000000-0000-0000-0000-000000000001),
                           name: "SwiftUI"
                         ),
                         isAssigned: false
                       ),
-                      [4]: TagRow(
+                      [5]: TagRow(
                         tag: Tag(
                           id: UUID(00000000-0000-0000-0000-000000000004),
                           name: "UI Design"

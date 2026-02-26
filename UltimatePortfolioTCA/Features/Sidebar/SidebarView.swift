@@ -84,11 +84,11 @@ private struct FilterRow: View {
 }
 
 #Preview {
-    NavigationStack {
-        SidebarView(store: Store(
-            initialState: SidebarFeature.State(),
-            reducer: { SidebarFeature() },
-            withDependencies: { try! $0.bootstrapDatabase() }
-        ))
+    withPreviewDependencies {
+        NavigationStack {
+            SidebarView(store: Store(initialState: SidebarFeature.State()) {
+                SidebarFeature()
+            })
+        }
     }
 }

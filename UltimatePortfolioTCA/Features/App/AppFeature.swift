@@ -4,14 +4,20 @@ import SQLiteData
 
 @Reducer struct AppFeature {
     @ObservableState struct State: Equatable {
-        var sidebar = SidebarFeature.State()
+        var sidebar: SidebarFeature.State
         var content: ContentFeature.State?
         var detail: DetailFeature.State
         var tagDraft: Tag.Draft?
 
-        init() {
-            content = ContentFeature.State(filter: .open)
-            detail = DetailFeature.State(issueID: nil)
+        init(selectedFilter: IssueFilter? = .open, selectedIssueID: Issue.ID? = nil) {
+            sidebar = SidebarFeature.State(selectedFilter: selectedFilter)
+            if let selectedFilter {
+                content = ContentFeature.State(filter: selectedFilter, selectedIssueID: selectedIssueID)
+                detail = DetailFeature.State(issueID: selectedIssueID)
+            } else {
+                content = nil
+                detail = DetailFeature.State(issueID: nil)
+            }
         }
     }
 

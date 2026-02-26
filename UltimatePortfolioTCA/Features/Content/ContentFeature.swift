@@ -19,8 +19,9 @@ import SwiftUI
         @FetchAll var issueRows: [IssueWithTags] = []
 
         /// Sets up the issue list observation (`@FetchAll`) for the given filter.
-        init(filter: IssueFilter) {
+        init(filter: IssueFilter, selectedIssueID: Issue.ID? = nil) {
             self.filter = filter
+            self.selectedIssueID = selectedIssueID
             _issueRows = FetchAll(issueQuery, animation: .default)
         }
 

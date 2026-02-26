@@ -43,6 +43,18 @@ extension BaseTestSuite {
                     ),
                     [1]: IssueWithTags(
                       issue: Issue(
+                        id: UUID(00000000-0000-0000-0000-000000000010),
+                        title: "Implement comprehensive push notification system with background delivery and rich media attachments",
+                        detail: "We need a full push notification system that handles foreground, background, and terminated states. This should include support for rich media attachments (images, video thumbnails), notification actions (reply, mark as read, snooze), and a notification service extension for decrypting end-to-end encrypted payloads. The system should also integrate with the existing badge count logic and group notifications by conversation thread using the thread-id field.",
+                        priority: .medium,
+                        isCompleted: false,
+                        created: Date(2009-02-05T23:31:30.000Z),
+                        modified: Date(2009-02-09T23:31:30.000Z)
+                      ),
+                      tagNames: "SwiftUI, Networking, UI Design, Accessibility & VoiceOver"
+                    ),
+                    [2]: IssueWithTags(
+                      issue: Issue(
                         id: UUID(00000000-0000-0000-0000-00000000000B),
                         title: "Add dark mode support",
                         detail: "Implement dark mode across all screens using asset catalogs",
@@ -53,7 +65,7 @@ extension BaseTestSuite {
                       ),
                       tagNames: "SwiftUI, UI Design"
                     ),
-                    [2]: IssueWithTags(
+                    [3]: IssueWithTags(
                       issue: Issue(
                         id: UUID(00000000-0000-0000-0000-00000000000D),
                         title: "Update onboarding flow",
@@ -64,6 +76,18 @@ extension BaseTestSuite {
                         modified: nil
                       ),
                       tagNames: "SwiftUI, UI Design"
+                    ),
+                    [4]: IssueWithTags(
+                      issue: Issue(
+                        id: UUID(00000000-0000-0000-0000-00000000000F),
+                        title: "Audit VoiceOver labels and traits across the entire application for WCAG 2.1 AA compliance",
+                        detail: "",
+                        priority: .low,
+                        isCompleted: false,
+                        created: Date(2009-02-08T23:31:30.000Z),
+                        modified: nil
+                      ),
+                      tagNames: nil
                     )
                   ]
                 )
@@ -122,7 +146,7 @@ extension BaseTestSuite {
 
         @Test func tagFilterShowsIssuesForTag() {
             // NB: Uses the default showCompleted = false, so only open issues for this tag
-            let testTag = Tag(id: UUID(5), name: "Bug")
+            let testTag = Tag(id: .tagBug, name: "Bug")
             let store = TestStore(initialState: ContentFeature.State(filter: .tag(testTag))) {
                 ContentFeature()
             }
@@ -230,7 +254,7 @@ extension BaseTestSuite {
                 ContentFeature()
             }
             #expect(!store.state.showCompleted)
-            #expect(store.state.issueRows.count == 2)
+            #expect(store.state.issueRows.count == 4)
             #expect(!store.state.issueRows.contains(where: { $0.issue.title == "Fix crash on iPad rotation" }))
             // User toggles binding for showCompleted
             await store.send(\.binding.showCompleted, true) {
@@ -239,7 +263,7 @@ extension BaseTestSuite {
             // View reacts and sends the action
             await store.receive(\.issue​Query​Changed)
             await store.finish()
-            #expect(store.state.issueRows.count == 3)
+            #expect(store.state.issueRows.count == 5)
             #expect(store.state.issueRows.contains(where: { $0.issue.title == "Fix crash on iPad rotation" }))
         }
     }

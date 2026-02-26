@@ -11,7 +11,7 @@ extension BaseTestSuite {
         let testTag = Tag(id: UUID(-1), name: "Test")
 
         init() {
-            store = TestStore(initialState: SidebarFeature.State()) {
+            store = TestStore(initialState: SidebarFeature.State(selectedFilter: .open)) {
                 SidebarFeature()
             }
         }
@@ -29,45 +29,52 @@ extension BaseTestSuite {
                     isAscending: true
                   ),
                   _smartFilterCounts: SmartFilterCounts(
-                    open: 3,
+                    open: 5,
                     completed: 2,
-                    recent: 2
+                    recent: 4
                   ),
                   _tagRows: [
                     [0]: TagWithCount(
+                      tag: Tag(
+                        id: UUID(00000000-0000-0000-0000-000000000006),
+                        name: "Accessibility & VoiceOver"
+                      ),
+                      issueCount: 1
+                    ),
+                    [1]: TagWithCount(
                       tag: Tag(
                         id: UUID(00000000-0000-0000-0000-000000000005),
                         name: "Bug"
                       ),
                       issueCount: 1
                     ),
-                    [1]: TagWithCount(
+                    [2]: TagWithCount(
                       tag: Tag(
                         id: UUID(00000000-0000-0000-0000-000000000003),
                         name: "Core Data"
                       ),
                       issueCount: 0
                     ),
-                    [2]: TagWithCount(
+                    [3]: TagWithCount(
                       tag: Tag(
                         id: UUID(00000000-0000-0000-0000-000000000002),
                         name: "Networking"
                       ),
-                      issueCount: 0
+                      issueCount: 1
                     ),
-                    [3]: TagWithCount(
+                    [4]: TagWithCount(
                       tag: Tag(
                         id: UUID(00000000-0000-0000-0000-000000000001),
                         name: "SwiftUI"
                       ),
-                      issueCount: 3
+                      issueCount: 4
                     ),
-                    [4]: TagWithCount(
+                    [5]: TagWithCount(
                       tag: Tag(
                         id: UUID(00000000-0000-0000-0000-000000000004),
                         name: "UI Design"
                       ),
-                      issueCount: 2
+                      issueCount: 3
                     )
                   ]
                 )
@@ -138,8 +145,8 @@ extension BaseTestSuite {
 
         @Test func showCompletedToggled() async {
             #expect(!store.state.showCompleted)
-            #expect(store.state.smartFilterCounts == SmartFilterCounts(open: 3, completed: 2, recent: 2))
-            #expect(store.state.tagRows.map(\.issueCount) == [1, 0, 0, 3, 2])
+            #expect(store.state.smartFilterCounts == SmartFilterCounts(open: 5, completed: 2, recent: 4))
+            #expect(store.state.tagRows.map(\.issueCount) == [1, 1, 0, 1, 4, 3])
             // User toggles binding for showCompleted
             await store.send(\.binding.showCompleted, true) {
                 $0.$showCompleted.withLock { $0 = true }
@@ -147,8 +154,8 @@ extension BaseTestSuite {
             // View reacts and sends the action
             await store.send(\.view.showCompletedToggled)
             await store.finish()
-            #expect(store.state.smartFilterCounts == SmartFilterCounts(open: 3, completed: 2, recent: 3))
-            #expect(store.state.tagRows.map(\.issueCount) == [2, 0, 1, 4, 2])
+            #expect(store.state.smartFilterCounts == SmartFilterCounts(open: 5, completed: 2, recent: 5))
+            #expect(store.state.tagRows.map(\.issueCount) == [1, 2, 0, 2, 5, 3])
         }
     }
 }

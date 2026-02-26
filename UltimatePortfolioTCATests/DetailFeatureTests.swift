@@ -12,7 +12,7 @@ extension BaseTestSuite {
         let store: TestStoreOf<DetailFeature>
 
         init() {
-            store = TestStore(initialState: DetailFeature.State(issueID: UUID(10))) {
+            store = TestStore(initialState: DetailFeature.State(issueID: .issueLoginLayout)) {
                 DetailFeature()
             }
         }
@@ -31,33 +31,40 @@ extension BaseTestSuite {
                   _tagRows: [
                     [0]: TagRow(
                       tag: Tag(
+                        id: UUID(00000000-0000-0000-0000-000000000006),
+                        name: "Accessibility & VoiceOver"
+                      ),
+                      isAssigned: false
+                    ),
+                    [1]: TagRow(
+                      tag: Tag(
                         id: UUID(00000000-0000-0000-0000-000000000005),
                         name: "Bug"
                       ),
                       isAssigned: false
                     ),
-                    [1]: TagRow(
+                    [2]: TagRow(
                       tag: Tag(
                         id: UUID(00000000-0000-0000-0000-000000000003),
                         name: "Core Data"
                       ),
                       isAssigned: false
                     ),
-                    [2]: TagRow(
+                    [3]: TagRow(
                       tag: Tag(
                         id: UUID(00000000-0000-0000-0000-000000000002),
                         name: "Networking"
                       ),
                       isAssigned: false
                     ),
-                    [3]: TagRow(
+                    [4]: TagRow(
                       tag: Tag(
                         id: UUID(00000000-0000-0000-0000-000000000001),
                         name: "SwiftUI"
                       ),
                       isAssigned: false
                     ),
-                    [4]: TagRow(
+                    [5]: TagRow(
                       tag: Tag(
                         id: UUID(00000000-0000-0000-0000-000000000004),
                         name: "UI Design"
@@ -99,33 +106,40 @@ extension BaseTestSuite {
                   _tagRows: [
                     [0]: TagRow(
                       tag: Tag(
+                        id: UUID(00000000-0000-0000-0000-000000000006),
+                        name: "Accessibility & VoiceOver"
+                      ),
+                      isAssigned: false
+                    ),
+                    [1]: TagRow(
+                      tag: Tag(
                         id: UUID(00000000-0000-0000-0000-000000000005),
                         name: "Bug"
                       ),
                       isAssigned: true
                     ),
-                    [1]: TagRow(
+                    [2]: TagRow(
                       tag: Tag(
                         id: UUID(00000000-0000-0000-0000-000000000003),
                         name: "Core Data"
                       ),
                       isAssigned: false
                     ),
-                    [2]: TagRow(
+                    [3]: TagRow(
                       tag: Tag(
                         id: UUID(00000000-0000-0000-0000-000000000002),
                         name: "Networking"
                       ),
                       isAssigned: false
                     ),
-                    [3]: TagRow(
+                    [4]: TagRow(
                       tag: Tag(
                         id: UUID(00000000-0000-0000-0000-000000000001),
                         name: "SwiftUI"
                       ),
                       isAssigned: true
                     ),
-                    [4]: TagRow(
+                    [5]: TagRow(
                       tag: Tag(
                         id: UUID(00000000-0000-0000-0000-000000000004),
                         name: "UI Design"

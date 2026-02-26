@@ -84,12 +84,35 @@ struct DetailView: View {
     }
 }
 
-#Preview {
-    NavigationStack {
-        DetailView(store: Store(
-            initialState: DetailFeature.State(issueID: UUID(10)),
-            reducer: { DetailFeature() },
-            withDependencies: { try! $0.bootstrapDatabase() }
-        ))
+#Preview("Issue Selected") {
+    withPreviewDependencies {
+        NavigationStack {
+            DetailView(store: Store(initialState: DetailFeature.State(issueID: .issueLoginLayout)) {
+                DetailFeature()
+            })
+        }
+    }
+}
+
+#Preview("No Issue Selected") {
+    withPreviewDependencies {
+        NavigationStack {
+            DetailView(store: Store(initialState: DetailFeature.State(issueID: nil)) {
+                DetailFeature()
+            })
+        }
+    }
+}
+
+#Preview("Create Mode") {
+    withPreviewDependencies {
+        NavigationStack {
+            DetailView(store: Store(initialState: DetailFeature.State(
+                issueID: nil,
+                isEditing: true
+            )) {
+                DetailFeature()
+            })
+        }
     }
 }

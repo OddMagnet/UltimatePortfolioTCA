@@ -49,6 +49,10 @@ private struct IssueRow: View {
         tagNames = row.tagNames
     }
 
+    private var issueDate: Date {
+        issue.modified ?? issue.created
+    }
+
     var body: some View {
         HStack {
             PriorityIndicator(priority: issue.priority)
@@ -57,17 +61,19 @@ private struct IssueRow: View {
                 Text(issue.title)
                     .strikethrough(issue.isCompleted)
                     .foregroundStyle(issue.isCompleted ? .secondary : .primary)
+                    .accessibilityLabel("\(issue.title)\(issue.isCompleted ? ", completed" : "")")
 
                 if let tagNames {
                     Text(tagNames)
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                        .accessibilityLabel("Tagged with: \(tagNames)")
                 }
             }
 
             Spacer()
 
-            Text((issue.modified ?? issue.created).compactRelative())
+            Text(issueDate.compactRelative())
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }

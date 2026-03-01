@@ -39,14 +39,11 @@ struct EditIssueView: View {
             Section("Tags") {
                 FlowLayout {
                     ForEach(assignedTags + unassignedTags) { tag in
-                        Button {
+                        TagButton(tag: tag, isAssigned: selectedTagIDs.contains(tag.id)) {
                             withAnimation {
                                 if selectedTagIDs.contains(tag.id) { selectedTagIDs.remove(tag.id) }
                                 else { selectedTagIDs.insert(tag.id) }
                             }
-                        } label: {
-                            Text(tag.name)
-                                .chipStyle(isAssigned: selectedTagIDs.contains(tag.id))
                         }
                     }
 
@@ -57,6 +54,20 @@ struct EditIssueView: View {
                     }
                 }
                 .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private struct TagButton: View {
+        let tag: Tag
+        let isAssigned: Bool
+        let action: () -> Void
+
+        var body: some View {
+            Button(action: action) {
+                Text(tag.name)
+                    .chipStyle(isAssigned: isAssigned)
+                    .accessibilityAddTraits(isAssigned ? .isSelected : [])
             }
         }
     }

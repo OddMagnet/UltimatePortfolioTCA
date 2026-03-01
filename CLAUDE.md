@@ -41,7 +41,7 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 ## Database
 
 - **Setup**: `Schema.swift` in `Dependencies/` — `bootstrapDatabase()` on `DependencyValues` configures the database, runs migrations, starts `SyncEngine`, registers temporary triggers, and seeds sample data (debug only).
-- **Sample data**: `SampleData.swift` in `Dependencies/` — `seedSampleData()` on `DatabaseWriter` provides seed issues, tags, and associations for development/previews. Issue dates are computed relative to `@Dependency(\.date.now)` via `daysAgo(_:)`, making them deterministic in tests when the date dependency is pinned.
+- **Sample data**: `SampleData.swift` in `Dependencies/` — `seedSampleData()` on `DatabaseWriter` provides seed issues, tags, and associations for development/previews. Issue dates are computed relative to `@Dependency(\.date.now)` via `daysAgo(_:)`, making them deterministic in tests when the date dependency is pinned. `UUID+SampleData.swift` defines static UUID constants (e.g., `.tagSwiftUI`, `.issueLoginLayout`) for all sample entities, used in seed data, previews, and tests.
 - **Models**: `Issue`, `Tag`, `IssueTag` (join table) — all use `@Table` with UUID primary keys. `Tag.Draft` conforms to `Equatable` (required for SwiftUI's `.alert(item:)`).
 - **iCloud sync**: `SyncEngine` initialized for all three tables. Entitlements and `CKSharingSupported` are configured. Metadatabase is attached for future sharing support.
 - **Foreign keys**: `configuration.foreignKeysEnabled = true` — enforced at runtime.
@@ -50,7 +50,7 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 - **Date precision**: `datetime('subsec')` for sub-second precision.
 - **Debug only**: `eraseDatabaseOnSchemaChange = true`, SQL query tracing via `os.Logger`.
 - **Context-aware database**: `SQLiteData.defaultDatabase()` automatically uses in-memory for previews, temporary file for tests, app container for live.
-- **Previews**: Use TCA's `Store(initialState:reducer:withDependencies:)` initializer with `{ try! $0.bootstrapDatabase() }` to bootstrap dependencies in `#Preview`. This is a workaround for a `prepareDependencies` bug in swift-dependencies (since 1.10.1) with `@FetchAll` — revert to `prepareDependencies` once fixed.
+- **Previews**: Use the `withPreviewDependencies(view:)` helper (defined in `UltimatePortfolioTCAApp.swift`) which wraps preview content in `withDependencies { try! $0.bootstrapDatabase(); $0.date = .constant(...) } operation: { ... }`. Inside the closure, `Store` uses the plain `Store(initialState:) { Reducer() }` initializer — no `withDependencies` trailing closure on `Store` itself. This is a workaround for a `prepareDependencies` bug in swift-dependencies (since 1.10.1) with `@FetchAll` — revert to `prepareDependencies` once fixed.
 - **Query operation ordering**: Use `Where → Group → Order → Join → Select` ordering in StructuredQueries chains. Operations that don't need join tables should come before joins (per StructuredQueries convention), and within the pre-join operations, filter first, then group, then sort — matching the logical data pipeline.
 - **Query convenience properties**: `Issue.TableColumns` has reusable computed properties (`lastActivity`, `isNotCompleted`, `isRecent`) available as `$0.property` inside StructuredQueries closures. Note: custom `TableColumns` computed properties cannot be accessed via the static shorthand (`Issue.lastActivity`) — only real `@Table` columns support `@dynamicMemberLookup` on the static subscript.
 - **Extracted query helpers**: Common filter/ordering logic is extracted into model file extensions:
@@ -89,7 +89,7 @@ The Xcode project uses **File System Synchronized Groups** — the on-disk folde
 UltimatePortfolioTCA/
   App/                  — App entry point (UltimatePortfolioTCAApp.swift)
   Assets.xcassets
-  Dependencies/         — Database setup, sample data, constants (Schema.swift, SampleData.swift, AppStorageKeys.swift)
+  Dependencies/         — Database setup, sample data, constants (Schema.swift, SampleData.swift, AppStorageKeys.swift, UUID+SampleData.swift)
   Features/
     App/                — Root AppFeature + AppView (NavigationSplitView) + Common/
     Sidebar/            — SidebarFeature + SidebarView + IssueFilter
@@ -104,7 +104,7 @@ UltimatePortfolioTCATests/    — Unit tests (Swift Testing)
 
 - **`SortMenu`** + **`SortOrderProtocol`**: Generic toolbar sort menu. `SortOrderProtocol` pairs a `Field` enum with `isAscending`; `apply(_:)` toggles direction for the same field or replaces with a new field's default. Conforming types: `IssueSortOrder`, `TagSortOrder` (in `Models/SortOrder/`).
 - **`FlowLayout`**: Custom SwiftUI `Layout` that arranges children left-to-right, wrapping to the next line. Configurable `horizontalSpacing`/`verticalSpacing` (default 6). Used for tag chips.
-- **`ChipStyle`** + **`.chipStyle(isAssigned:)`**: A `ViewModifier` applying capsule-shaped chip styling to any view. Assigned = white text on tint background; unassigned = secondary text on tertiary fill. Uses `.geometryGroup()` to keep text and background animations in sync. `TagChip` is a convenience wrapper applying `.chipStyle()` to a `Text` view.
+- **`ChipStyle`** + **`.chipStyle(isAssigned:)`**: A `ViewModifier` applying capsule-shaped chip styling to any view. Assigned = white text on tint background; unassigned = secondary text on tertiary fill. Uses `.geometryGroup()` to keep text and background animations in sync.
 - **`PriorityIndicator`**: 10pt colored circle for `Issue.Priority` with an accessibility label. Color is defined on `Issue.Priority.color`.
 - **`Date.compactRelative(to:)`** (in `Extensions/Date+CompactRelative.swift`): Compact relative date string — "< 1 hour" / "> N hours" (today), "> N days" (this week), locale-aware day+month (this year), "> N years" (older). Used in issue row trailing labels.
 

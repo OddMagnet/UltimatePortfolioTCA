@@ -31,6 +31,7 @@ struct IssueView: View {
                 LabeledContent("Completed") {
                     Image(systemName: issue.isCompleted ? "checkmark.circle.fill" : "circle")
                         .foregroundStyle(issue.isCompleted ? .green : .secondary)
+                        .accessibilityLabel(issue.isCompleted ? "Completed" : "Open")
                 }
             }
 

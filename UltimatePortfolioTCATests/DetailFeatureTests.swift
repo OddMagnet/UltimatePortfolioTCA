@@ -225,6 +225,9 @@ extension BaseTestSuite {
             await store.send(\.binding.draft, newDraft) {
                 $0.draft.title = "New issue"
             }
+            await store.send(\.binding.selectedTagIDs, [.tagSwiftUI]) {
+                $0.selectedTagIDs = [.tagSwiftUI]
+            }
             await store.send(\.view.saveButtonTapped) {
                 $0.draft = Issue.Draft(created: now)
                 $0.selectedTagIDs = []
@@ -279,8 +282,13 @@ extension BaseTestSuite {
                 $0.selectedTagIDs = assignedTagIDs
                 $0.isEditing = true
             }
+            // Remove all tags
             await store.send(\.binding.selectedTagIDs, []) {
                 $0.selectedTagIDs = []
+            }
+            // Add a new tag
+            await store.send(\.binding.selectedTagIDs, [.tagSwiftUI]) {
+                $0.selectedTagIDs = [.tagSwiftUI]
             }
             await store.send(\.view.saveButtonTapped) {
                 $0.draft = Issue.Draft(created: now)
@@ -291,9 +299,28 @@ extension BaseTestSuite {
             await store.finish()
         }
 
+        @Test func saveEditWithNoID() async {
+            // Simulate a `nil` id for draft
+            let store = TestStore(initialState: DetailFeature.State(issueID: nil, isEditing: true)) {
+                DetailFeature()
+            }
+            // Update the draft
+            var updatedDraft = store.state.draft
+            updatedDraft.title = "Updated title"
+            await store.send(\.binding.draft, updatedDraft) {
+                $0.draft.title = "Updated title"
+            }
+            await store.send(\.view.saveButtonTapped) {
+                $0.draft = Issue.Draft(created: now)
+                $0.selectedTagIDs = []
+                $0.isEditing = false
+            }
+            // No run effect to exhaust
+        }
+
         // MARK: - Create tag
 
-        @Test func createTagButtonTapped() async {
+        @Test func createTagButtonTappedFromNewIssue() async {
             await store.send(\.view.createNewIssueButtonTapped) {
                 $0.draft = Issue.Draft(id: UUID(0), created: now)
                 $0.selectedTagIDs = []
@@ -303,6 +330,22 @@ extension BaseTestSuite {
                 $0.selectedTagIDs = [UUID(1)]
             }
             await store.receive(\.delegate.createTag, UUID(1))
+        }
+
+        @Test func createTagButtonTappedFromEditIssue() async throws {
+            let issue = try #require(store.state.issue)
+            let assignedTagIDs = Set(store.state.tagRows.filter(\.isAssigned).map(\.tag.id))
+            let newTagIDs = assignedTagIDs.union([UUID(0)])
+            await store.send(\.view.editButtonTapped) {
+                $0.draft = Issue.Draft(issue)
+                $0.selectedTagIDs = assignedTagIDs
+                $0.isEditing = true
+            }
+            await store.send(\.view.createTagButtonTapped) {
+                $0.selectedTagIDs = newTagIDs
+            }
+            await store.receive(\.delegate.createTag, UUID(0))
+            #expect(store.state.selectedTagIDs == newTagIDs)
         }
 
         // MARK: - Delete

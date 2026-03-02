@@ -221,21 +221,38 @@ extension BaseTestSuite {
 
         @Test func selectedFilterChangedToTag() async {
             let testTag = Tag(id: UUID(-1), name: "Test")
-            await store.send(\.sidebar.delegate.selectedFilterChanged, .tag(testTag)) {
+            await store.send(\.sidebar.binding.selectedFilter, .tag(testTag)) {
+                $0.sidebar.selectedFilter = .tag(testTag)
+            }
+            await store.receive(\.sidebar.delegate.selectedFilterChanged, .tag(testTag)) {
                 $0.content = ContentFeature.State(filter: .tag(testTag))
                 $0.detail = DetailFeature.State(issueID: nil)
             }
         }
 
         @Test func selectedFilterChangedToNil() async {
-            await store.send(\.sidebar.delegate.selectedFilterChanged, nil) {
+            await store.send(\.sidebar.binding.selectedFilter, nil) {
+                $0.sidebar.selectedFilter = nil
+            }
+            await store.receive(\.sidebar.delegate.selectedFilterChanged, nil) {
                 $0.content = nil
                 $0.detail = DetailFeature.State(issueID: nil)
             }
         }
 
         @Test func selectedFilterChangedToSameFilter() async {
-            await store.send(\.sidebar.delegate.selectedFilterChanged, .open)
+            await store.send(\.sidebar.binding.selectedFilter, .open)
+            await store.receive(\.sidebar.delegate.selectedFilterChanged, .open)
+        }
+
+        @Test func selectedFilterChangedToOtherSmartFilter() async {
+            await store.send(\.sidebar.binding.selectedFilter, .completed) {
+                $0.sidebar.selectedFilter = .completed
+            }
+            await store.receive(\.sidebar.delegate.selectedFilterChanged, .completed) {
+                $0.content = ContentFeature.State(filter: .completed)
+                $0.detail = DetailFeature.State(issueID: nil)
+            }
         }
 
         // MARK: - Issue Selection / Deletion
@@ -365,6 +382,23 @@ extension BaseTestSuite {
                 $0.sidebar.selectedFilter = .tag(newTag)
                 $0.content?.filter = .tag(newTag)
             }
+        }
+
+        @Test func tagAlertConfirmRenamesTag() async {
+            let tagID = UUID(-1)
+            let testTag = Tag(id: tagID, name: "TestTag")
+            let newTag = Tag(id: tagID, name: "NewNameTag")
+            await store.send(\.sidebar.delegate.renameTag, testTag) {
+                $0.tagDraft = Tag.Draft(testTag)
+            }
+            await store.send(\.binding.tagDraft, Tag.Draft(newTag)) {
+                $0.tagDraft = Tag.Draft(newTag)
+            }
+            await store.send(\.tagAlertConfirmButtonTapped) {
+                $0.tagDraft = nil
+            }
+            // No `.selectedTagRenamed` is received
+            await store.finish()
         }
 
         @Test func selectedTagRenamed() async {

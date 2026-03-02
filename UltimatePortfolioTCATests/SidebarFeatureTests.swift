@@ -82,6 +82,23 @@ extension BaseTestSuite {
             }
         }
 
+        // MARK: - Bindings
+
+        @Test func selectedFilterBinding() async {
+            await store.send(\.binding.selectedFilter, .completed) {
+                $0.selectedFilter = .completed
+            }
+            await store.receive(\.delegate.selectedFilterChanged, .completed)
+            await store.send(\.binding.selectedFilter, nil) {
+                $0.selectedFilter = nil
+            }
+            await store.receive(\.delegate.selectedFilterChanged, nil)
+            await store.send(\.binding.selectedFilter, .tag(testTag)) {
+                $0.selectedFilter = .tag(testTag)
+            }
+            await store.receive(\.delegate.selectedFilterChanged, .tag(testTag))
+        }
+
         // MARK: - Selection
 
         @Test func updateSelectedFilter() async {
@@ -131,14 +148,18 @@ extension BaseTestSuite {
             let sortOrder = TagSortOrder(.issueCount)
             // New sort order -> set default value
             await store.send(\.view.sortOrderSelected, sortOrder) {
-                $0.$sortOrder.withLock { $0 = sortOrder }
+                $0.$sortOrder.withLock { $0.apply(sortOrder) }
             }
             await store.finish()
+            #expect(store.state.tagRows.first?.issueCount == 4)
+            #expect(store.state.tagRows.last?.issueCount == 0)
             // Same sort order -> change direction
             await store.send(\.view.sortOrderSelected, sortOrder) {
                 $0.$sortOrder.withLock { $0.apply(sortOrder) }
             }
             await store.finish()
+            #expect(store.state.tagRows.first?.issueCount == 0)
+            #expect(store.state.tagRows.last?.issueCount == 4)
         }
 
         // MARK: - Show completed

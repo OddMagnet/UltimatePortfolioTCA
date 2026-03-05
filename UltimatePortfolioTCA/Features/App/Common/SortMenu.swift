@@ -77,7 +77,7 @@ struct SortMenu<Order: SortOrderProtocol, ExtraActions: View>: View {
 
             extraActions
         } label: {
-            Label("Sort", systemImage: "arrow.up.arrow.down")
+            Label("Sort", systemImage: "line.3.horizontal.decrease.circle")
         }
     }
 }

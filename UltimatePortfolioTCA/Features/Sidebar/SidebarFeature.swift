@@ -30,7 +30,7 @@ import SwiftUI
 
 @Reducer struct SidebarFeature {
     @ObservableState struct State: Equatable {
-        var selectedFilter: IssueFilter? = .open
+        var selectedFilter: IssueFilter?
         @Shared(.appStorage(AppStorageKeys.showCompleted)) var showCompleted = false
         @Shared(.appStorage(AppStorageKeys.tagSortOrder)) var sortOrder = TagSortOrder(.name)
         @FetchOne var smartFilterCounts = SmartFilterCounts()

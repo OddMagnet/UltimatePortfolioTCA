@@ -6,7 +6,7 @@ struct ContentView: View {
     @Bindable var store: StoreOf<ContentFeature>
 
     var body: some View {
-        Group {
+        VStack {
             if store.issueRows.isEmpty {
                 if store.searchText.isEmpty, store.searchTokens.isEmpty {
                     ContentUnavailableView("No Issues", systemImage: "tray")
@@ -48,6 +48,12 @@ struct ContentView: View {
                         systemImage: store.showCompleted ? "eye" : "eye.slash"
                     )
                 }
+            }
+
+            Button {
+                send(.createIssueButtonTapped)
+            } label: {
+                Label("New issue", systemImage: "square.and.pencil")
             }
 
             SortMenu(currentOrder: store.sortOrder) { order in

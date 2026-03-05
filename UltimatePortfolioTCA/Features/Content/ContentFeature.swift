@@ -116,11 +116,13 @@ import SwiftUI
 
         @CasePathable
         enum Delegate {
+            case createIssue
             case selectedIssueChanged(Issue.ID?)
         }
 
         @CasePathable
         enum View {
+            case createIssueButtonTapped
             case deleteIssuesSwiped(offsets: IndexSet)
             case sortOrderSelected(IssueSortOrder)
         }
@@ -165,6 +167,9 @@ import SwiftUI
                     }
                     try await state.$issueRows.load(state.issueQuery, animation: .default)
                 }.cancellable(id: CancelID.issueQuery, cancelInFlight: true)
+
+            case .view(.createIssueButtonTapped):
+                return .send(.delegate(.createIssue))
 
             case let .view(.deleteIssuesSwiped(offsets)):
                 let ids = offsets.map { state.issueRows[$0].issue.id }

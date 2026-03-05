@@ -5,6 +5,7 @@ import Testing
 @testable import UltimatePortfolioTCA
 
 @Suite(
+    .serialized, // Workaround for in-flight effects running too long, remove with TCA 2.0
     .dependency(\.date.now, Date(timeIntervalSince1970: 1_234_567_890)),
     .dependency(\.uuid, .incrementing),
     .dependencies {

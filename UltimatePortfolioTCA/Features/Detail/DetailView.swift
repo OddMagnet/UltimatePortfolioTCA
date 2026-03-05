@@ -8,12 +8,13 @@ struct DetailView: View {
         switch (store.isEditing, store.issueID) {
         case (true, .some): "Edit Issue"
         case (true, .none): "New Issue"
-        case (false, _): "Details"
+        case (false, .some): "Details"
+        case (false, .none): ""
         }
     }
 
     var body: some View {
-        Group {
+        VStack {
             if store.isEditing {
                 EditIssueView(
                     draft: $store.draft,
@@ -22,13 +23,11 @@ struct DetailView: View {
                     onCreateTag: { send(.createTagButtonTapped) }
                 )
                 .alert($store.scope(state: \.alert, action: \.alert))
-                .navigationTitle(title)
             } else if let issue = store.issue {
                 IssueView(
                     issue: issue,
                     assignedTags: store.tagRows.filter(\.isAssigned).map(\.tag)
                 )
-                .navigationTitle(title)
             } else {
                 ContentUnavailableView {
                     Label("No Issue Selected", systemImage: "exclamationmark.triangle")
@@ -37,7 +36,10 @@ struct DetailView: View {
                 }
             }
         }
-        .toolbarTitleDisplayMode(.inlineLarge)
+        .animation(.default, value: store.issueID)
+        .animation(.default, value: store.isEditing)
+        .navigationTitle(title)
+        .toolbarTitleDisplayMode(.inline)
         .toolbar {
             if store.isEditing {
                 editIssueToolBarContent

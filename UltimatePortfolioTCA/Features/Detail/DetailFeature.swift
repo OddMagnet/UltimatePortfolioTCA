@@ -65,6 +65,7 @@ import SwiftUI
         enum Delegate {
             case createTag(Tag.ID)
             case issueDeleted
+            case issueSaved(Issue.ID)
         }
 
         @CasePathable
@@ -116,15 +117,17 @@ import SwiftUI
                 return .none
 
             case .view(.saveButtonTapped):
-                defer { resetDraftState(&state) }
-                guard userDidModifyDraft(state) else { return .none }
+                guard userDidModifyDraft(state) else {
+                    resetDraftState(&state)
+                    return .none
+                }
                 // For new issue creation, the draft was assigned a uuid at creation
                 // For editing an issue, the id of the draft comes from Issue.Draft(state.issue)
                 // If it's nil, we need to abort early
                 guard let issueID = state.draft.id else { return .none }
                 let selectedTagIDs = state.selectedTagIDs
                 let draft = state.draft
-                return .run { [database] _ in
+                return .run { [database] send in
                     await withErrorReporting {
                         try await database.write { db in
                             try Issue.upsert { draft }.execute(db)
@@ -135,6 +138,7 @@ import SwiftUI
                                 }.execute(db)
                             }
                         }
+                        await send(.delegate(.issueSaved(issueID)))
                     }
                 }
 

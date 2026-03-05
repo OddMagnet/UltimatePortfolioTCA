@@ -9,7 +9,7 @@ import SQLiteData
         var detail: DetailFeature.State
         var tagDraft: Tag.Draft?
 
-        init(selectedFilter: IssueFilter? = .open, selectedIssueID: Issue.ID? = nil) {
+        init(selectedFilter: IssueFilter? = nil, selectedIssueID: Issue.ID? = nil) {
             sidebar = SidebarFeature.State(selectedFilter: selectedFilter)
             if let selectedFilter {
                 content = ContentFeature.State(filter: selectedFilter, selectedIssueID: selectedIssueID)
@@ -31,6 +31,8 @@ import SQLiteData
     }
 
     @Dependency(\.defaultDatabase) var database
+    @Dependency(\.date.now) var now
+    @Dependency(\.uuid) var uuid
 
     var body: some Reducer<State, Action> {
         BindingReducer()
@@ -74,6 +76,13 @@ import SQLiteData
             case .sidebar:
                 return .none
 
+            case .content(.delegate(.createIssue)):
+                let issueID = uuid()
+                state.content?.selectedIssueID = issueID
+                state.detail.draft = Issue.Draft(id: issueID, created: now)
+                state.detail.isEditing = true
+                return .none
+
             case let .content(.delegate(.selectedIssueChanged(newIssueID))):
                 // Nothing to do if issue didn't change
                 guard newIssueID != state.detail.issueID else { return .none }
@@ -92,6 +101,11 @@ import SQLiteData
             case .detail(.delegate(.issueDeleted)):
                 state.detail = DetailFeature.State(issueID: nil)
                 state.content?.selectedIssueID = nil
+                return .none
+
+            case let .detail(.delegate(.issueSaved(newIssueID))):
+                state.content?.selectedIssueID = newIssueID
+                state.detail = DetailFeature.State(issueID: newIssueID)
                 return .none
 
             case .detail:

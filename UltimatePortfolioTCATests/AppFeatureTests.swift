@@ -8,10 +8,11 @@ import Testing
 extension BaseTestSuite {
     // swiftlint:disable:next type_body_length
     @MainActor struct AppFeatureTests {
+        @Dependency(\.date.now) var now
         let store: TestStoreOf<AppFeature>
 
         init() {
-            store = TestStore(initialState: AppFeature.State()) {
+            store = TestStore(initialState: AppFeature.State(selectedFilter: .open)) {
                 AppFeature()
             }
         }
@@ -284,6 +285,32 @@ extension BaseTestSuite {
             }
         }
 
+        // MARK: - Issue Creation / Saving
+
+        @Test func createIssueFromContent() async {
+            let newIssueID = UUID(0)
+            await store.send(\.content.delegate.createIssue) {
+                $0.content?.selectedIssueID = newIssueID
+                $0.detail.isEditing = true
+                $0.detail.draft = Issue.Draft(id: newIssueID, created: now)
+            }
+        }
+
+        @Test func issueSavedFromDetail() async {
+            let newIssueID = UUID(0)
+            await store.send(\.sidebar.binding.selectedFilter, .open)
+            await store.receive(\.sidebar.delegate.selectedFilterChanged, .open)
+            await store.send(\.content.delegate.createIssue) {
+                $0.content?.selectedIssueID = newIssueID
+                $0.detail.isEditing = true
+                $0.detail.draft = Issue.Draft(id: newIssueID, created: now)
+            }
+            await store.send(\.detail.delegate.issueSaved, newIssueID) {
+                $0.content?.selectedIssueID = newIssueID
+                $0.detail = DetailFeature.State(issueID: newIssueID)
+            }
+        }
+
         // MARK: - Issue Selection / Deletion
 
         @Test func selectedIssueChangedToIssue() async {
@@ -376,6 +403,7 @@ extension BaseTestSuite {
             await store.send(\.tagAlertConfirmButtonTapped) {
                 $0.tagDraft = nil
             }
+            await store.finish()
             // Whitespace only name
             await store.send(\.sidebar.delegate.createTag, tagId) {
                 $0.tagDraft = Tag.Draft(id: tagId)
@@ -386,6 +414,7 @@ extension BaseTestSuite {
             await store.send(\.tagAlertConfirmButtonTapped) {
                 $0.tagDraft = nil
             }
+            await store.finish()
         }
 
         @Test func tagAlertConfirmRenamesSelectedTag() async {
@@ -411,6 +440,7 @@ extension BaseTestSuite {
                 $0.sidebar.selectedFilter = .tag(newTag)
                 $0.content?.filter = .tag(newTag)
             }
+            await store.finish()
         }
 
         @Test func tagAlertConfirmRenamesTag() async {

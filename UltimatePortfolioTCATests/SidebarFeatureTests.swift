@@ -138,6 +138,7 @@ extension BaseTestSuite {
                 $0.selectedFilter = .open
             }
             await store.receive(\.delegate.selectedFilterChanged, .open)
+            await store.finish()
             #expect(!store.state.tagRows.contains(selectedTagRow))
         }
 

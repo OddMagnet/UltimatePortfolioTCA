@@ -341,6 +341,7 @@ extension BaseTestSuite {
                 $0.selectedIssueID = nil
             }
             await store.receive(\.delegate.selectedIssueChanged, nil)
+            await store.finish()
             #expect(!store.state.issueRows.contains(selectedIssueRow))
         }
 

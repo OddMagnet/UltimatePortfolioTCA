@@ -228,11 +228,8 @@ extension BaseTestSuite {
             await store.send(\.binding.selectedTagIDs, [.tagSwiftUI]) {
                 $0.selectedTagIDs = [.tagSwiftUI]
             }
-            await store.send(\.view.saveButtonTapped) {
-                $0.draft = Issue.Draft(created: now)
-                $0.selectedTagIDs = []
-                $0.isEditing = false
-            }
+            await store.send(\.view.saveButtonTapped)
+            await store.receive(\.delegate.issueSaved)
             await store.finish()
         }
 
@@ -249,12 +246,8 @@ extension BaseTestSuite {
             await store.send(\.binding.draft, updatedDraft) {
                 $0.draft.title = "Updated title"
             }
-            await store.send(\.view.saveButtonTapped) {
-                $0.draft = Issue.Draft(created: now)
-                $0.selectedTagIDs = []
-                $0.isEditing = false
-            }
-            // Waiting for effect triggered by save
+            await store.send(\.view.saveButtonTapped)
+            await store.receive(\.delegate.issueSaved)
             await store.finish()
         }
 
@@ -272,6 +265,7 @@ extension BaseTestSuite {
                 $0.selectedTagIDs = []
                 $0.isEditing = false
             }
+            await store.finish()
         }
 
         @Test func saveEditWithOnlyTagChanges() async throws {
@@ -290,12 +284,8 @@ extension BaseTestSuite {
             await store.send(\.binding.selectedTagIDs, [.tagSwiftUI]) {
                 $0.selectedTagIDs = [.tagSwiftUI]
             }
-            await store.send(\.view.saveButtonTapped) {
-                $0.draft = Issue.Draft(created: now)
-                $0.selectedTagIDs = []
-                $0.isEditing = false
-            }
-            // Waiting for effect triggered by save
+            await store.send(\.view.saveButtonTapped)
+            await store.receive(\.delegate.issueSaved)
             await store.finish()
         }
 
@@ -310,11 +300,7 @@ extension BaseTestSuite {
             await store.send(\.binding.draft, updatedDraft) {
                 $0.draft.title = "Updated title"
             }
-            await store.send(\.view.saveButtonTapped) {
-                $0.draft = Issue.Draft(created: now)
-                $0.selectedTagIDs = []
-                $0.isEditing = false
-            }
+            await store.send(\.view.saveButtonTapped)
             // No run effect to exhaust
         }
 
@@ -384,6 +370,7 @@ extension BaseTestSuite {
                 $0.alert = nil
             }
             await store.receive(\.delegate.issueDeleted)
+            await store.finish()
         }
 
         @Test func confirmDeletionWithNilIssueID() async {
@@ -407,6 +394,7 @@ extension BaseTestSuite {
             await store.send(\.alert.presented.confirmDeletion) {
                 $0.alert = nil
             }
+            await store.finish()
         }
     }
 }

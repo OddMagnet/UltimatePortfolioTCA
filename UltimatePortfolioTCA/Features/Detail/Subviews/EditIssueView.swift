@@ -18,7 +18,8 @@ struct EditIssueView: View {
     var body: some View {
         Form {
             Section("Title") {
-                TextField("Title", text: $draft.title)
+                TextField("Title", text: $draft.title, axis: .vertical)
+                    .lineLimit(1...3)
             }
 
             Section("Description") {

@@ -83,6 +83,9 @@ extension BaseTestSuite {
                   _content: ContentFeature.State(
                     _filter: .open,
                     _selectedIssueID: nil,
+                    _searchText: "",
+                    _searchTokens: [],
+                    _suggestedTokens: [],
                     _showCompleted: #1 Bool(↩︎),
                     _sortOrder: #1 IssueSortOrder(
                       field: .priority,
@@ -148,6 +151,32 @@ extension BaseTestSuite {
                           modified: nil
                         ),
                         tagNames: nil
+                      )
+                    ],
+                    _availableTags: [
+                      [0]: Tag(
+                        id: UUID(00000000-0000-0000-0000-000000000006),
+                        name: "Accessibility & VoiceOver"
+                      ),
+                      [1]: Tag(
+                        id: UUID(00000000-0000-0000-0000-000000000005),
+                        name: "Bug"
+                      ),
+                      [2]: Tag(
+                        id: UUID(00000000-0000-0000-0000-000000000003),
+                        name: "Core Data"
+                      ),
+                      [3]: Tag(
+                        id: UUID(00000000-0000-0000-0000-000000000002),
+                        name: "Networking"
+                      ),
+                      [4]: Tag(
+                        id: UUID(00000000-0000-0000-0000-000000000001),
+                        name: "SwiftUI"
+                      ),
+                      [5]: Tag(
+                        id: UUID(00000000-0000-0000-0000-000000000004),
+                        name: "UI Design"
                       )
                     ]
                   ),

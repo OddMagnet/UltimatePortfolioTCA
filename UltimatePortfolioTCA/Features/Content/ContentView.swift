@@ -8,7 +8,11 @@ struct ContentView: View {
     var body: some View {
         Group {
             if store.issueRows.isEmpty {
-                ContentUnavailableView("No Issues", systemImage: "tray")
+                if store.searchText.isEmpty, store.searchTokens.isEmpty {
+                    ContentUnavailableView("No Issues", systemImage: "tray")
+                } else {
+                    ContentUnavailableView.search
+                }
             } else {
                 List(selection: $store.selectedIssueID) {
                     ForEach(store.issueRows) { row in
@@ -21,6 +25,19 @@ struct ContentView: View {
         }
         .navigationTitle(store.filter.title)
         .toolbarTitleDisplayMode(.inlineLarge)
+        .searchable(
+            text: $store.searchText,
+            tokens: $store.searchTokens,
+            prompt: "Search issues or type # for filters"
+        ) { token in
+            SearchTokenLabel(token: token)
+        }
+        .searchSuggestions {
+            ForEach(store.suggestedTokens) { token in
+                SearchTokenLabel(token: token)
+                    .searchCompletion(token)
+            }
+        }
         .toolbar {
             if store.filter.hasShowCompletedToggle {
                 Button {
@@ -36,6 +53,19 @@ struct ContentView: View {
             SortMenu(currentOrder: store.sortOrder) { order in
                 send(.sortOrderSelected(order))
             }
+        }
+    }
+}
+
+private struct SearchTokenLabel: View {
+    let token: SearchToken
+
+    var body: some View {
+        Label {
+            Text(token.label)
+        } icon: {
+            Image(systemName: token.systemImage)
+                .foregroundStyle(token.tintColor ?? .accentColor)
         }
     }
 }

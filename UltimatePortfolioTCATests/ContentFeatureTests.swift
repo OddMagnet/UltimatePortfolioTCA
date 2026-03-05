@@ -5,7 +5,9 @@ import SnapshotTestingCustomDump
 import Testing
 @testable import UltimatePortfolioTCA
 
+// swiftlint:disable file_length
 extension BaseTestSuite {
+    // swiftlint:disable:next type_body_length
     @MainActor struct ContentFeatureTests {
         let store: TestStoreOf<ContentFeature>
 
@@ -17,12 +19,16 @@ extension BaseTestSuite {
 
         // MARK: - State snapshots
 
+        // swiftlint:disable:next function_body_length
         @Test func defaultContentStoreState() {
             assertInlineSnapshot(of: store.state, as: .customDump) {
                 """
                 ContentFeature.State(
                   _filter: .open,
                   _selectedIssueID: nil,
+                  _searchText: "",
+                  _searchTokens: [],
+                  _suggestedTokens: [],
                   _showCompleted: #1 false,
                   _sortOrder: #1 IssueSortOrder(
                     field: .priority,
@@ -89,6 +95,32 @@ extension BaseTestSuite {
                       ),
                       tagNames: nil
                     )
+                  ],
+                  _availableTags: [
+                    [0]: Tag(
+                      id: UUID(00000000-0000-0000-0000-000000000006),
+                      name: "Accessibility & VoiceOver"
+                    ),
+                    [1]: Tag(
+                      id: UUID(00000000-0000-0000-0000-000000000005),
+                      name: "Bug"
+                    ),
+                    [2]: Tag(
+                      id: UUID(00000000-0000-0000-0000-000000000003),
+                      name: "Core Data"
+                    ),
+                    [3]: Tag(
+                      id: UUID(00000000-0000-0000-0000-000000000002),
+                      name: "Networking"
+                    ),
+                    [4]: Tag(
+                      id: UUID(00000000-0000-0000-0000-000000000001),
+                      name: "SwiftUI"
+                    ),
+                    [5]: Tag(
+                      id: UUID(00000000-0000-0000-0000-000000000004),
+                      name: "UI Design"
+                    )
                   ]
                 )
                 """
@@ -139,7 +171,7 @@ extension BaseTestSuite {
             await store.send(\.binding.showCompleted, true) {
                 $0.$showCompleted.withLock { $0 = true }
             }
-            await store.receive(\.issue​Query​Changed)
+            await store.receive(\.issueQueryChanged)
             await store.finish()
             #expect(store.state.issueRows.count == count)
         }
@@ -257,14 +289,14 @@ extension BaseTestSuite {
             await store.send(\.view.sortOrderSelected, sortOrder) {
                 $0.$sortOrder.withLock { $0 = sortOrder }
             }
-            await store.receive(\.issue​Query​Changed)
+            await store.receive(\.issueQueryChanged)
             await store.finish()
             let initialOrdering = store.state.issueRows.map(\.issue.title)
             // Same sort order -> change direction
             await store.send(\.view.sortOrderSelected, sortOrder) {
                 $0.$sortOrder.withLock { $0.apply(sortOrder) }
             }
-            await store.receive(\.issue​Query​Changed)
+            await store.receive(\.issueQueryChanged)
             await store.finish()
             #expect(store.state.issueRows.map(\.issue.title) == initialOrdering.reversed())
         }
@@ -276,14 +308,14 @@ extension BaseTestSuite {
             await store.send(\.view.sortOrderSelected, sortOrder) {
                 $0.$sortOrder.withLock { $0 = sortOrder }
             }
-            await store.receive(\.issue​Query​Changed)
+            await store.receive(\.issueQueryChanged)
             await store.finish()
             let initialOrdering = store.state.issueRows.map(\.issue.title)
             // Same sort order -> change direction
             await store.send(\.view.sortOrderSelected, sortOrder) {
                 $0.$sortOrder.withLock { $0.apply(sortOrder) }
             }
-            await store.receive(\.issue​Query​Changed)
+            await store.receive(\.issueQueryChanged)
             await store.finish()
             #expect(store.state.issueRows.map(\.issue.title) == initialOrdering.reversed())
         }
@@ -343,7 +375,7 @@ extension BaseTestSuite {
                 $0.$showCompleted.withLock { $0 = true }
             }
             // View reacts and sends the action
-            await store.receive(\.issue​Query​Changed)
+            await store.receive(\.issueQueryChanged)
             await store.finish()
             #expect(store.state.issueRows.count == 5)
             #expect(store.state.issueRows.contains(where: { $0.issue.title == "Fix crash on iPad rotation" }))
@@ -362,10 +394,246 @@ extension BaseTestSuite {
                 $0.$showCompleted.withLock { $0 = true }
             }
             // View reacts and sends the action
-            await store.receive(\.issue​Query​Changed)
+            await store.receive(\.issueQueryChanged)
             await store.finish()
             #expect(store.state.issueRows.count == 5)
             #expect(store.state.issueRows.contains(where: { $0.issue.title == "Fix crash on iPad rotation" }))
+        }
+
+        // MARK: - Search text (FTS5)
+
+        @Test func searchTextMatchesTitle() async {
+            await store.send(\.binding.searchText, "login") {
+                $0.searchText = "login"
+            }
+            await store.receive(\.issueQueryChanged)
+            await store.finish()
+            #expect(store.state.issueRows.count == 1)
+            #expect(store.state.issueRows.first?.issue.title == "Fix login screen layout")
+        }
+
+        @Test func searchTextMatchesDetail() async {
+            await store.send(\.binding.searchText, "overlaps") {
+                $0.searchText = "overlaps"
+            }
+            await store.receive(\.issueQueryChanged)
+            await store.finish()
+            #expect(store.state.issueRows.count == 1)
+            #expect(store.state.issueRows.first?.issue.title == "Fix login screen layout")
+        }
+
+        @Test func searchTextNoMatch() async {
+            await store.send(\.binding.searchText, "zzzznonexistent") {
+                $0.searchText = "zzzznonexistent"
+            }
+            await store.receive(\.issueQueryChanged)
+            await store.finish()
+            #expect(store.state.issueRows.isEmpty)
+        }
+
+        @Test func searchTextPrefixMatches() async {
+            // FTS5 prefix matching: "dark" should match "dark mode support"
+            await store.send(\.binding.searchText, "dark") {
+                $0.searchText = "dark"
+            }
+            await store.receive(\.issueQueryChanged)
+            await store.finish()
+            #expect(store.state.issueRows.count == 1)
+            #expect(store.state.issueRows.first?.issue.title == "Add dark mode support")
+        }
+
+        @Test func clearSearchRestoresFullList() async {
+            let originalCount = store.state.issueRows.count
+            await store.send(\.binding.searchText, "login") {
+                $0.searchText = "login"
+            }
+            await store.receive(\.issueQueryChanged)
+            await store.finish()
+            #expect(store.state.issueRows.count == 1)
+            // Clear search
+            await store.send(\.binding.searchText, "") {
+                $0.searchText = ""
+            }
+            await store.receive(\.issueQueryChanged)
+            await store.finish()
+            #expect(store.state.issueRows.count == originalCount)
+        }
+
+        // MARK: - Priority token
+
+        @Test func priorityTokenFiltersHighOnly() async {
+            let token = SearchToken.priority(.high)
+            await store.send(\.binding.searchTokens, [token]) {
+                $0.searchTokens = [token]
+            }
+            await store.receive(\.issueQueryChanged)
+            await store.finish()
+            #expect(store.state.issueRows.allSatisfy { $0.issue.priority == .high })
+            #expect(store.state.issueRows.count == 1)
+            #expect(store.state.issueRows.first?.issue.title == "Fix login screen layout")
+        }
+
+        @Test func priorityTokenFiltersMedium() async {
+            let token = SearchToken.priority(.medium)
+            await store.send(\.binding.searchTokens, [token]) {
+                $0.searchTokens = [token]
+            }
+            await store.receive(\.issueQueryChanged)
+            await store.finish()
+            #expect(store.state.issueRows.allSatisfy { $0.issue.priority == .medium })
+            #expect(store.state.issueRows.count == 2)
+        }
+
+        // MARK: - Status token
+
+        @Test func statusTokenCompletedShowsCompleted() async {
+            // Status token overrides the filter's completed-issue visibility
+            let token = SearchToken.status(.completed)
+            await store.send(\.binding.searchTokens, [token]) {
+                $0.searchTokens = [token]
+            }
+            await store.receive(\.issueQueryChanged)
+            await store.finish()
+            #expect(store.state.issueRows.filter(\.issue.isCompleted).count == store.state.issueRows.count)
+            #expect(store.state.issueRows.count == 2)
+        }
+
+        @Test func statusTokenOpenShowsOpenOnly() async {
+            // Use .recent filter with showCompleted=true, then apply .open token
+            let store = TestStore(initialState: ContentFeature.State(filter: .recent)) {
+                ContentFeature()
+            }
+            // First enable show completed so we have both open and completed
+            await store.send(\.binding.showCompleted, true) {
+                $0.$showCompleted.withLock { $0 = true }
+            }
+            await store.receive(\.issueQueryChanged)
+            await store.finish()
+            let countWithCompleted = store.state.issueRows.count
+            #expect(store.state.issueRows.contains { $0.issue.isCompleted })
+            // Apply open status token — should override and show only open
+            let token = SearchToken.status(.open)
+            await store.send(\.binding.searchTokens, [token]) {
+                $0.searchTokens = [token]
+            }
+            await store.receive(\.issueQueryChanged)
+            await store.finish()
+            #expect(store.state.issueRows.allSatisfy { !$0.issue.isCompleted })
+            #expect(store.state.issueRows.count < countWithCompleted)
+        }
+
+        // MARK: - Tag token
+
+        @Test func tagTokenFiltersByTag() async {
+            let bugTag = Tag(id: .tagBug, name: "Bug")
+            let token = SearchToken.tag(bugTag)
+            await store.send(\.binding.searchTokens, [token]) {
+                $0.searchTokens = [token]
+            }
+            await store.receive(\.issueQueryChanged)
+            await store.finish()
+            // Only open issues tagged "Bug": "Fix login screen layout"
+            #expect(store.state.issueRows.count == 1)
+            #expect(store.state.issueRows.first?.issue.title == "Fix login screen layout")
+        }
+
+        // MARK: - Multiple tokens (AND)
+
+        @Test func multipleTokensCombineWithAND() async {
+            // SwiftUI tag + medium priority = only medium-priority SwiftUI-tagged open issues
+            let swiftUITag = Tag(id: .tagSwiftUI, name: "SwiftUI")
+            let tokens: [SearchToken] = [.tag(swiftUITag), .priority(.medium)]
+            await store.send(\.binding.searchTokens, tokens) {
+                $0.searchTokens = tokens
+            }
+            await store.receive(\.issueQueryChanged)
+            await store.finish()
+            #expect(store.state.issueRows.allSatisfy { $0.issue.priority == .medium })
+            // Should include "Add dark mode support" and "Implement comprehensive push..."
+            #expect(store.state.issueRows.count == 2)
+        }
+
+        // MARK: - Text + tokens combined
+
+        @Test func searchTextWithTagToken() async {
+            let swiftUITag = Tag(id: .tagSwiftUI, name: "SwiftUI")
+            let token = SearchToken.tag(swiftUITag)
+            await store.send(\.binding.searchTokens, [token]) {
+                $0.searchTokens = [token]
+            }
+            await store.receive(\.issueQueryChanged)
+            await store.finish()
+            let countWithTag = store.state.issueRows.count
+            // Now also search for "dark"
+            await store.send(\.binding.searchText, "dark") {
+                $0.searchText = "dark"
+            }
+            await store.receive(\.issueQueryChanged)
+            await store.finish()
+            #expect(store.state.issueRows.count < countWithTag)
+            #expect(store.state.issueRows.count == 1)
+            #expect(store.state.issueRows.first?.issue.title == "Add dark mode support")
+        }
+
+        // MARK: - Suggestions
+
+        @Test func suggestionsAppearOnHash() async {
+            await store.send(\.binding.searchText, "#") {
+                $0.searchText = "#"
+                // All tags + all priorities + all statuses
+                $0.suggestedTokens = [
+                    .tag(Tag(id: .tagAccessibility, name: "Accessibility & VoiceOver")),
+                    .tag(Tag(id: .tagBug, name: "Bug")),
+                    .tag(Tag(id: .tagCoreData, name: "Core Data")),
+                    .tag(Tag(id: .tagNetworking, name: "Networking")),
+                    .tag(Tag(id: .tagSwiftUI, name: "SwiftUI")),
+                    .tag(Tag(id: .tagUIDesign, name: "UI Design")),
+                    .priority(.low),
+                    .priority(.medium),
+                    .priority(.high),
+                    .status(.open),
+                    .status(.completed),
+                ]
+            }
+            await store.receive(\.issueQueryChanged)
+            await store.finish()
+        }
+
+        @Test func suggestionsFilteredByQuery() async {
+            await store.send(\.binding.searchText, "#sw") {
+                $0.searchText = "#sw"
+                $0.suggestedTokens = [
+                    .tag(Tag(id: .tagSwiftUI, name: "SwiftUI")),
+                ]
+            }
+            await store.receive(\.issueQueryChanged)
+            await store.finish()
+        }
+
+        @Test func suggestionsExcludeSelected() async {
+            let swiftUITag = Tag(id: .tagSwiftUI, name: "SwiftUI")
+            let token = SearchToken.tag(swiftUITag)
+            await store.send(\.binding.searchTokens, [token]) {
+                $0.searchTokens = [token]
+            }
+            await store.receive(\.issueQueryChanged)
+            await store.finish()
+            // Now type "#sw" — SwiftUI should be excluded since already selected
+            await store.send(\.binding.searchText, "#sw") {
+                $0.searchText = "#sw"
+                $0.suggestedTokens = []
+            }
+            await store.receive(\.issueQueryChanged)
+            await store.finish()
+        }
+
+        @Test func suggestionsEmptyWithoutHash() async {
+            await store.send(\.binding.searchText, "dark") {
+                $0.searchText = "dark"
+            }
+            await store.receive(\.issueQueryChanged)
+            await store.finish()
+            #expect(store.state.suggestedTokens.isEmpty)
         }
     }
 }

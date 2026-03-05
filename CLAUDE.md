@@ -28,6 +28,8 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 - **UI Framework**: SwiftUI with `#Preview` macros
 - **App Architecture**: Composable Architecture (TCA) from pointfreeco — features are `@Reducer` structs with `@ObservableState struct State`, `enum Action`, and `var body: some Reducer<State, Action>`. Views take `StoreOf<Feature>` directly (do NOT use legacy `ViewStore`/`WithViewStore`).
 - **Navigation**: Three-column `NavigationSplitView` — Sidebar (always present), Content (optional, shown when a filter is selected), Detail (always present — shows issue details, the edit/create form, or an empty state with a "Create New Issue" button). `AppFeature` composes children via `Scope` (sidebar, detail) and `.ifLet` (content). Child reducers intercept their own binding changes and forward them as delegate actions with associated values (e.g., `selectedFilterChanged(IssueFilter?)`), so the parent only handles delegate actions to drive navigation. Content list selection uses `selectedIssueID: Issue.ID?` (not `Issue?`) so that `@FetchAll` reloads (which produce new `Issue` values with updated `modified` timestamps) don't break SwiftUI's `List(selection:)` matching.
+- **Search**: `ContentFeature` provides FTS5 full-text search combined with token-based filtering (tag, priority, status). Uses SwiftUI's `.searchable(text:tokens:)` with `.searchSuggestions` and `.searchCompletion` for token insertion. Suggestions appear when the user types `#` as a prefix; the query fragment after `#` filters available tokens. Tokens combine with AND logic. The search query is debounced (0.3s) via `issueQueryChanged(debounce:)` with `cancelInFlight` to avoid excessive database reloads on each keystroke.
+- **Binding change handling**: `ContentFeature` uses `BindingReducer().onChange(of:)` to react to state changes from bindings (search text, tokens, sort order, etc.) instead of matching individual `case .binding(\.property)` cases. This provides automatic deduplication — the `onChange` handler only fires when the value actually changes.
 - **Child-to-parent communication**: Child reducers in the `NavigationSplitView` columns use **delegate actions** (not `@Dependency(\.dismiss)`) to communicate back to `AppFeature`. This is because `AppFeature` must coordinate multiple children simultaneously — e.g., clearing both the detail column and the content list's selection when an issue is deleted. `dismiss` only removes the child's own state and can't carry semantic context (deleted vs. navigated away). Reserve `@Dependency(\.dismiss)` for modally-presented features (sheets, popovers) where the parent doesn't need to react.
 - **ViewAction**: Features with view-sent actions use the `ViewAction` protocol to separate view actions (`enum View`) from internal actions (`delegate`, `binding`). Views use `@ViewAction(for:)` to send view actions via `send()` instead of `store.send()`.
 - **Persistence**: SQLiteData (pointfreeco) with StructuredQueries for type-safe SQL (`@Table`, not GRDB's `FetchableRecord`/`PersistableRecord`).
@@ -42,10 +44,11 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 
 - **Setup**: `Schema.swift` in `Dependencies/` — `bootstrapDatabase()` on `DependencyValues` configures the database, runs migrations, starts `SyncEngine`, registers temporary triggers, and seeds sample data (debug only).
 - **Sample data**: `SampleData.swift` in `Dependencies/` — `seedSampleData()` on `DatabaseWriter` provides seed issues, tags, and associations for development/previews. Issue dates are computed relative to `@Dependency(\.date.now)` via `daysAgo(_:)`, making them deterministic in tests when the date dependency is pinned. `UUID+SampleData.swift` defines static UUID constants (e.g., `.tagSwiftUI`, `.issueLoginLayout`) for all sample entities, used in seed data, previews, and tests.
-- **Models**: `Issue`, `Tag`, `IssueTag` (join table) — all use `@Table` with UUID primary keys. `Tag.Draft` conforms to `Equatable` (required for SwiftUI's `.alert(item:)`).
+- **Models**: `Issue`, `Tag`, `IssueTag` (join table) — all use `@Table` with UUID primary keys. `Tag.Draft` conforms to `Equatable` (required for SwiftUI's `.alert(item:)`). `IssueText` is an FTS5 virtual table (`@Table` with `FTS5` conformance) for full-text search on issue title and detail. `SearchToken` is a plain enum (tag/priority/status) used for token-based filtering in the content list.
 - **iCloud sync**: `SyncEngine` initialized for all three tables. Entitlements and `CKSharingSupported` are configured. Metadatabase is attached for future sharing support.
 - **Foreign keys**: `configuration.foreignKeysEnabled = true` — enforced at runtime.
 - **`modified` column on `Issue`**: Managed by a type-safe temporary trigger (`Issue.createTemporaryTrigger(after: .update(touch: \.modified))`), created after migrations in `bootstrapDatabase()`. The trigger uses `!SyncEngine.$isSynchronizing` to skip SyncEngine's no-op updates. The Swift property is `let modified: Date?` to prevent manual updates. Do NOT set `modified` from Swift code.
+- **FTS5 full-text search**: The `issueTexts` virtual table uses `content="issues"` (external content table) with `content_rowid="rowid"`. Three raw SQL temporary triggers keep the FTS index in sync with the `issues` table (insert, update of title/detail, delete). Unlike the `modified` trigger, FTS triggers do **not** guard against `SyncEngine.$isSynchronizing` — FTS must always stay in sync. `IssueText.sanitize(query:)` strips FTS5 operators, wraps terms in double-quotes for literal matching, and appends `*` for prefix matching.
 - **Tag names**: Use `COLLATE NOCASE` — case-insensitive by default.
 - **Date precision**: `datetime('subsec')` for sub-second precision.
 - **Debug only**: `eraseDatabaseOnSchemaChange = true`, SQL query tracing via `os.Logger`.
@@ -96,7 +99,7 @@ UltimatePortfolioTCA/
     Content/            — ContentFeature + ContentView (issue list)
     Detail/             — DetailFeature + DetailView + Subviews/ (IssueView, EditIssueView)
     App/Common/Extensions/ — Foundation extensions (Date+CompactRelative)
-  Models/               — Data models (Issue.swift, Tag.swift, IssueTag.swift) + SortOrder/
+  Models/               — Data models (Issue.swift, Tag.swift, IssueTag.swift, IssueText.swift, SearchToken.swift) + SortOrder/
 UltimatePortfolioTCATests/    — Unit tests (Swift Testing)
 ```
 
@@ -140,6 +143,7 @@ Uses the Swift Testing framework (`import Testing`, `@Test`, `@Suite`, `#expect`
     .dependencies {
         try $0.bootstrapDatabase()
         try $0.defaultDatabase.seedSampleData()
+        $0.continuousClock = .immediate
     }
 )
 struct BaseTestSuite {}

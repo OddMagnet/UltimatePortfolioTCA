@@ -10,6 +10,7 @@ import Testing
     .dependencies {
         try $0.bootstrapDatabase()
         try $0.defaultDatabase.seedSampleData()
+        $0.continuousClock = .immediate
     }
 )
 struct BaseTestSuite {}

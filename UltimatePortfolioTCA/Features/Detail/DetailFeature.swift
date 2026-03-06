@@ -7,6 +7,7 @@ import SwiftUI
 @Selection struct TagRow: Equatable, Identifiable {
     var tag: Tag
     var isAssigned: Bool
+    var isNotAssigned: Bool { !isAssigned }
     var id: Tag.ID { tag.id }
 }
 

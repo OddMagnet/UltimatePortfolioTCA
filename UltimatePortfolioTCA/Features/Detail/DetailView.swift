@@ -4,7 +4,15 @@ import SwiftUI
 @ViewAction(for: DetailFeature.self)
 struct DetailView: View {
     @Bindable var store: StoreOf<DetailFeature>
-    var title: String {
+
+    private var issue: Issue.Draft {
+        if let issue = store.issue {
+            return Issue.Draft(issue)
+        }
+        return store.draft
+    }
+
+    private var title: String {
         switch (store.isEditing, store.issueID) {
         case (true, .some): "Edit Issue"
         case (true, .none): "New Issue"
@@ -13,21 +21,126 @@ struct DetailView: View {
         }
     }
 
+    private var assignedTags: [Tag] {
+        store.tagRows.filter(\.isAssigned).map(\.tag)
+    }
+
+    private var unassignedTags: [Tag] {
+        store.tagRows.filter(\.isNotAssigned).map(\.tag)
+    }
+
     var body: some View {
         VStack {
-            if store.isEditing {
-                EditIssueView(
-                    draft: $store.draft,
-                    selectedTagIDs: $store.selectedTagIDs,
-                    tags: store.tagRows.map(\.tag),
-                    onCreateTag: { send(.createTagButtonTapped) }
-                )
-                .alert($store.scope(state: \.alert, action: \.alert))
-            } else if let issue = store.issue {
-                IssueView(
-                    issue: issue,
-                    assignedTags: store.tagRows.filter(\.isAssigned).map(\.tag)
-                )
+            if store.issue != nil || store.isEditing {
+                Form {
+                    // TODO: Extract
+                    Section("Title") {
+                        TextField(
+                            "Title",
+                            text: store.isEditing ? $store.draft.title : .constant(issue.title),
+                            axis: .vertical
+                        )
+                        .disabled(!store.isEditing)
+                        .accessibilityHint("editable", isEnabled: store.isEditing)
+                    }
+
+                    // TODO: Extract
+                    Section("Description") {
+                        TextField(
+                            "Description",
+                            text: store.isEditing
+                                ? $store.draft.detail
+                                : .constant(!issue.detail.isEmpty ? issue.detail : "No Description"),
+                            axis: .vertical
+                        )
+                        .lineLimit(1...10)
+                        .foregroundStyle(store.isEditing || !issue.detail.isEmpty ? .primary : .secondary)
+                        .disabled(!store.isEditing)
+                        .accessibilityHint("editable", isEnabled: store.isEditing)
+                    }
+
+                    // TODO: Extract
+                    Section("Status") {
+                        LabeledContent("Priority") {
+                            HStack {
+                                if !store.isEditing {
+                                    PriorityIndicator(priority: issue.priority)
+                                }
+                                Picker(
+                                    "Priority",
+                                    selection: store.isEditing ? $store.draft.priority : .constant(issue.priority)
+                                ) {
+                                    ForEach(Issue.Priority.allCases) { priority in
+                                        Text(priority.label).tag(priority)
+                                    }
+                                }
+                                .labelsHidden()
+                                .disabled(!store.isEditing)
+                            }
+                        }
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel("Priority")
+                        .accessibilityValue(issue.priority.label)
+                        .accessibilityAddTraits(store.isEditing ? .isButton : [])
+
+                        LabeledContent("Completed") {
+                            Toggle("Completed", isOn: store.isEditing ? $store.draft.isCompleted : .constant(issue.isCompleted))
+                                .labelsHidden()
+                                .disabled(!store.isEditing)
+                        }
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityLabel("Completed")
+                        .accessibilityValue(issue.isCompleted ? "Yes" : "No")
+                        .accessibilityAddTraits(store.isEditing ? .isToggle : [])
+                    }
+
+                    // TODO: Extract
+                    if !store.isEditing {
+                        Section("Dates") {
+                            LabeledContent("Created", value: issue.created, format: .dateTime)
+
+                            if let modified = issue.modified {
+                                LabeledContent("Modified", value: modified, format: .dateTime)
+                            }
+                        }
+                    }
+
+                    // TODO: Extract
+                    Section("Tags") {
+                        FlowLayout {
+                            if store.isEditing {
+                                ForEach(assignedTags + unassignedTags) { tag in
+                                    TagButton(tag: tag, isAssigned: store.selectedTagIDs.contains(tag.id)) {
+                                        withAnimation {
+                                            if store.selectedTagIDs.contains(tag.id) { store.selectedTagIDs.remove(tag.id) }
+                                            else { store.selectedTagIDs.insert(tag.id) }
+                                        }
+                                    }
+                                }
+
+                                Button {
+                                    send(.createTagButtonTapped)
+                                } label: {
+                                    Text("+ Add Tag")
+                                        .chipStyle(isAssigned: false)
+                                        .overlay { Capsule().strokeBorder(.secondary) }
+                                        .accessibilityLabel("Add Tag")
+                                }
+                            } else {
+                                if assignedTags.isEmpty {
+                                    Text("No tags")
+                                        .foregroundStyle(.secondary)
+                                } else {
+                                    ForEach(assignedTags) { tag in
+                                        Text(tag.name)
+                                            .chipStyle()
+                                    }
+                                }
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
             } else {
                 ContentUnavailableView {
                     Label("No Issue Selected", systemImage: "exclamationmark.triangle")
@@ -36,10 +149,10 @@ struct DetailView: View {
                 }
             }
         }
-        .animation(.default, value: store.issueID)
         .animation(.default, value: store.isEditing)
         .navigationTitle(title)
         .toolbarTitleDisplayMode(.inline)
+        .alert($store.scope(state: \.alert, action: \.alert))
         .toolbar {
             if store.isEditing {
                 editIssueToolBarContent
@@ -81,6 +194,20 @@ struct DetailView: View {
                 send(.saveButtonTapped)
             } label: {
                 Label("Save", systemImage: "checkmark.circle")
+            }
+        }
+    }
+
+    private struct TagButton: View {
+        let tag: Tag
+        let isAssigned: Bool
+        let action: () -> Void
+
+        var body: some View {
+            Button(action: action) {
+                Text(tag.name)
+                    .chipStyle(isAssigned: isAssigned)
+                    .accessibilityAddTraits(isAssigned ? .isSelected : [])
             }
         }
     }

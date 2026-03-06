@@ -88,6 +88,13 @@ private struct IssueRow: View {
         issue.modified ?? issue.created
     }
 
+    private var accessibilityLabel: String {
+        var parts = [issue.title, "\(issue.priority.label) priority", issueDate.compactRelative(a11y: true)]
+        if issue.isCompleted { parts.append("completed") }
+        if let tagNames { parts.append("tagged with \(tagNames)") }
+        return parts.joined(separator: ", ")
+    }
+
     var body: some View {
         HStack {
             PriorityIndicator(priority: issue.priority)
@@ -96,13 +103,11 @@ private struct IssueRow: View {
                 Text(issue.title)
                     .strikethrough(issue.isCompleted)
                     .foregroundStyle(issue.isCompleted ? .secondary : .primary)
-                    .accessibilityLabel("\(issue.title)\(issue.isCompleted ? ", completed" : "")")
 
                 if let tagNames {
                     Text(tagNames)
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                        .accessibilityLabel("Tagged with: \(tagNames)")
                 }
             }
 
@@ -112,6 +117,8 @@ private struct IssueRow: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityLabel)
     }
 }
 

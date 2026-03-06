@@ -6,25 +6,24 @@ struct ContentView: View {
     @Bindable var store: StoreOf<ContentFeature>
 
     var body: some View {
-        VStack {
+        List(selection: $store.selectedIssueID) {
+            ForEach(store.issueRows) { row in
+                IssueRow(row)
+                    .tag(row.issue.id)
+            }
+            .onDelete { send(.deleteIssuesSwiped(offsets: $0)) }
+        }
+        .overlay {
             if store.issueRows.isEmpty {
                 if store.searchText.isEmpty, store.searchTokens.isEmpty {
                     ContentUnavailableView("No Issues", systemImage: "tray")
                 } else {
                     ContentUnavailableView.search
                 }
-            } else {
-                List(selection: $store.selectedIssueID) {
-                    ForEach(store.issueRows) { row in
-                        IssueRow(row)
-                            .tag(row.issue.id)
-                    }
-                    .onDelete { send(.deleteIssuesSwiped(offsets: $0)) }
-                }
             }
         }
         .navigationTitle(store.filter.title)
-        .toolbarTitleDisplayMode(.inlineLarge)
+        .toolbarTitleDisplayMode(.inline)
         .searchable(
             text: $store.searchText,
             tokens: $store.searchTokens,

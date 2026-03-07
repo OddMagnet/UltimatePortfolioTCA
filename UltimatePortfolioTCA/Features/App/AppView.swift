@@ -1,6 +1,7 @@
 import ComposableArchitecture
 import SwiftUI
 
+@ViewAction(for: AppFeature.self)
 struct AppView: View {
     @Bindable var store: StoreOf<AppFeature>
 
@@ -14,13 +15,21 @@ struct AppView: View {
                 ContentUnavailableView("Select a Filter", systemImage: "line.3.horizontal.decrease.circle")
             }
         } detail: {
-            DetailView(store: store.scope(state: \.detail, action: \.detail))
+            if let detailStore = store.scope(state: \.detail, action: \.detail) {
+                DetailView(store: detailStore)
+            } else {
+                ContentUnavailableView {
+                    Label("No Issue Selected", systemImage: "exclamationmark.triangle")
+                } actions: {
+                    Button("Create New Issue") { send(.createIssueButtonTapped) }
+                }
+            }
         }
         .alert(item: $store.tagDraft) {
             Text($0.name.isEmpty ? "New Tag" : "Rename Tag")
         } actions: { tagDraft in
             TextField("Tag name", text: tagDraft.name)
-            Button("Save") { store.send(.tagAlertConfirmButtonTapped) }
+            Button("Save") { send(.tagAlertConfirmButtonTapped) }
             Button("Cancel") {}
         }
     }

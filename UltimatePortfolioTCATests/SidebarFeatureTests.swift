@@ -101,10 +101,11 @@ extension BaseTestSuite {
 
         // MARK: - Selection
 
-        @Test func updateSelectedFilter() async {
-            await store.send(\.updateSelectedFilter, .tag(testTag)) {
+        @Test func selectedFilterBindingSendsDelegateAction() async {
+            await store.send(\.binding.selectedFilter, .tag(testTag)) {
                 $0.selectedFilter = .tag(testTag)
             }
+            await store.receive(\.delegate.selectedFilterChanged, .tag(testTag))
         }
 
         // MARK: - Tag management
@@ -131,9 +132,10 @@ extension BaseTestSuite {
             // Deleting the tag backing the current filter resets selection to .open
             let selectedTagRow = try #require(store.state.tagRows.first)
             let selectedTag = selectedTagRow.tag
-            await store.send(\.updateSelectedFilter, .tag(selectedTag)) {
+            await store.send(\.binding.selectedFilter, .tag(selectedTag)) {
                 $0.selectedFilter = .tag(selectedTag)
             }
+            await store.receive(\.delegate.selectedFilterChanged, .tag(selectedTag))
             await store.send(\.view.deleteTagSwiped, selectedTag) {
                 $0.selectedFilter = .open
             }

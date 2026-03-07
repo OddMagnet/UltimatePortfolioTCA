@@ -13,7 +13,7 @@ struct DetailView: View {
     }
 
     private var title: String {
-        switch (store.isEditing, store.issueID) {
+        switch (store.isEditing, store.issue) {
         case (true, .some): "Edit Issue"
         case (true, .none): "New Issue"
         case (false, .some): "Details"
@@ -21,131 +21,40 @@ struct DetailView: View {
         }
     }
 
-    private var assignedTags: [Tag] {
-        store.tagRows.filter(\.isAssigned).map(\.tag)
-    }
-
-    private var unassignedTags: [Tag] {
-        store.tagRows.filter(\.isNotAssigned).map(\.tag)
-    }
-
     var body: some View {
         VStack {
             if store.issue != nil || store.isEditing {
                 Form {
-                    // TODO: Extract
-                    Section("Title") {
-                        TextField(
-                            "Title",
-                            text: store.isEditing ? $store.draft.title : .constant(issue.title),
-                            axis: .vertical
-                        )
-                        .disabled(!store.isEditing)
-                        .accessibilityHint("editable", isEnabled: store.isEditing)
-                    }
+                    DetailTitle(text: store.isEditing ? $store.draft.title : .constant(issue.title), isEditing: store.isEditing)
 
-                    // TODO: Extract
-                    Section("Description") {
-                        TextField(
-                            "Description",
-                            text: store.isEditing
-                                ? $store.draft.detail
-                                : .constant(!issue.detail.isEmpty ? issue.detail : "No Description"),
-                            axis: .vertical
-                        )
-                        .lineLimit(1...10)
-                        .foregroundStyle(store.isEditing || !issue.detail.isEmpty ? .primary : .secondary)
-                        .disabled(!store.isEditing)
-                        .accessibilityHint("editable", isEnabled: store.isEditing)
-                    }
+                    DetailDescription(
+                        text: store.isEditing ? $store.draft.detail : .constant(!issue.detail.isEmpty ? issue.detail : "No Description"),
+                        isEditing: store.isEditing
+                    )
 
-                    // TODO: Extract
-                    Section("Status") {
-                        LabeledContent("Priority") {
-                            HStack {
-                                if !store.isEditing {
-                                    PriorityIndicator(priority: issue.priority)
-                                }
-                                Picker(
-                                    "Priority",
-                                    selection: store.isEditing ? $store.draft.priority : .constant(issue.priority)
-                                ) {
-                                    ForEach(Issue.Priority.allCases) { priority in
-                                        Text(priority.label).tag(priority)
-                                    }
-                                }
-                                .labelsHidden()
-                                .disabled(!store.isEditing)
-                            }
-                        }
-                        .accessibilityElement(children: .ignore)
-                        .accessibilityLabel("Priority")
-                        .accessibilityValue(issue.priority.label)
-                        .accessibilityAddTraits(store.isEditing ? .isButton : [])
+                    DetailStatus(
+                        priority: store.isEditing ? $store.draft.priority : .constant(issue.priority),
+                        isCompleted: store.isEditing ? $store.draft.isCompleted : .constant(issue.isCompleted),
+                        isEditing: store.isEditing
+                    )
 
-                        LabeledContent("Completed") {
-                            Toggle("Completed", isOn: store.isEditing ? $store.draft.isCompleted : .constant(issue.isCompleted))
-                                .labelsHidden()
-                                .disabled(!store.isEditing)
-                        }
-                        .accessibilityElement(children: .ignore)
-                        .accessibilityLabel("Completed")
-                        .accessibilityValue(issue.isCompleted ? "Yes" : "No")
-                        .accessibilityAddTraits(store.isEditing ? .isToggle : [])
-                    }
-
-                    // TODO: Extract
                     if !store.isEditing {
-                        Section("Dates") {
-                            LabeledContent("Created", value: issue.created, format: .dateTime)
-
-                            if let modified = issue.modified {
-                                LabeledContent("Modified", value: modified, format: .dateTime)
-                            }
-                        }
+                        DetailDates(created: issue.created, modified: issue.modified)
                     }
 
-                    // TODO: Extract
-                    Section("Tags") {
-                        FlowLayout {
-                            if store.isEditing {
-                                ForEach(assignedTags + unassignedTags) { tag in
-                                    TagButton(tag: tag, isAssigned: store.selectedTagIDs.contains(tag.id)) {
-                                        withAnimation {
-                                            if store.selectedTagIDs.contains(tag.id) { store.selectedTagIDs.remove(tag.id) }
-                                            else { store.selectedTagIDs.insert(tag.id) }
-                                        }
-                                    }
-                                }
-
-                                Button {
-                                    send(.createTagButtonTapped)
-                                } label: {
-                                    Text("+ Add Tag")
-                                        .chipStyle(isAssigned: false)
-                                        .overlay { Capsule().strokeBorder(.secondary) }
-                                        .accessibilityLabel("Add Tag")
-                                }
-                            } else {
-                                if assignedTags.isEmpty {
-                                    Text("No tags")
-                                        .foregroundStyle(.secondary)
-                                } else {
-                                    ForEach(assignedTags) { tag in
-                                        Text(tag.name)
-                                            .chipStyle()
-                                    }
-                                }
-                            }
-                        }
-                        .buttonStyle(.plain)
+                    DetailTags(
+                        selectedTagIDs: $store.selectedTagIDs,
+                        tagRows: store.tagRows,
+                        isEditing: store.isEditing
+                    ) {
+                        send(.createTagButtonTapped)
                     }
                 }
             } else {
                 ContentUnavailableView {
-                    Label("No Issue Selected", systemImage: "exclamationmark.triangle")
+                    Label("No Issue Found", systemImage: "exclamationmark.magnifyingglass")
                 } actions: {
-                    Button("Create New Issue") { send(.createNewIssueButtonTapped) }
+                    Button("Create New Issue") { send(.createIssueButtonTapped) }
                 }
             }
         }
@@ -170,8 +79,8 @@ struct DetailView: View {
 
     @ToolbarContentBuilder
     var editIssueToolBarContent: some ToolbarContent {
-        // Only show delete when editing an issue
-        if store.issueID != nil {
+        // Only show delete when editing an existing issue
+        if store.issue != nil {
             ToolbarItem(placement: .destructiveAction) {
                 Button(role: .destructive) {
                     send(.deleteButtonTapped)
@@ -197,20 +106,6 @@ struct DetailView: View {
             }
         }
     }
-
-    private struct TagButton: View {
-        let tag: Tag
-        let isAssigned: Bool
-        let action: () -> Void
-
-        var body: some View {
-            Button(action: action) {
-                Text(tag.name)
-                    .chipStyle(isAssigned: isAssigned)
-                    .accessibilityAddTraits(isAssigned ? .isSelected : [])
-            }
-        }
-    }
 }
 
 #Preview("Issue Selected") {
@@ -223,10 +118,10 @@ struct DetailView: View {
     }
 }
 
-#Preview("No Issue Selected") {
+#Preview("No Issue Found") {
     withPreviewDependencies {
         NavigationStack {
-            DetailView(store: Store(initialState: DetailFeature.State(issueID: nil)) {
+            DetailView(store: Store(initialState: DetailFeature.State(issueID: UUID(-1))) {
                 DetailFeature()
             })
         }
@@ -237,7 +132,7 @@ struct DetailView: View {
     withPreviewDependencies {
         NavigationStack {
             DetailView(store: Store(initialState: DetailFeature.State(
-                issueID: nil,
+                issueID: UUID(-1),
                 isEditing: true
             )) {
                 DetailFeature()

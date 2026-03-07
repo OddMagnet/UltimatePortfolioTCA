@@ -6,28 +6,31 @@ import SQLiteData
     @ObservableState struct State: Equatable {
         var sidebar: SidebarFeature.State
         var content: ContentFeature.State?
-        var detail: DetailFeature.State
+        var detail: DetailFeature.State?
         var tagDraft: Tag.Draft?
 
         init(selectedFilter: IssueFilter? = nil, selectedIssueID: Issue.ID? = nil) {
             sidebar = SidebarFeature.State(selectedFilter: selectedFilter)
-            if let selectedFilter {
-                content = ContentFeature.State(filter: selectedFilter, selectedIssueID: selectedIssueID)
-                detail = DetailFeature.State(issueID: selectedIssueID)
-            } else {
-                content = nil
-                detail = DetailFeature.State(issueID: nil)
-            }
+            guard let selectedFilter else { return }
+            content = ContentFeature.State(filter: selectedFilter, selectedIssueID: selectedIssueID)
+            guard let selectedIssueID else { return }
+            detail = DetailFeature.State(issueID: selectedIssueID)
         }
     }
 
-    enum Action: BindableAction {
+    enum Action: BindableAction, ViewAction {
         case binding(BindingAction<State>)
         case content(ContentFeature.Action)
         case detail(DetailFeature.Action)
         case sidebar(SidebarFeature.Action)
         case selectedTagRenamed(Tag)
-        case tagAlertConfirmButtonTapped
+        case view(View)
+
+        @CasePathable
+        enum View {
+            case createIssueButtonTapped
+            case tagAlertConfirmButtonTapped
+        }
     }
 
     @Dependency(\.defaultDatabase) var database
@@ -39,10 +42,6 @@ import SQLiteData
 
         Scope(state: \.sidebar, action: \.sidebar) {
             SidebarFeature()
-        }
-
-        Scope(state: \.detail, action: \.detail) {
-            DetailFeature()
         }
 
         Reduce<State, Action> { state, action in
@@ -65,30 +64,38 @@ import SQLiteData
                 // Reset content and detail if the new filter is nil
                 guard let newFilter else {
                     state.content = nil
-                    state.detail = DetailFeature.State(issueID: nil)
+                    state.detail = nil
                     return .none
                 }
                 // If not nil, the filter has changed
                 state.content = ContentFeature.State(filter: newFilter)
-                state.detail = DetailFeature.State(issueID: nil)
+                state.detail = nil
                 return .none
 
             case .sidebar:
                 return .none
 
-            case .content(.delegate(.createIssue)):
+            case .content(.delegate(.createIssue)),
+                 .detail(.delegate(.createIssue)),
+                 .view(.createIssueButtonTapped):
                 let issueID = uuid()
-                state.content?.selectedIssueID = issueID
-                state.detail.draft = Issue.Draft(id: issueID, created: now)
-                state.detail.isEditing = true
+                let currentFilter = state.content?.filter ?? .open
+                state.sidebar.selectedFilter = currentFilter
+                if state.content == nil {
+                    state.content = ContentFeature.State(filter: currentFilter, selectedIssueID: issueID)
+                } else {
+                    state.content?.selectedIssueID = issueID
+                }
+                state.detail = DetailFeature.State(issueID: issueID, isEditing: true)
+                state.detail?.draft = Issue.Draft(id: issueID, created: now)
                 return .none
 
             case let .content(.delegate(.selectedIssueChanged(newIssueID))):
                 // Nothing to do if issue didn't change
-                guard newIssueID != state.detail.issueID else { return .none }
+                guard newIssueID != state.detail?.issueID else { return .none }
                 // Reset detail if the new issue is nil
                 guard let newIssueID else {
-                    state.detail = DetailFeature.State(issueID: nil)
+                    state.detail = nil
                     return .none
                 }
                 // If not nil, the issue has changed
@@ -99,8 +106,8 @@ import SQLiteData
                 return .none
 
             case .detail(.delegate(.issueDeleted)):
-                state.detail = DetailFeature.State(issueID: nil)
                 state.content?.selectedIssueID = nil
+                state.detail = nil
                 return .none
 
             case let .detail(.delegate(.issueSaved(newIssueID))):
@@ -116,7 +123,7 @@ import SQLiteData
                 state.content?.filter = .tag(renamedTag)
                 return .none
 
-            case .tagAlertConfirmButtonTapped:
+            case .view(.tagAlertConfirmButtonTapped):
                 defer { state.tagDraft = nil }
                 guard let id = state.tagDraft?.id,
                       let name = state.tagDraft?.name.trimmingCharacters(in: .whitespaces),
@@ -146,6 +153,9 @@ import SQLiteData
         }
         .ifLet(\.content, action: \.content) {
             ContentFeature()
+        }
+        .ifLet(\.detail, action: \.detail) {
+            DetailFeature()
         }
     }
 }

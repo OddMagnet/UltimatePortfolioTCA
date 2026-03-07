@@ -13,26 +13,24 @@ import SwiftUI
 
 @Reducer struct DetailFeature {
     @ObservableState struct State: Equatable {
-        let issueID: Issue.ID?
-        @FetchOne var issue: Issue?
-        @FetchAll var tagRows: [TagRow] = []
-
-        @Presents var alert: AlertState<Action.Alert>?
+        let issueID: Issue.ID
         var isEditing: Bool
         var draft: Issue.Draft
         var selectedTagIDs: Set<Tag.ID> = []
 
+        @FetchOne var issue: Issue?
+        @FetchAll var tagRows: [TagRow] = []
+
+        @Presents var alert: AlertState<Action.Alert>?
+
         /// Sets up database observations (`@FetchOne`, `@FetchAll`) for the issue and its tags.
-        init(issueID: Issue.ID?, isEditing: Bool = false) {
+        init(issueID: Issue.ID, isEditing: Bool = false) {
             self.issueID = issueID
             self.isEditing = isEditing
-            if let issueID {
-                _issue = FetchOne(Issue.find(issueID), animation: .default)
-            } else {
-                _issue = FetchOne(Issue.none)
-            }
             @Dependency(\.date.now) var now
             draft = Issue.Draft(created: now)
+
+            _issue = FetchOne(Issue.find(issueID), animation: .default)
             _tagRows = FetchAll(tagQuery, animation: .default)
         }
 
@@ -44,7 +42,7 @@ import SwiftUI
                     TagRow.Columns(
                         tag: $0,
                         isAssigned: $0.id.in(
-                            IssueTag.select(\.tagID).where { $0.issueID.eq(issueID ?? UUID()) }
+                            IssueTag.select(\.tagID).where { $0.issueID.eq(issueID) }
                         )
                     )
                 }
@@ -64,6 +62,7 @@ import SwiftUI
 
         @CasePathable
         enum Delegate {
+            case createIssue
             case createTag(Tag.ID)
             case issueDeleted
             case issueSaved(Issue.ID)
@@ -71,7 +70,7 @@ import SwiftUI
 
         @CasePathable
         enum View {
-            case createNewIssueButtonTapped
+            case createIssueButtonTapped
             case createTagButtonTapped
             case editButtonTapped
             case cancelEditButtonTapped
@@ -95,11 +94,8 @@ import SwiftUI
             case .delegate:
                 return .none
 
-            case .view(.createNewIssueButtonTapped):
-                state.draft = Issue.Draft(id: uuid(), created: now)
-                state.selectedTagIDs = []
-                state.isEditing = true
-                return .none
+            case .view(.createIssueButtonTapped):
+                return .send(.delegate(.createIssue))
 
             case .view(.createTagButtonTapped):
                 let tagID = uuid()
@@ -156,7 +152,7 @@ import SwiftUI
                 return .none
 
             case .alert(.presented(.confirmDeletion)):
-                guard let issueID = state.issueID else { return .none }
+                let issueID = state.issueID
                 return .run { [database] send in
                     await withErrorReporting {
                         try await database.write { db in

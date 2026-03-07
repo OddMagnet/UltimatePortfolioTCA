@@ -19,14 +19,25 @@ extension BaseTestSuite {
 
         // MARK: - State snapshots
 
-        @Test func defaultStateWithNoIssue() {
-            let store = TestStore(initialState: DetailFeature.State(issueID: nil)) {
+        @Test func defaultStateWithNoIssueFound() {
+            let store = TestStore(initialState: DetailFeature.State(issueID: UUID(-1))) {
                 DetailFeature()
             }
             assertInlineSnapshot(of: store.state, as: .customDump) {
                 """
                 DetailFeature.State(
-                  issueID: nil,
+                  issueID: UUID(00000000-0000-0001-0000-000000000001),
+                  _isEditing: false,
+                  _draft: Issue.Draft(
+                    id: nil,
+                    title: "",
+                    detail: "",
+                    priority: .low,
+                    isCompleted: false,
+                    created: Date(2009-02-13T23:31:30.000Z),
+                    modified: nil
+                  ),
+                  _selectedTagIDs: Set([]),
                   _issue: nil,
                   _tagRows: [
                     [0]: TagRow(
@@ -72,18 +83,7 @@ extension BaseTestSuite {
                       isAssigned: false
                     )
                   ],
-                  _alert: nil,
-                  _isEditing: false,
-                  _draft: Issue.Draft(
-                    id: nil,
-                    title: "",
-                    detail: "",
-                    priority: .low,
-                    isCompleted: false,
-                    created: Date(2009-02-13T23:31:30.000Z),
-                    modified: nil
-                  ),
-                  _selectedTagIDs: Set([])
+                  _alert: nil
                 )
                 """
             }
@@ -94,6 +94,17 @@ extension BaseTestSuite {
                 """
                 DetailFeature.State(
                   issueID: UUID(00000000-0000-0000-0000-00000000000A),
+                  _isEditing: false,
+                  _draft: Issue.Draft(
+                    id: nil,
+                    title: "",
+                    detail: "",
+                    priority: .low,
+                    isCompleted: false,
+                    created: Date(2009-02-13T23:31:30.000Z),
+                    modified: nil
+                  ),
+                  _selectedTagIDs: Set([]),
                   _issue: Issue(
                     id: UUID(00000000-0000-0000-0000-00000000000A),
                     title: "Fix login screen layout",
@@ -147,18 +158,7 @@ extension BaseTestSuite {
                       isAssigned: false
                     )
                   ],
-                  _alert: nil,
-                  _isEditing: false,
-                  _draft: Issue.Draft(
-                    id: nil,
-                    title: "",
-                    detail: "",
-                    priority: .low,
-                    isCompleted: false,
-                    created: Date(2009-02-13T23:31:30.000Z),
-                    modified: nil
-                  ),
-                  _selectedTagIDs: Set([])
+                  _alert: nil
                 )
                 """
             }
@@ -166,12 +166,9 @@ extension BaseTestSuite {
 
         // MARK: - Create new issue
 
-        @Test func createNewIssueButtonTapped() async {
-            await store.send(\.view.createNewIssueButtonTapped) {
-                $0.draft = Issue.Draft(id: UUID(0), created: now)
-                $0.selectedTagIDs = []
-                $0.isEditing = true
-            }
+        @Test func createNewIssueButtonTappedSendsDelegateAction() async {
+            await store.send(\.view.createIssueButtonTapped)
+            await store.receive(\.delegate.createIssue)
         }
 
         // MARK: - Edit
@@ -186,8 +183,8 @@ extension BaseTestSuite {
             }
         }
 
-        @Test func editButtonTappedWithNoIssue() async {
-            let store = TestStore(initialState: DetailFeature.State(issueID: nil)) {
+        @Test func editButtonTappedWithNoIssueFound() async {
+            let store = TestStore(initialState: DetailFeature.State(issueID: UUID(-1))) {
                 DetailFeature()
             }
             // No state changes, edit button should not be tapable without an issue
@@ -212,18 +209,14 @@ extension BaseTestSuite {
         // MARK: - Save
 
         @Test func saveNewIssue() async {
-            let store = TestStore(initialState: DetailFeature.State(issueID: nil)) {
+            let store = TestStore(initialState: DetailFeature.State(issueID: UUID(-1))) {
                 DetailFeature()
             }
-            await store.send(\.view.createNewIssueButtonTapped) {
-                $0.draft = Issue.Draft(id: UUID(0), created: now)
-                $0.selectedTagIDs = []
-                $0.isEditing = true
-            }
-            var newDraft = store.state.draft
-            newDraft.title = "New issue"
+            await store.send(\.view.createIssueButtonTapped)
+            await store.receive(\.delegate.createIssue)
+            let newDraft = Issue.Draft(id: UUID(-1), title: "New Issue", created: now)
             await store.send(\.binding.draft, newDraft) {
-                $0.draft.title = "New issue"
+                $0.draft = newDraft
             }
             await store.send(\.binding.selectedTagIDs, [.tagSwiftUI]) {
                 $0.selectedTagIDs = [.tagSwiftUI]
@@ -289,9 +282,9 @@ extension BaseTestSuite {
             await store.finish()
         }
 
-        @Test func saveEditWithNoID() async {
+        @Test func saveEditWithNoIssueFound() async {
             // Simulate a `nil` id for draft
-            let store = TestStore(initialState: DetailFeature.State(issueID: nil, isEditing: true)) {
+            let store = TestStore(initialState: DetailFeature.State(issueID: UUID(-1), isEditing: true)) {
                 DetailFeature()
             }
             // Update the draft
@@ -307,15 +300,12 @@ extension BaseTestSuite {
         // MARK: - Create tag
 
         @Test func createTagButtonTappedFromNewIssue() async {
-            await store.send(\.view.createNewIssueButtonTapped) {
-                $0.draft = Issue.Draft(id: UUID(0), created: now)
-                $0.selectedTagIDs = []
-                $0.isEditing = true
-            }
+            await store.send(\.view.createIssueButtonTapped)
+            await store.receive(\.delegate.createIssue)
             await store.send(\.view.createTagButtonTapped) {
-                $0.selectedTagIDs = [UUID(1)]
+                $0.selectedTagIDs = [UUID(0)]
             }
-            await store.receive(\.delegate.createTag, UUID(1))
+            await store.receive(\.delegate.createTag, UUID(0))
         }
 
         @Test func createTagButtonTappedFromEditIssue() async throws {
@@ -373,8 +363,8 @@ extension BaseTestSuite {
             await store.finish()
         }
 
-        @Test func confirmDeletionWithNilIssueID() async {
-            let store = TestStore(initialState: DetailFeature.State(issueID: nil)) {
+        @Test func confirmDeletionWithNoIssueFound() async {
+            let store = TestStore(initialState: DetailFeature.State(issueID: UUID(-1))) {
                 DetailFeature()
             }
             await store.send(\.view.deleteButtonTapped) {
@@ -390,10 +380,10 @@ extension BaseTestSuite {
                     )
                 }
             }
-            // No issue id -> no actions taken. Only alert state resets
             await store.send(\.alert.presented.confirmDeletion) {
                 $0.alert = nil
             }
+            await store.receive(\.delegate.issueDeleted)
             await store.finish()
         }
     }

@@ -81,7 +81,6 @@ import SwiftUI
         case binding(BindingAction<State>)
         case delegate(Delegate)
         case view(View)
-        case updateSelectedFilter(IssueFilter)
 
         @CasePathable
         enum Delegate {
@@ -105,20 +104,18 @@ import SwiftUI
 
     var body: some Reducer<State, Action> {
         BindingReducer()
+            .onChange(of: \.selectedFilter) { _, newValue in
+                Reduce<State, Action> { _, _ in
+                    .send(.delegate(.selectedFilterChanged(newValue)))
+                }
+            }
 
         Reduce<State, Action> { state, action in
             switch action {
-            case .binding(\.selectedFilter):
-                return .send(.delegate(.selectedFilterChanged(state.selectedFilter)))
-
             case .binding:
                 return .none
 
             case .delegate:
-                return .none
-
-            case let .updateSelectedFilter(filter):
-                state.selectedFilter = filter
                 return .none
 
             case .view(.createTagButtonTapped):

@@ -181,66 +181,7 @@ extension BaseTestSuite {
                       )
                     ]
                   ),
-                  _detail: DetailFeature.State(
-                    issueID: nil,
-                    _issue: nil,
-                    _tagRows: [
-                      [0]: TagRow(
-                        tag: Tag(
-                          id: UUID(00000000-0000-0000-0000-000000000006),
-                          name: "Accessibility & VoiceOver"
-                        ),
-                        isAssigned: false
-                      ),
-                      [1]: TagRow(
-                        tag: Tag(
-                          id: UUID(00000000-0000-0000-0000-000000000005),
-                          name: "Bug"
-                        ),
-                        isAssigned: false
-                      ),
-                      [2]: TagRow(
-                        tag: Tag(
-                          id: UUID(00000000-0000-0000-0000-000000000003),
-                          name: "Core Data"
-                        ),
-                        isAssigned: false
-                      ),
-                      [3]: TagRow(
-                        tag: Tag(
-                          id: UUID(00000000-0000-0000-0000-000000000002),
-                          name: "Networking"
-                        ),
-                        isAssigned: false
-                      ),
-                      [4]: TagRow(
-                        tag: Tag(
-                          id: UUID(00000000-0000-0000-0000-000000000001),
-                          name: "SwiftUI"
-                        ),
-                        isAssigned: false
-                      ),
-                      [5]: TagRow(
-                        tag: Tag(
-                          id: UUID(00000000-0000-0000-0000-000000000004),
-                          name: "UI Design"
-                        ),
-                        isAssigned: false
-                      )
-                    ],
-                    _alert: nil,
-                    _isEditing: false,
-                    _draft: Issue.Draft(
-                      id: nil,
-                      title: "",
-                      detail: "",
-                      priority: .low,
-                      isCompleted: false,
-                      created: Date(2009-02-13T23:31:30.000Z),
-                      modified: nil
-                    ),
-                    _selectedTagIDs: Set([])
-                  ),
+                  _detail: nil,
                   _tagDraft: nil
                 )
                 """
@@ -256,7 +197,7 @@ extension BaseTestSuite {
             }
             await store.receive(\.sidebar.delegate.selectedFilterChanged, .tag(testTag)) {
                 $0.content = ContentFeature.State(filter: .tag(testTag))
-                $0.detail = DetailFeature.State(issueID: nil)
+                $0.detail = nil
             }
         }
 
@@ -266,13 +207,8 @@ extension BaseTestSuite {
             }
             await store.receive(\.sidebar.delegate.selectedFilterChanged, nil) {
                 $0.content = nil
-                $0.detail = DetailFeature.State(issueID: nil)
+                $0.detail = nil
             }
-        }
-
-        @Test func selectedFilterChangedToSameFilter() async {
-            await store.send(\.sidebar.binding.selectedFilter, .open)
-            await store.receive(\.sidebar.delegate.selectedFilterChanged, .open)
         }
 
         @Test func selectedFilterChangedToOtherSmartFilter() async {
@@ -281,29 +217,36 @@ extension BaseTestSuite {
             }
             await store.receive(\.sidebar.delegate.selectedFilterChanged, .completed) {
                 $0.content = ContentFeature.State(filter: .completed)
-                $0.detail = DetailFeature.State(issueID: nil)
+                $0.detail = nil
             }
         }
 
         // MARK: - Issue Creation / Saving
 
+        @Test func createIssueFromAppView() async {
+            let newIssueID = UUID(0)
+            await store.send(\.view.createIssueButtonTapped) {
+                $0.content?.selectedIssueID = newIssueID
+                $0.detail = DetailFeature.State(issueID: newIssueID, isEditing: true)
+                $0.detail?.draft = Issue.Draft(id: newIssueID, created: now)
+            }
+        }
+
         @Test func createIssueFromContent() async {
             let newIssueID = UUID(0)
             await store.send(\.content.delegate.createIssue) {
                 $0.content?.selectedIssueID = newIssueID
-                $0.detail.isEditing = true
-                $0.detail.draft = Issue.Draft(id: newIssueID, created: now)
+                $0.detail = DetailFeature.State(issueID: newIssueID, isEditing: true)
+                $0.detail?.draft = Issue.Draft(id: newIssueID, created: now)
             }
         }
 
         @Test func issueSavedFromDetail() async {
             let newIssueID = UUID(0)
-            await store.send(\.sidebar.binding.selectedFilter, .open)
-            await store.receive(\.sidebar.delegate.selectedFilterChanged, .open)
             await store.send(\.content.delegate.createIssue) {
                 $0.content?.selectedIssueID = newIssueID
-                $0.detail.isEditing = true
-                $0.detail.draft = Issue.Draft(id: newIssueID, created: now)
+                $0.detail = DetailFeature.State(issueID: newIssueID, isEditing: true)
+                $0.detail?.draft = Issue.Draft(id: newIssueID, created: now)
             }
             await store.send(\.detail.delegate.issueSaved, newIssueID) {
                 $0.content?.selectedIssueID = newIssueID
@@ -332,7 +275,7 @@ extension BaseTestSuite {
             }
             // Then test the deselect
             await store.send(\.content.delegate.selectedIssueChanged, nil) {
-                $0.detail = DetailFeature.State(issueID: nil)
+                $0.detail = nil
             }
         }
 
@@ -350,8 +293,8 @@ extension BaseTestSuite {
                 $0.detail = DetailFeature.State(issueID: testIssueId)
             }
             await store.send(\.detail.delegate.issueDeleted) {
-                $0.detail = DetailFeature.State(issueID: nil)
                 $0.content?.selectedIssueID = nil
+                $0.detail = nil
             }
         }
 
@@ -366,6 +309,9 @@ extension BaseTestSuite {
 
         @Test func createTagFromDetail() async {
             let testTagId = UUID(-1)
+            await store.send(\.binding.detail, DetailFeature.State(issueID: UUID(-1))) {
+                $0.detail = DetailFeature.State(issueID: UUID(-1))
+            }
             await store.send(\.detail.delegate.createTag, testTagId) {
                 $0.tagDraft = Tag.Draft(id: testTagId)
             }
@@ -388,7 +334,7 @@ extension BaseTestSuite {
             await store.send(\.binding.tagDraft, Tag.Draft(id: tagId, name: "TestTag")) {
                 $0.tagDraft?.name = "TestTag"
             }
-            await store.send(\.tagAlertConfirmButtonTapped) {
+            await store.send(\.view.tagAlertConfirmButtonTapped) {
                 $0.tagDraft = nil
             }
             await store.finish()
@@ -400,7 +346,7 @@ extension BaseTestSuite {
             await store.send(\.sidebar.delegate.createTag, tagId) {
                 $0.tagDraft = Tag.Draft(id: tagId)
             }
-            await store.send(\.tagAlertConfirmButtonTapped) {
+            await store.send(\.view.tagAlertConfirmButtonTapped) {
                 $0.tagDraft = nil
             }
             await store.finish()
@@ -411,7 +357,7 @@ extension BaseTestSuite {
             await store.send(\.binding.tagDraft, Tag.Draft(id: tagId, name: "  ")) {
                 $0.tagDraft?.name = "  "
             }
-            await store.send(\.tagAlertConfirmButtonTapped) {
+            await store.send(\.view.tagAlertConfirmButtonTapped) {
                 $0.tagDraft = nil
             }
             await store.finish()
@@ -433,7 +379,7 @@ extension BaseTestSuite {
             await store.send(\.binding.tagDraft, Tag.Draft(newTag)) {
                 $0.tagDraft = Tag.Draft(newTag)
             }
-            await store.send(\.tagAlertConfirmButtonTapped) {
+            await store.send(\.view.tagAlertConfirmButtonTapped) {
                 $0.tagDraft = nil
             }
             await store.receive(\.selectedTagRenamed, newTag) {
@@ -453,7 +399,7 @@ extension BaseTestSuite {
             await store.send(\.binding.tagDraft, Tag.Draft(newTag)) {
                 $0.tagDraft = Tag.Draft(newTag)
             }
-            await store.send(\.tagAlertConfirmButtonTapped) {
+            await store.send(\.view.tagAlertConfirmButtonTapped) {
                 $0.tagDraft = nil
             }
             // No `.selectedTagRenamed` is received

@@ -1,6 +1,6 @@
 import Dependencies
 import Foundation
-import StructuredQueries
+import SQLiteData
 import SwiftUI
 
 @Table struct Issue: Hashable, Identifiable {
@@ -53,6 +53,59 @@ extension Issue {
                 )
             }
         }
+    }
+}
+
+extension Where<Issue> {
+    /// Applies search text and token-based filters as additional WHERE clauses.
+    ///
+    /// Each parameter adds an independent condition (combined with AND):
+    /// - **Search text**: Sanitized and matched via FTS5 prefix search against ``IssueText``.
+    /// - **Tag tokens**: Issues must be associated with *all* selected tags (AND logic
+    ///   via a grouped subquery on ``IssueTag``).
+    /// - **Priority token**: Issues must match the selected ``Issue/Priority`` (first token wins).
+    /// - **Status token**: Issues must match the selected ``SearchToken/Status``
+    ///   — `.open` or `.completed` (first token wins).
+    ///
+    /// Parameters that are empty or absent produce no additional clauses,
+    /// so calling this with no search text and an empty token array is a no-op.
+    func filter(with searchQuery: String, tokens: [SearchToken]) -> Where<Issue> {
+        let sanitizedFTS = IssueText.sanitize(query: searchQuery)
+        let tagTokenIDs = tokens.compactMap(\.tag?.id)
+        let priorityToken = tokens.compactMap(\.priority).first
+        let statusToken = tokens.compactMap(\.status).first
+
+        return self
+            .where { // FTS5 full-text search
+                if let sanitizedFTS {
+                    // Search IssueText for matches, then get Issues based on their rowIDs
+                    $0.rowid.in(IssueText.where { $0.match(sanitizedFTS) }.select { $0.rowid })
+                }
+            }
+            .where { // Priority token filter
+                if let priorityToken { $0.priority.eq(priorityToken) }
+            }
+            .where { // Status token filter
+                if let statusToken {
+                    switch statusToken {
+                    case .open: $0.isNotCompleted
+                    case .completed: $0.isCompleted
+                    }
+                }
+            }
+            .where { // Tag token filter (AND: must have all selected tags)
+                if !tagTokenIDs.isEmpty {
+                    $0.id.in(
+                        IssueTag
+                            .where { $0.tagID.in(tagTokenIDs) } // Get IssueTags that have corresponding tagIDs
+                            .group(by: \.issueID) // group by issueID
+                            .having { // if the count equals the tagTokenIDs count => Issue has all tags
+                                $0.tagID.count(distinct: true).eq(tagTokenIDs.count)
+                            }
+                            .select(\.issueID) // get the corresponding IssueID
+                    )
+                }
+            }
     }
 }
 

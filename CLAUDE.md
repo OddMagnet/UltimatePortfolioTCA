@@ -60,6 +60,7 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 - **Query convenience properties**: `Issue.TableColumns` has reusable computed properties (`lastActivity`, `isNotCompleted`, `isRecent`) available as `$0.property` inside StructuredQueries closures. Note: custom `TableColumns` computed properties cannot be accessed via the static shorthand (`Issue.lastActivity`) — only real `@Table` columns support `@dynamicMemberLookup` on the static subscript.
 - **Extracted query helpers**: Common filter/ordering logic is extracted into model file extensions:
   - `Issue.filter(with:)` returns `Where<Issue>` for an `IssueFilter` predicate
+  - `Where<Issue>.filter(with:tokens:)` appends FTS5 search and token-based filters (tag, priority, status) as additional WHERE clauses
   - `extension Select where From == Issue, Joins == ()` adds `.order(by:)` for `IssueSortOrder` (pre-join only)
   - `extension Select where From == Tag, Joins == (IssueTag?, Issue?)` adds `.order(by:showCompleted:)` for `TagSortOrder` (post-join — `leftJoin` produces optional `Joins` types)
 - **App entry point**: `prepareDependencies` must complete before `Store` initialization, since `AppFeature.State()` constructs child states with `@FetchAll` queries that require the database. The app body guards with `if !isTesting` (from IssueReporting, re-exported via ComposableArchitecture) to skip UI during test runs.

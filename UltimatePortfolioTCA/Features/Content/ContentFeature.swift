@@ -47,48 +47,14 @@ import SwiftUI
         /// tags, and selects each issue with comma-separated tag names.
         /// Pipeline: Where → Group → Order → Join → Select
         var issueQuery: some Statement<IssueWithTags> {
-            let sanitizedFTS = IssueText.sanitize(query: searchQuery)
-            let tagTokenIDs = searchTokens.compactMap(\.tag?.id)
-            let priorityToken = searchTokens.compactMap(\.priority).first
-            let statusToken = searchTokens.compactMap(\.status).first
-
-            return Issue
+            Issue
                 .filter(with: filter)
                 .where { // Completed-issue visibility
-                    if statusToken == nil { // only filter when search does not have a status token
+                    if searchTokens.compactMap(\.status).first == nil { // only filter when search does not have a status token
                         filter.showsCompletedIssues(with: showCompleted).or($0.isNotCompleted)
                     }
                 }
-                .where { // FTS5 full-text search
-                    if let ftsQuery = sanitizedFTS {
-                        // Search IssueText for matches, then get Issues based on their rowIDs
-                        $0.rowid.in(IssueText.where { $0.match(ftsQuery) }.select { $0.rowid })
-                    }
-                }
-                .where { // Priority token filter
-                    if let priorityToken { $0.priority.eq(priorityToken) }
-                }
-                .where { // Status token filter
-                    if let statusToken {
-                        switch statusToken {
-                        case .open: $0.isNotCompleted
-                        case .completed: $0.isCompleted
-                        }
-                    }
-                }
-                .where { // Tag token filter (AND: must have all selected tags)
-                    if !tagTokenIDs.isEmpty {
-                        $0.id.in(
-                            IssueTag
-                                .where { $0.tagID.in(tagTokenIDs) } // Get IssueTags that have corrosponding tagIDs
-                                .group(by: \.issueID) // group by issueID
-                                .having { // if the count equals the tagTokenIDs count => Issue has all tags
-                                    $0.tagID.count(distinct: true).eq(tagTokenIDs.count)
-                                }
-                                .select(\.issueID) // get the corrosponding IssueID
-                        )
-                    }
-                }
+                .filter(with: searchQuery, tokens: searchTokens)
                 .group(by: \.id)
                 .order(by: \.isCompleted)
                 .order(by: sortOrder)

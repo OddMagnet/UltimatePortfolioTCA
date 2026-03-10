@@ -232,12 +232,69 @@ extension BaseTestSuite {
             }
         }
 
+        @Test func createIssueFromAppViewWithSelectedTagFiler() async {
+            let newIssueID = UUID(0)
+            let selectedTag = Tag(id: UUID(-1), name: "Test")
+            await store.send(\.sidebar.binding.selectedFilter, .tag(selectedTag)) {
+                $0.sidebar.selectedFilter = .tag(selectedTag)
+            }
+            await store.receive(\.sidebar.delegate.selectedFilterChanged, .tag(selectedTag)) {
+                $0.content = ContentFeature.State(filter: .tag(selectedTag))
+            }
+            await store.send(\.view.createIssueButtonTapped) {
+                $0.content?.selectedIssueID = newIssueID
+                $0.detail = DetailFeature.State(issueID: newIssueID, isEditing: true)
+                $0.detail?.draft = Issue.Draft(id: newIssueID, created: now)
+                $0.detail?.selectedTagIDs = [selectedTag.id]
+            }
+        }
+
         @Test func createIssueFromContent() async {
             let newIssueID = UUID(0)
             await store.send(\.content.delegate.createIssue) {
                 $0.content?.selectedIssueID = newIssueID
                 $0.detail = DetailFeature.State(issueID: newIssueID, isEditing: true)
                 $0.detail?.draft = Issue.Draft(id: newIssueID, created: now)
+            }
+        }
+
+        @Test func createIssueFromContentWithSelectedTagFilter() async {
+            let newIssueID = UUID(0)
+            let selectedTag = Tag(id: UUID(-1), name: "Test")
+            await store.send(\.sidebar.binding.selectedFilter, .tag(selectedTag)) {
+                $0.sidebar.selectedFilter = .tag(selectedTag)
+            }
+            await store.receive(\.sidebar.delegate.selectedFilterChanged, .tag(selectedTag)) {
+                $0.content = ContentFeature.State(filter: .tag(selectedTag))
+            }
+            await store.send(\.content.delegate.createIssue) {
+                $0.content?.selectedIssueID = newIssueID
+                $0.detail = DetailFeature.State(issueID: newIssueID, isEditing: true)
+                $0.detail?.draft = Issue.Draft(id: newIssueID, created: now)
+                $0.detail?.selectedTagIDs = [selectedTag.id]
+            }
+        }
+
+        @Test func createIssueFromDetailWithSelectedTagFilter() async {
+            let newIssueID = UUID(0)
+            let selectedTag = Tag(id: UUID(-1), name: "Test")
+            await store.send(\.sidebar.binding.selectedFilter, .tag(selectedTag)) {
+                $0.sidebar.selectedFilter = .tag(selectedTag)
+            }
+            await store.receive(\.sidebar.delegate.selectedFilterChanged, .tag(selectedTag)) {
+                $0.content = ContentFeature.State(filter: .tag(selectedTag))
+            }
+            await store.send(\.content.binding.selectedIssueID, .issueLoginLayout) {
+                $0.content?.selectedIssueID = .issueLoginLayout
+            }
+            await store.receive(\.content.delegate.selectedIssueChanged, .issueLoginLayout) {
+                $0.detail = DetailFeature.State(issueID: .issueLoginLayout)
+            }
+            await store.send(\.detail.delegate.createIssue) {
+                $0.content?.selectedIssueID = newIssueID
+                $0.detail = DetailFeature.State(issueID: newIssueID, isEditing: true)
+                $0.detail?.draft = Issue.Draft(id: newIssueID, created: now)
+                $0.detail?.selectedTagIDs = [selectedTag.id]
             }
         }
 

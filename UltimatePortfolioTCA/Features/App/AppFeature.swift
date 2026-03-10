@@ -88,6 +88,9 @@ import SQLiteData
                 }
                 state.detail = DetailFeature.State(issueID: issueID, isEditing: true)
                 state.detail?.draft = Issue.Draft(id: issueID, created: now)
+                if case let .tag(tag) = currentFilter {
+                    state.detail?.selectedTagIDs = [tag.id]
+                }
                 return .none
 
             case let .content(.delegate(.selectedIssueChanged(newIssueID))):

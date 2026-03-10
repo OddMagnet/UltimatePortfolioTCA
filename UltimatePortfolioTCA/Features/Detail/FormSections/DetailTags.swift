@@ -7,11 +7,11 @@ struct DetailTags: View {
     let onCreateTagButton: () -> Void
 
     private var assignedTags: [Tag] {
-        tagRows.filter(\.isAssigned).map(\.tag)
+        tagRows.filter { selectedTagIDs.contains($0.tag.id) }.map(\.tag)
     }
 
     private var unassignedTags: [Tag] {
-        tagRows.filter(\.isNotAssigned).map(\.tag)
+        tagRows.filter { !selectedTagIDs.contains($0.tag.id) }.map(\.tag)
     }
 
     var body: some View {

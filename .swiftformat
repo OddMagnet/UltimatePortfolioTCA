@@ -77,7 +77,7 @@
 --enable redundantOptionalBinding            # Remove redundant identifiers in optional binding
 --enable redundantParens                     # Remove unnecessary parentheses
 --enable redundantPattern                    # Remove redundant patterns
---enable redundantProperty                   # Simplify redundant property definitions
+--enable redundantVariable                   # Simplify redundant variable definitions
 --enable redundantPublic                     # Remove redundant public inside internal types
 --enable redundantRawValues                  # Remove redundant raw values matching case name
 --enable redundantReturn                     # Remove return in single-expression bodies

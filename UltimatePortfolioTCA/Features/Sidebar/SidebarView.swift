@@ -23,21 +23,20 @@ struct SidebarView: View {
                 } else {
                     ForEach(store.tagRows) { row in
                         FilterRow(row: row)
-                            .swipeActions(edge: .leading) {
+                            .contextMenu {
                                 Button {
                                     send(.renameTagSwiped(row.tag))
                                 } label: {
                                     Label("Rename", systemImage: "pencil")
                                 }
-                            }
-                            .swipeActions(edge: .trailing) {
                                 Button(role: .destructive) {
-                                    send(.deleteTagSwiped(row.tag))
+                                    send(.deleteTagsSwiped([row.tag.id]))
                                 } label: {
                                     Label("Delete", systemImage: "trash")
                                 }
                             }
                     }
+                    .onDelete(perform: deleteTagsForOffsets)
                 }
             }
         }
@@ -59,6 +58,11 @@ struct SidebarView: View {
         .onChange(of: store.showCompleted) {
             send(.showCompletedToggled)
         }
+    }
+
+    private func deleteTagsForOffsets(_ offsets: IndexSet) {
+        let tagIDs = offsets.map { store.tagRows[$0].id }
+        send(.deleteTagsSwiped(tagIDs))
     }
 }
 

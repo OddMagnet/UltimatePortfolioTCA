@@ -123,7 +123,7 @@ extension BaseTestSuite {
         @Test func deleteTagSwipedOnUnselectedFilter() async throws {
             let unselectedTagRow = try #require(store.state.tagRows.first)
             let unselectedTag = unselectedTagRow.tag
-            await store.send(\.view.deleteTagSwiped, unselectedTag)
+            await store.send(\.view.deleteTagsSwiped, [unselectedTag.id])
             await store.finish()
             #expect(!store.state.tagRows.contains(unselectedTagRow))
         }
@@ -136,7 +136,7 @@ extension BaseTestSuite {
                 $0.selectedFilter = .tag(selectedTag)
             }
             await store.receive(\.delegate.selectedFilterChanged, .tag(selectedTag))
-            await store.send(\.view.deleteTagSwiped, selectedTag) {
+            await store.send(\.view.deleteTagsSwiped, [selectedTag.id]) {
                 $0.selectedFilter = .open
             }
             await store.receive(\.delegate.selectedFilterChanged, .open)

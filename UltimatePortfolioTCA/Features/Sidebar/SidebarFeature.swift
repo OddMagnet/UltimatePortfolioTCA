@@ -92,7 +92,7 @@ import SwiftUI
         @CasePathable
         enum View {
             case createTagButtonTapped
-            case deleteTagSwiped(Tag)
+            case deleteTagsSwiped([Tag.ID])
             case renameTagSwiped(Tag)
             case sortOrderSelected(TagSortOrder)
             case showCompletedToggled
@@ -124,16 +124,16 @@ import SwiftUI
             case let .view(.renameTagSwiped(tag)):
                 return .send(.delegate(.renameTag(tag)))
 
-            case let .view(.deleteTagSwiped(tag)):
+            case let .view(.deleteTagsSwiped(tagIDs)):
                 let didDeleteSelectedFilter = switch state.selectedFilter {
-                case let .tag(selectedTag): selectedTag.id == tag.id
+                case let .tag(selectedTag): tagIDs.contains(selectedTag.id)
                 default: false
                 }
                 if didDeleteSelectedFilter { state.selectedFilter = .open }
                 return .run { [database] send in
                     await withErrorReporting {
                         try await database.write { db in
-                            try Tag.find(tag.id).delete().execute(db)
+                            try Tag.where { $0.id.in(tagIDs) }.delete().execute(db)
                         }
                     }
                     if didDeleteSelectedFilter { await send(.delegate(.selectedFilterChanged(.open))) }

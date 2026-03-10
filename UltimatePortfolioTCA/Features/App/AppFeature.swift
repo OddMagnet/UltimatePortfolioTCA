@@ -7,7 +7,7 @@ import SQLiteData
         var sidebar: SidebarFeature.State
         var content: ContentFeature.State?
         var detail: DetailFeature.State?
-        var tagDraft: Tag.Draft?
+        var destination: Destination?
 
         init(selectedFilter: IssueFilter? = nil, selectedIssueID: Issue.ID? = nil) {
             sidebar = SidebarFeature.State(selectedFilter: selectedFilter)
@@ -16,6 +16,12 @@ import SQLiteData
             guard let selectedIssueID else { return }
             detail = DetailFeature.State(issueID: selectedIssueID)
         }
+    }
+
+    @CasePathable
+    enum Destination: Equatable {
+        case alert(Tag.Draft)
+        case awards
     }
 
     enum Action: BindableAction, ViewAction {
@@ -51,11 +57,11 @@ import SQLiteData
 
             case let .sidebar(.delegate(.createTag(tagID))),
                  let .detail(.delegate(.createTag(tagID))):
-                state.tagDraft = Tag.Draft(id: tagID)
+                state.destination = .alert(Tag.Draft(id: tagID))
                 return .none
 
             case let .sidebar(.delegate(.renameTag(tag))):
-                state.tagDraft = Tag.Draft(tag)
+                state.destination = .alert(Tag.Draft(tag))
                 return .none
 
             case let .sidebar(.delegate(.selectedFilterChanged(newFilter))):
@@ -70,6 +76,10 @@ import SQLiteData
                 // If not nil, the filter has changed
                 state.content = ContentFeature.State(filter: newFilter)
                 state.detail = nil
+                return .none
+
+            case .sidebar(.delegate(.showAwards)):
+                state.destination = .awards
                 return .none
 
             case .sidebar:
@@ -127,11 +137,11 @@ import SQLiteData
                 return .none
 
             case .view(.tagAlertConfirmButtonTapped):
-                defer { state.tagDraft = nil }
-                guard let id = state.tagDraft?.id,
-                      let name = state.tagDraft?.name.trimmingCharacters(in: .whitespaces),
-                      !name.isEmpty else { return .none }
-                let tagDraft = Tag.Draft(id: id, name: name)
+                defer { state.destination = nil }
+                guard case let .alert(tagDraft) = state.destination, let id = tagDraft.id else { return .none }
+                let name = tagDraft.name.trimmingCharacters(in: .whitespaces)
+                guard !name.isEmpty else { return .none }
+                let newTagDraft = Tag.Draft(id: id, name: name)
                 let is​Renaming​Selected​Tag = switch state.sidebar.selectedFilter {
                 case let .tag(selectedTag): selectedTag.id == id
                 default: false
@@ -139,7 +149,7 @@ import SQLiteData
                 return .run { [database] send in
                     await withErrorReporting {
                         try await database.write { db in
-                            try Tag.upsert { tagDraft }.execute(db)
+                            try Tag.upsert { newTagDraft }.execute(db)
                         }
                     }
                     if is​Renaming​Selected​Tag {

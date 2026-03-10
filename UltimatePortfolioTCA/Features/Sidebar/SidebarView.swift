@@ -43,6 +43,11 @@ struct SidebarView: View {
         .navigationTitle("Filters")
         .toolbarTitleDisplayMode(.inlineLarge)
         .toolbar {
+            // TODO: Differentiate between iOS and iPadOS
+            // on ios only one column is shown at the same time, meaning we
+            // can show all buttons next to each other. On iPadOS all columns
+            // are shown at the same time, so we can't display all button at
+            // the same time without the title disappearing
             ToolbarItem(placement: .topBarTrailing) {
                 SortMenu(currentOrder: store.sortOrder) { order in
                     send(.sortOrderSelected(order))
@@ -51,6 +56,11 @@ struct SidebarView: View {
                         send(.createTagButtonTapped)
                     } label: {
                         Label("Add Tag", systemImage: "plus")
+                    }
+                    Button {
+                        send(.showAwardsButtonTapped)
+                    } label: {
+                        Label("Show awards", systemImage: "rosette")
                     }
                 }
             }

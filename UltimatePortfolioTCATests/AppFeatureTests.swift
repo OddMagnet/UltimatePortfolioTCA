@@ -182,7 +182,7 @@ extension BaseTestSuite {
                     ]
                   ),
                   _detail: nil,
-                  _tagDraft: nil
+                  _destination: nil
                 )
                 """
             }
@@ -360,7 +360,7 @@ extension BaseTestSuite {
         @Test func createTagFromSidebar() async {
             let testTagId = UUID(-1)
             await store.send(\.sidebar.delegate.createTag, testTagId) {
-                $0.tagDraft = Tag.Draft(id: testTagId)
+                $0.destination = .alert(Tag.Draft(id: testTagId))
             }
         }
 
@@ -370,14 +370,14 @@ extension BaseTestSuite {
                 $0.detail = DetailFeature.State(issueID: UUID(-1))
             }
             await store.send(\.detail.delegate.createTag, testTagId) {
-                $0.tagDraft = Tag.Draft(id: testTagId)
+                $0.destination = .alert(Tag.Draft(id: testTagId))
             }
         }
 
         @Test func renameTag() async {
             let testTag = Tag(id: UUID(-1), name: "TestTag")
             await store.send(\.sidebar.delegate.renameTag, testTag) {
-                $0.tagDraft = Tag.Draft(testTag)
+                $0.destination = .alert(Tag.Draft(testTag))
             }
         }
 
@@ -386,13 +386,14 @@ extension BaseTestSuite {
         @Test func tagAlertConfirmCreatesTag() async {
             let tagId = UUID(-1)
             await store.send(\.sidebar.delegate.createTag, tagId) {
-                $0.tagDraft = Tag.Draft(id: tagId)
+                $0.destination = .alert(Tag.Draft(id: tagId))
             }
-            await store.send(\.binding.tagDraft, Tag.Draft(id: tagId, name: "TestTag")) {
-                $0.tagDraft?.name = "TestTag"
+            let newTag = Tag.Draft(id: tagId, name: "TestTag")
+            await store.send(\.binding.destination, .alert(newTag)) {
+                $0.destination = .alert(newTag)
             }
             await store.send(\.view.tagAlertConfirmButtonTapped) {
-                $0.tagDraft = nil
+                $0.destination = nil
             }
             await store.finish()
         }
@@ -401,21 +402,22 @@ extension BaseTestSuite {
             let tagId = UUID(-1)
             // Empty name
             await store.send(\.sidebar.delegate.createTag, tagId) {
-                $0.tagDraft = Tag.Draft(id: tagId)
+                $0.destination = .alert(Tag.Draft(id: tagId))
             }
             await store.send(\.view.tagAlertConfirmButtonTapped) {
-                $0.tagDraft = nil
+                $0.destination = nil
             }
             await store.finish()
             // Whitespace only name
+            let whiteSpaceOnlyTag = Tag.Draft(id: tagId, name: "  ")
             await store.send(\.sidebar.delegate.createTag, tagId) {
-                $0.tagDraft = Tag.Draft(id: tagId)
+                $0.destination = .alert(Tag.Draft(id: tagId))
             }
-            await store.send(\.binding.tagDraft, Tag.Draft(id: tagId, name: "  ")) {
-                $0.tagDraft?.name = "  "
+            await store.send(\.binding.destination, .alert(whiteSpaceOnlyTag)) {
+                $0.destination = .alert(whiteSpaceOnlyTag)
             }
             await store.send(\.view.tagAlertConfirmButtonTapped) {
-                $0.tagDraft = nil
+                $0.destination = nil
             }
             await store.finish()
         }
@@ -431,13 +433,13 @@ extension BaseTestSuite {
                 $0.content = ContentFeature.State(filter: .tag(testTag))
             }
             await store.send(\.sidebar.delegate.renameTag, testTag) {
-                $0.tagDraft = Tag.Draft(testTag)
+                $0.destination = .alert(Tag.Draft(testTag))
             }
-            await store.send(\.binding.tagDraft, Tag.Draft(newTag)) {
-                $0.tagDraft = Tag.Draft(newTag)
+            await store.send(\.binding.destination, .alert(Tag.Draft(newTag))) {
+                $0.destination = .alert(Tag.Draft(newTag))
             }
             await store.send(\.view.tagAlertConfirmButtonTapped) {
-                $0.tagDraft = nil
+                $0.destination = nil
             }
             await store.receive(\.selectedTagRenamed, newTag) {
                 $0.sidebar.selectedFilter = .tag(newTag)
@@ -451,13 +453,13 @@ extension BaseTestSuite {
             let testTag = Tag(id: tagID, name: "TestTag")
             let newTag = Tag(id: tagID, name: "NewNameTag")
             await store.send(\.sidebar.delegate.renameTag, testTag) {
-                $0.tagDraft = Tag.Draft(testTag)
+                $0.destination = .alert(Tag.Draft(testTag))
             }
-            await store.send(\.binding.tagDraft, Tag.Draft(newTag)) {
-                $0.tagDraft = Tag.Draft(newTag)
+            await store.send(\.binding.destination, .alert(Tag.Draft(newTag))) {
+                $0.destination = .alert(Tag.Draft(newTag))
             }
             await store.send(\.view.tagAlertConfirmButtonTapped) {
-                $0.tagDraft = nil
+                $0.destination = nil
             }
             // No `.selectedTagRenamed` is received
             await store.finish()
@@ -468,6 +470,14 @@ extension BaseTestSuite {
             await store.send(\.selectedTagRenamed, newTag) {
                 $0.sidebar.selectedFilter = .tag(newTag)
                 $0.content?.filter = .tag(newTag)
+            }
+        }
+
+        // MARK: - Awards Sheet
+
+        @Test func showAwardsDelegate() async {
+            await store.send(\.sidebar.delegate.showAwards) {
+                $0.destination = .awards
             }
         }
     }

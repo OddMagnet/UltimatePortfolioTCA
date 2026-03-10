@@ -181,5 +181,12 @@ extension BaseTestSuite {
             #expect(store.state.smartFilterCounts == SmartFilterCounts(open: 5, completed: 2, recent: 5))
             #expect(store.state.tagRows.map(\.issueCount) == [1, 2, 0, 2, 5, 3])
         }
+
+        // MARK: - Show Awards
+
+        @Test func showAwardsButtonTapped() async {
+            await store.send(\.view.showAwardsButtonTapped)
+            await store.receive(\.delegate.showAwards)
+        }
     }
 }

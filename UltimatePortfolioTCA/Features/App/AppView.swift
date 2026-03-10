@@ -25,13 +25,14 @@ struct AppView: View {
                 }
             }
         }
-        .alert(item: $store.tagDraft) {
-            Text($0.name.isEmpty ? "New Tag" : "Rename Tag")
+        .alert(item: $store.destination.alert) { tagDraft in
+            Text(tagDraft.name.isEmpty ? "New Tag" : "Rename Tag")
         } actions: { tagDraft in
             TextField("Tag name", text: tagDraft.name)
             Button("Save") { send(.tagAlertConfirmButtonTapped) }
             Button("Cancel") {}
         }
+        .sheet(isPresented: $store.destination.awards, content: AwardsView.init)
     }
 }
 

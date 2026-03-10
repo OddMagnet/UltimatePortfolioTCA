@@ -41,8 +41,8 @@
 --wrap-arguments before-first
 --wrap-collections before-first
 --wrap-conditions after-first
---wrap-parameters after-first
---wrap-return-type if-multiline
+--wrap-parameters before-first
+--wrap-return-type never
 --wrap-effects if-multiline
 --wrap-type-aliases after-first
 --enable wrapAttributes                      # Wrap @attributes

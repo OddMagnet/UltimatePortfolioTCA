@@ -37,7 +37,7 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 - **Persistence**: SQLiteData (pointfreeco) with StructuredQueries for type-safe SQL (`@Table`, not GRDB's `FetchableRecord`/`PersistableRecord`).
 - **Database observation**: `@FetchAll`/`@FetchOne` live in TCA reducer `@ObservableState` (not in views), so the reducer can update queries dynamically for sorting/filtering. `@Selection` structs are used for custom row types when queries involve joins or aggregations (e.g., `TagWithCount`, `TagRow`, `IssueWithTags`, `SmartFilterCounts`).
 - **User preferences**: `@Shared(.appStorage(AppStorageKeys.key))` from the Sharing library (re-exported by TCA) persists user preferences. Keys are centralized in `AppStorageKeys` enum (`Dependencies/AppStorageKeys.swift`) to prevent typos. Current keys: `showCompleted`, `issueSortOrder`, `tagSortOrder`.
-- **Alerts**: `DetailFeature` uses TCA's `AlertState` via `@Presents var alert` and `.ifLet(\.$alert, action: \.alert)` for the delete confirmation dialog. The view uses `.alert($store.scope(state: \.alert, action: \.alert))`. `AppFeature` uses native SwiftUI `.alert(item:)` with `Tag.Draft?` state for tag creation/renaming, since TCA's `AlertState` does not support text fields.
+- **Alerts**: `DetailFeature` uses TCA's `AlertState` via `@Presents var alert` and `.ifLet(\.$alert, action: \.alert)` for the delete confirmation dialog. The view uses `.alert($store.scope(state: \.alert, action: \.alert))`. `AppFeature` uses a `@CasePathable` `Destination` enum with `.alert(Tag.Draft)` and `.awards` cases, driven by native SwiftUI `.alert(item: $store.destination.alert)` and `.sheet(isPresented: $store.destination.awards)`. This avoids TCA's `AlertState` (which doesn't support text fields) while still using case key path projections into the enum. `AwardsView` is a plain SwiftUI view (no reducer) presented as a sheet.
 - **No-op save prevention**: `DetailFeature` compares the edit draft and tag selection against the current issue before writing. If nothing changed, `resetDraftState` is called and no effect is returned. New issues (where `state.issue` is `nil`) always save since there is no existing issue to compare against. The save path guards on `state.draft.id` being non-nil — the parent sets this when creating or editing.
 - **Completed-issue visibility**: `IssueFilter` centralizes the rules via `hasShowCompletedToggle` (whether the UI shows the toggle) and `showsCompletedIssues(with:)` (whether the query includes completed issues). The "Open" filter never shows completed issues; "Completed" always does; "Recent" and tag filters respect the `showCompleted` user preference.
 - **Testing**: Swift Testing framework — see the dedicated **Testing** section below for conventions, patterns, and linking rules.
@@ -46,7 +46,7 @@ When an Xcode MCP server is available, prefer using `BuildProject`, `RunAllTests
 
 - **Setup**: `Schema.swift` in `Dependencies/` — `bootstrapDatabase()` on `DependencyValues` configures the database, runs migrations, starts `SyncEngine`, registers temporary triggers, and seeds sample data (debug only).
 - **Sample data**: `SampleData.swift` in `Dependencies/` — `seedSampleData()` on `DatabaseWriter` provides seed issues, tags, and associations for development/previews. Issue dates are computed relative to `@Dependency(\.date.now)` via `daysAgo(_:)`, making them deterministic in tests when the date dependency is pinned. `UUID+SampleData.swift` defines static UUID constants (e.g., `.tagSwiftUI`, `.issueLoginLayout`) for all sample entities, used in seed data, previews, and tests.
-- **Models**: `Issue`, `Tag`, `IssueTag` (join table) — all use `@Table` with UUID primary keys. `Tag.Draft` conforms to `Equatable` (required for SwiftUI's `.alert(item:)`). `IssueText` is an FTS5 virtual table (`@Table` with `FTS5` conformance) for full-text search on issue title and detail. `SearchToken` is a plain enum (tag/priority/status) used for token-based filtering in the content list.
+- **Models**: `Issue`, `Tag`, `IssueTag` (join table) — all use `@Table` with UUID primary keys. `Tag.Draft` conforms to `Equatable` (required for SwiftUI's `.alert(item:)`). `IssueText` is an FTS5 virtual table (`@Table` with `FTS5` conformance) for full-text search on issue title and detail. `SearchToken` is a plain enum (tag/priority/status) used for token-based filtering in the content list. `Award` is a plain `Decodable + Identifiable` struct loaded from `Awards.json` via `Bundle.decode` — not a database table.
 - **iCloud sync**: `SyncEngine` initialized for all three tables. Entitlements and `CKSharingSupported` are configured. Metadatabase is attached for future sharing support.
 - **Foreign keys**: `configuration.foreignKeysEnabled = true` — enforced at runtime.
 - **`modified` column on `Issue`**: Managed by a type-safe temporary trigger (`Issue.createTemporaryTrigger(after: .update(touch: \.modified))`), created after migrations in `bootstrapDatabase()`. The trigger uses `!SyncEngine.$isSynchronizing` to skip SyncEngine's no-op updates. The Swift property is `let modified: Date?` to prevent manual updates. Do NOT set `modified` from Swift code.
@@ -93,25 +93,29 @@ The Xcode project uses **File System Synchronized Groups** — the on-disk folde
 
 ```
 UltimatePortfolioTCA/
-  App/                  — App entry point (UltimatePortfolioTCAApp.swift)
   Assets.xcassets
+  Colors.xcassets       — Custom award colors (UP-prefixed to avoid SwiftUI conflicts)
+  Awards.json           — Award definitions (decoded by Bundle+Decodable)
+  Common/               — Shared UI components + extensions
+    Extensions/         — Bundle+Decodable, Date+CompactRelative
   Dependencies/         — Database setup, sample data, constants (Schema.swift, SampleData.swift, AppStorageKeys.swift, UUID+SampleData.swift)
   Features/
-    App/                — Root AppFeature + AppView (NavigationSplitView) + Common/
+    App/                — Root AppFeature + AppView (NavigationSplitView) + UltimatePortfolioTCAApp (entry point)
+    Awards/             — AwardsView (plain SwiftUI view, no reducer)
     Sidebar/            — SidebarFeature + SidebarView + IssueFilter
     Content/            — ContentFeature + ContentView (issue list)
     Detail/             — DetailFeature + DetailView + FormSections/ (DetailTitle, DetailDescription, DetailStatus, DetailDates, DetailTags)
-    App/Common/Extensions/ — Foundation extensions (Date+CompactRelative)
-  Models/               — Data models (Issue.swift, Tag.swift, IssueTag.swift, IssueText.swift, SearchToken.swift) + SortOrder/
+  Models/               — Data models (Issue, Tag, IssueTag, IssueText, SearchToken, Award) + SortOrder/
 UltimatePortfolioTCATests/    — Unit tests (Swift Testing)
 ```
 
-## Shared UI Components (`Features/App/Common/`)
+## Shared UI Components (`Common/`)
 
 - **`SortMenu`** + **`SortOrderProtocol`**: Generic toolbar sort menu. `SortOrderProtocol` pairs a `Field` enum with `isAscending`; `apply(_:)` toggles direction for the same field or replaces with a new field's default. Conforming types: `IssueSortOrder`, `TagSortOrder` (in `Models/SortOrder/`).
 - **`FlowLayout`**: Custom SwiftUI `Layout` that arranges children left-to-right, wrapping to the next line. Configurable `horizontalSpacing`/`verticalSpacing` (default 6). Used for tag chips.
 - **`ChipStyle`** + **`.chipStyle(isAssigned:)`**: A `ViewModifier` applying capsule-shaped chip styling to any view. Assigned = white text on tint background; unassigned = secondary text on tertiary fill. Uses `.geometryGroup()` to keep text and background animations in sync.
 - **`PriorityIndicator`**: 10pt colored circle for `Issue.Priority` with an accessibility label. Color is defined on `Issue.Priority.color`.
+- **`Bundle.decode(_:as:)`** (in `Extensions/Bundle+Decodable.swift`): Generic JSON decoder for bundled resources. Uses `fatalError` with detailed `DecodingError` messages for debugging. Used by `Award.allAwards`.
 - **`Date.compactRelative(to:)`** (in `Extensions/Date+CompactRelative.swift`): Compact relative date string — "< 1 hour" / "> N hours" (today), "> N days" (this week), locale-aware day+month (this year), "> N years" (older). Used in issue row trailing labels.
 
 ## Commits

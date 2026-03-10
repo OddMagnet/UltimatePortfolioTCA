@@ -87,6 +87,7 @@ import SwiftUI
             case createTag(Tag.ID)
             case renameTag(Tag)
             case selectedFilterChanged(IssueFilter?)
+            case showAwards
         }
 
         @CasePathable
@@ -95,6 +96,7 @@ import SwiftUI
             case deleteTagsSwiped([Tag.ID])
             case renameTagSwiped(Tag)
             case sortOrderSelected(TagSortOrder)
+            case showAwardsButtonTapped
             case showCompletedToggled
         }
     }
@@ -144,6 +146,9 @@ import SwiftUI
                 return .run { [state] _ in
                     try await state.$tagRows.load(state.tagQuery, animation: .default)
                 }
+
+            case .view(.showAwardsButtonTapped):
+                return .send(.delegate(.showAwards))
 
             case .view(.showCompletedToggled):
                 return .run { [state] _ in

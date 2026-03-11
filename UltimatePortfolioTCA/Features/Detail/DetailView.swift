@@ -65,14 +65,8 @@ struct DetailView: View {
         .toolbar {
             if store.isEditing {
                 editIssueToolBarContent
-            } else if store.issue != nil {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button {
-                        send(.editButtonTapped)
-                    } label: {
-                        Label("Edit", systemImage: "square.and.pencil")
-                    }
-                }
+            } else if let issueIsCompleted = store.issue?.isCompleted {
+                viewIssueToolBarContent(issueIsCompleted: issueIsCompleted)
             }
         }
     }
@@ -103,6 +97,38 @@ struct DetailView: View {
                 send(.saveButtonTapped)
             } label: {
                 Label("Save", systemImage: "checkmark.circle")
+            }
+        }
+    }
+
+    @ToolbarContentBuilder
+    func viewIssueToolBarContent(issueIsCompleted: Bool) -> some ToolbarContent {
+        ToolbarItem {
+            Menu {
+                Button {
+                    UIPasteboard.general.string = issue.title
+                } label: {
+                    Label("Copy Issue Title", systemImage: "doc.on.doc")
+                }
+
+                Button {
+                    send(.toggleIssueCompletedButtonTapped)
+                } label: {
+                    Label(
+                        issueIsCompleted ? "Re-open Issue" : "Close Issue",
+                        systemImage: "bubble.left.and.exclamationmark.bubble.right"
+                    )
+                }
+            } label: {
+                Label("Actions", systemImage: "ellipsis.circle")
+            }
+        }
+
+        ToolbarItem(placement: .confirmationAction) {
+            Button {
+                send(.editButtonTapped)
+            } label: {
+                Label("Edit", systemImage: "square.and.pencil")
             }
         }
     }

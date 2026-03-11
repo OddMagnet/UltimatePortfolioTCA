@@ -128,6 +128,17 @@ import SQLiteData
                 state.detail = DetailFeature.State(issueID: newIssueID)
                 return .none
 
+            case .detail(.delegate(.issueCompletedToggled)):
+                // If one of the following is true, issue would disappear in Content's list
+                guard state.content?.filter == .open // Open -> Closed
+                    || state.content?.filter == .completed // Closed -> Open
+                    || state.content?.showCompleted == false // Open -> Closed, covers tag & recent filters
+                else { return .none }
+                // Then we need to reset state
+                state.content?.selectedIssueID = nil
+                state.detail = nil
+                return .none
+
             case .detail:
                 return .none
 

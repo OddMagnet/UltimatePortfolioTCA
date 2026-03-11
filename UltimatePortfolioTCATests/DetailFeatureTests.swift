@@ -206,6 +206,22 @@ extension BaseTestSuite {
             }
         }
 
+        // MARK: - Toggle completed
+
+        @Test func toggleIssueCompletedButtonTapped() async {
+            await store.send(\.view.toggleIssueCompletedButtonTapped)
+            await store.receive(\.delegate.issueCompletedToggled)
+            await store.finish()
+        }
+
+        @Test func toggleIssueCompletedWithNoIssueFound() async {
+            let store = TestStore(initialState: DetailFeature.State(issueID: UUID(-1))) {
+                DetailFeature()
+            }
+            // Guard exits early, no state changes, no delegates send
+            await store.send(\.view.toggleIssueCompletedButtonTapped)
+        }
+
         // MARK: - Save
 
         @Test func saveNewIssue() async {

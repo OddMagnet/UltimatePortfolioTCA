@@ -66,6 +66,7 @@ import SwiftUI
             case createTag(Tag.ID)
             case issueDeleted
             case issueSaved(Issue.ID)
+            case issueCompletedToggled
         }
 
         @CasePathable
@@ -76,6 +77,7 @@ import SwiftUI
             case cancelEditButtonTapped
             case saveButtonTapped
             case deleteButtonTapped
+            case toggleIssueCompletedButtonTapped
         }
     }
 
@@ -150,6 +152,19 @@ import SwiftUI
                     TextState("Are you sure you want to delete this issue? This action cannot be undone.")
                 }
                 return .none
+
+            case .view(.toggleIssueCompletedButtonTapped):
+                guard let issue = state.issue else { return .none }
+                var draft = Issue.Draft(issue)
+                draft.isCompleted.toggle()
+                return .run { [database, draft] send in
+                    await withErrorReporting {
+                        try await database.write { db in
+                            try Issue.upsert { draft }.execute(db)
+                        }
+                    }
+                    await send(.delegate(.issueCompletedToggled))
+                }
 
             case .alert(.presented(.confirmDeletion)):
                 let issueID = state.issueID

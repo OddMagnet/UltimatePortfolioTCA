@@ -355,6 +355,73 @@ extension BaseTestSuite {
             }
         }
 
+        // MARK: - Issue completion toggled
+
+        @Test func issueCompletedToggledFromOpenFilter() async {
+            let testIssueId = UUID(-1)
+            await store.send(\.content.delegate.selectedIssueChanged, testIssueId) {
+                $0.detail = DetailFeature.State(issueID: testIssueId)
+            }
+            await store.send(\.detail.delegate.issueCompletedToggled) {
+                $0.content?.selectedIssueID = nil
+                $0.detail = nil
+            }
+        }
+
+        @Test func issueCompletedToggledFromCompletedFilter() async {
+            let testIssueId = UUID(-1)
+            await store.send(\.sidebar.binding.selectedFilter, .completed) {
+                $0.sidebar.selectedFilter = .completed
+            }
+            await store.receive(\.sidebar.delegate.selectedFilterChanged, .completed) {
+                $0.content = ContentFeature.State(filter: .completed)
+            }
+            await store.send(\.content.delegate.selectedIssueChanged, testIssueId) {
+                $0.detail = DetailFeature.State(issueID: testIssueId)
+            }
+            await store.send(\.detail.delegate.issueCompletedToggled) {
+                $0.content?.selectedIssueID = nil
+                $0.detail = nil
+            }
+        }
+
+        @Test func issueCompletedToggledFromTagFilterWithShowCompletedFalse() async {
+            let testIssueId = UUID.issueLoginLayout
+            let selectedFilter: IssueFilter = .tag(Tag(id: .tagSwiftUI, name: "SwiftUI"))
+            await store.send(\.sidebar.binding.selectedFilter, selectedFilter) {
+                $0.sidebar.selectedFilter = selectedFilter
+            }
+            await store.receive(\.sidebar.delegate.selectedFilterChanged, selectedFilter) {
+                $0.content = ContentFeature.State(filter: selectedFilter)
+            }
+            await store.send(\.content.delegate.selectedIssueChanged, testIssueId) {
+                $0.detail = DetailFeature.State(issueID: testIssueId)
+            }
+            await store.send(\.detail.delegate.issueCompletedToggled) {
+                $0.content?.selectedIssueID = nil
+                $0.detail = nil
+            }
+        }
+
+        @Test func issueCompletedToggledFromTagFilterWithShowCompletedTrue() async {
+            let testIssueId = UUID.issueLoginLayout
+            let selectedFilter: IssueFilter = .tag(Tag(id: .tagSwiftUI, name: "SwiftUI"))
+            await store.send(\.sidebar.binding.selectedFilter, selectedFilter) {
+                $0.sidebar.selectedFilter = selectedFilter
+            }
+            await store.receive(\.sidebar.delegate.selectedFilterChanged, selectedFilter) {
+                $0.content = ContentFeature.State(filter: selectedFilter)
+            }
+            await store.send(\.content.binding.showCompleted, true) {
+                $0.content?.$showCompleted.withLock { $0 = true }
+            }
+            await store.receive(\.content.issueQueryChanged, nil)
+            await store.send(\.content.delegate.selectedIssueChanged, testIssueId) {
+                $0.detail = DetailFeature.State(issueID: testIssueId)
+            }
+            await store.send(\.detail.delegate.issueCompletedToggled)
+        }
+
         // MARK: - Tag creation / renaming
 
         @Test func createTagFromSidebar() async {

@@ -18,6 +18,13 @@ enum SearchToken: Hashable, Identifiable {
             case .completed: "Completed"
             }
         }
+
+        var a11yLabel: LocalizedStringKey {
+            switch self {
+            case .open: "Open"
+            case .completed: "Completed"
+            }
+        }
     }
 
     var id: String {
@@ -33,6 +40,14 @@ enum SearchToken: Hashable, Identifiable {
         case let .tag(tag): tag.name
         case let .priority(priority): priority.label
         case let .status(status): status.label
+        }
+    }
+
+    var a11yLabel: LocalizedStringKey {
+        switch self {
+        case let .tag(tag): LocalizedStringKey(tag.name)
+        case let .priority(priority): priority.a11yLabel
+        case let .status(status): status.a11yLabel
         }
     }
 

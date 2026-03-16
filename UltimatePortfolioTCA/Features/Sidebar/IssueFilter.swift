@@ -1,4 +1,5 @@
 import SQLiteData
+import SwiftUI
 
 /// Filter criteria for issues in the sidebar and content list.
 ///
@@ -26,12 +27,12 @@ enum IssueFilter: Hashable, Identifiable {
         }
     }
 
-    var title: String {
+    var title: LocalizedStringKey {
         switch self {
         case .open: "Open"
         case .completed: "Completed"
         case .recent: "Recent"
-        case let .tag(tag): tag.name
+        case let .tag(tag): "\(tag.name)"
         }
     }
 

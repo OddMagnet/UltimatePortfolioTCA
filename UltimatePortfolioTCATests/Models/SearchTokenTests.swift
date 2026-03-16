@@ -1,5 +1,6 @@
 import Dependencies
 import Foundation
+import SwiftUI
 import Testing
 @testable import UltimatePortfolioTCA
 

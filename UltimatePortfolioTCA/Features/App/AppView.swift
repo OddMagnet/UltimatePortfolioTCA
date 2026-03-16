@@ -29,6 +29,8 @@ struct AppView: View {
             Text(tagDraft.name.isEmpty ? "New Tag" : "Rename Tag")
         } actions: { tagDraft in
             TextField("Tag name", text: tagDraft.name)
+                .accessibilityLabel("Tag name")
+                .accessibilityHint("editable")
             Button("Save") { send(.tagAlertConfirmButtonTapped) }
             Button("Cancel") {}
         }

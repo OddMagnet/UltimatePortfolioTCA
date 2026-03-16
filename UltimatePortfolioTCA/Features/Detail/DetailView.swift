@@ -12,7 +12,7 @@ struct DetailView: View {
         return store.draft
     }
 
-    private var title: String {
+    private var title: LocalizedStringKey {
         switch (store.isEditing, store.issue) {
         case (true, .some): "Edit Issue"
         case (true, .none): "New Issue"
@@ -27,10 +27,14 @@ struct DetailView: View {
                 Form {
                     DetailTitle(text: store.isEditing ? $store.draft.title : .constant(issue.title), isEditing: store.isEditing)
 
-                    DetailDescription(
-                        text: store.isEditing ? $store.draft.detail : .constant(!issue.detail.isEmpty ? issue.detail : "No Description"),
-                        isEditing: store.isEditing
-                    )
+                    if !issue.detail.isEmpty || store.isEditing {
+                        DetailDescription(
+                            text: store.isEditing ? $store.draft.detail : .constant(issue.detail),
+                            isEditing: store.isEditing
+                        )
+                    } else {
+                        EmptyDetailDescription()
+                    }
 
                     DetailStatus(
                         priority: store.isEditing ? $store.draft.priority : .constant(issue.priority),
@@ -60,7 +64,6 @@ struct DetailView: View {
         }
         .animation(.default, value: store.isEditing)
         .navigationTitle(title)
-        .toolbarTitleDisplayMode(.inline)
         .alert($store.scope(state: \.alert, action: \.alert))
         .toolbar {
             if store.isEditing {

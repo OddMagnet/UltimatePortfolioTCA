@@ -43,6 +43,8 @@ struct AwardsView: View {
                                         : .secondary.opacity(0.5)
                                 )
                         }
+                        .accessibilityLabel(hasEarned(award) ? "Unlocked: \(award.name)" : "Locked")
+                        .accessibilityHint(award.description)
                     }
                 }
             }

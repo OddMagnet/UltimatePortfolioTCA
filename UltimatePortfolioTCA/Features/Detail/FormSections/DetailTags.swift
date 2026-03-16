@@ -28,10 +28,13 @@ struct DetailTags: View {
                     }
 
                     Button(action: onCreateTagButton) {
-                        Text("+ Add Tag")
-                            .chipStyle(isAssigned: false)
-                            .overlay { Capsule().strokeBorder(.secondary) }
-                            .accessibilityLabel("Add Tag")
+                        HStack(spacing: 0) {
+                            Text("+ ")
+                            Text("Add Tag")
+                        }
+                        .chipStyle(isAssigned: false)
+                        .overlay { Capsule().strokeBorder(.secondary) }
+                        .accessibilityLabel("Add Tag")
                     }
                 } else {
                     if assignedTags.isEmpty {

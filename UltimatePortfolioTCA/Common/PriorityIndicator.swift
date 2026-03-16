@@ -8,6 +8,6 @@ struct PriorityIndicator: View {
         Circle()
             .fill(priority.color)
             .frame(width: 10, height: 10)
-            .accessibilityLabel("Priority: \(priority.label)")
+            .accessibilityLabel(priority.a11yLabel)
     }
 }

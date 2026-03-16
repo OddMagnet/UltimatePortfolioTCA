@@ -8,7 +8,7 @@ struct Award: Decodable, Identifiable {
         case unlock
     }
 
-    var id: String { name }
+    var id: String { "\(criterion.rawValue)-\(value)" }
     var name: String
     var description: String
     var color: String

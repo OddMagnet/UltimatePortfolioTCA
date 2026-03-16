@@ -1,3 +1,5 @@
+import SwiftUI
+
 /// Sort order options for issues in the content list.
 /// The ordering logic lives in `extension Select where From == Issue` in `Issue.swift`.
 struct IssueSortOrder: SortOrderProtocol {
@@ -14,7 +16,7 @@ struct IssueSortOrder: SortOrderProtocol {
         }
     }
 
-    var label: String {
+    var label: LocalizedStringKey {
         switch field {
         case .date: "Date"
         case .priority: "Priority"

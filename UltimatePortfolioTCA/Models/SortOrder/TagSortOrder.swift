@@ -1,3 +1,5 @@
+import SwiftUI
+
 /// Sort order options for tags in the sidebar.
 /// The ordering logic lives in `extension Select where From == Tag` in `Tag.swift`.
 struct TagSortOrder: SortOrderProtocol {
@@ -14,7 +16,7 @@ struct TagSortOrder: SortOrderProtocol {
         }
     }
 
-    var label: String {
+    var label: LocalizedStringKey {
         switch field {
         case .name: "Name"
         case .issueCount: "Issue Count"

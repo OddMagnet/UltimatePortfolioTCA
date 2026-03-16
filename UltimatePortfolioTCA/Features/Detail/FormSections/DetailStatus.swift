@@ -16,12 +16,12 @@ struct DetailStatus: View {
                         }
                     }
                     .labelsHidden()
-                    .disabled(!isEditing)
+                    .disabled(!isEditing) // TODO: Even when disabled, picker can be opened
                 }
             }
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("Priority")
-            .accessibilityValue(priority.label)
+            .accessibilityValue(priority.a11yLabel)
             .accessibilityAddTraits(isEditing ? .isButton : [])
 
             LabeledContent("Completed") {

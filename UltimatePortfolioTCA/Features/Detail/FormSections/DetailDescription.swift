@@ -14,3 +14,14 @@ struct DetailDescription: View {
         }
     }
 }
+
+struct EmptyDetailDescription: View {
+    var body: some View {
+        Section("Description") {
+            Text("No Description")
+                .lineLimit(1...10)
+                .foregroundStyle(.secondary)
+                .disabled(true)
+        }
+    }
+}

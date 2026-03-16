@@ -18,6 +18,14 @@ import SwiftUI
             case .high: "High"
             }
         }
+
+        var a11yLabel: LocalizedStringKey {
+            switch self {
+            case .low: "Low Priority"
+            case .medium: "Medium Priority"
+            case .high: "High Priority"
+            }
+        }
     }
 
     typealias ID = UUID

@@ -18,7 +18,7 @@ protocol SortOrderProtocol: Codable, Equatable, Identifiable where ID == Field {
     associatedtype Field: CaseIterable
     var field: Field { get }
     var isAscending: Bool { get set }
-    var label: String { get }
+    var label: LocalizedStringKey { get }
     init(_ field: Field)
     mutating func apply(_ selected: Self)
 }

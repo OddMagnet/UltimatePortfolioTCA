@@ -1,0 +1,162 @@
+[
+    {
+        "name": "Erste Schritte",
+        "description": "Erstelle dein erstes Problem.",
+        "color": "UP Light Blue",
+        "criterion": "issues",
+        "value": 1,
+        "image": "figure.walk"
+    },
+    {
+        "name": "Ein guter Start",
+        "description": "Erstelle 10 Probleme.",
+        "color": "UP Light Blue",
+        "criterion": "issues",
+        "value": 10,
+        "image": "hand.thumbsup.fill"
+    },
+    {
+        "name": "Weiter geht's",
+        "description": "Erstelle 20 Probleme.",
+        "color": "UP Light Blue",
+        "criterion": "issues",
+        "value": 20,
+        "image": "tray.and.arrow.up.fill"
+    },
+    {
+        "name": "Immer schneller",
+        "description": "Erstelle 50 Probleme.",
+        "color": "UP Light Blue",
+        "criterion": "issues",
+        "value": 50,
+        "image": "speedometer"
+    },
+    {
+        "name": "Wellen schlagen",
+        "description": "Erstelle 100 Probleme.",
+        "color": "UP Light Blue",
+        "criterion": "issues",
+        "value": 100,
+        "image": "dot.radiowaves.left.and.right"
+    },
+    {
+        "name": "Starkleister",
+        "description": "Erstelle 250 Probleme.",
+        "color": "UP Light Blue",
+        "criterion": "issues",
+        "value": 250,
+        "image": "square.stack.3d.up.fill"
+    },
+    {
+        "name": "Spitzenleister",
+        "description": "Erstelle 500 Probleme.",
+        "color": "UP Light Blue",
+        "criterion": "issues",
+        "value": 500,
+        "image": "star.circle.fill"
+    },
+    {
+        "name": "Champion",
+        "description": "Erstelle 1000 Probleme.",
+        "color": "UP Light Blue",
+        "criterion": "issues",
+        "value": 1000,
+        "image": "crown.fill"
+    },
+    {
+        "name": "Boxen abhaken",
+        "description": "Schließe dein erstes Problem.",
+        "color": "UP Green",
+        "criterion": "closed",
+        "value": 1,
+        "image": "checkmark.shield.fill"
+    },
+    {
+        "name": "Du rockst",
+        "description": "Schließe 10 Probleme.",
+        "color": "UP Green",
+        "criterion": "closed",
+        "value": 10,
+        "image": "guitars.fill"
+    },
+    {
+        "name": "20 ist ganzig",
+        "description": "Schließe 20 Probleme.",
+        "color": "UP Green",
+        "criterion": "closed",
+        "value": 20,
+        "image": "20.square.fill"
+    },
+    {
+        "name": "Volltreffer!",
+        "description": "Schließe 50 Probleme.",
+        "color": "UP Green",
+        "criterion": "closed",
+        "value": 50,
+        "image": "target"
+    },
+    {
+        "name": "Hoch fliegend",
+        "description": "Schließe 100 Probleme.",
+        "color": "UP Green",
+        "criterion": "closed",
+        "value": 100,
+        "image": "airplane.circle.fill"
+    },
+    {
+        "name": "Du brennst!",
+        "description": "Schließe 250 Probleme.",
+        "color": "UP Green",
+        "criterion": "closed",
+        "value": 250,
+        "image": "flame.fill"
+    },
+    {
+        "name": "Oberster Häkchensetzer",
+        "description": "Schließe 500 Probleme.",
+        "color": "UP Green",
+        "criterion": "closed",
+        "value": 500,
+        "image": "text.badge.checkmark"
+    },
+    {
+        "name": "Boom!",
+        "description": "Schließe 1000 Probleme.",
+        "color": "UP Green",
+        "criterion": "closed",
+        "value": 1000,
+        "image": "bolt.circle.fill"
+    },
+    {
+        "name": "Mit Etiketten spielen",
+        "description": "Du hast dein erstes Tag erstellt.",
+        "color": "UP Gold",
+        "criterion": "tags",
+        "value": 1,
+        "image": "tag.fill"
+    },
+    {
+        "name": "Etiketten Wrestling",
+        "description": "Du hast 10 Tags erstellt.",
+        "color": "UP Gold",
+        "criterion": "tags",
+        "value": 10,
+        "image": "tag.circle.fill"
+    },
+    {
+        "name": "Meister-Etikettierer",
+        "description": "Du hast 50 Tags erstellt.",
+        "color": "UP Gold",
+        "criterion": "tags",
+        "value": 50,
+        "image": "square.grid.3x1.folder.fill.badge.plus"
+    },
+    {
+        "name": "Unterstützer",
+        "description": "Du hast Premium gekauft.",
+        "color": "UP Purple",
+        "criterion": "unlock",
+        "value": 0,
+        "image": "dollarsign.square.fill"
+    }
+]

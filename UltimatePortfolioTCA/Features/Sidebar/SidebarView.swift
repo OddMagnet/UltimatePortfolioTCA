@@ -41,27 +41,25 @@ struct SidebarView: View {
             }
         }
         .navigationTitle("Filters")
-        .toolbarTitleDisplayMode(.inlineLarge)
+        .toolbarTitleDisplayMode(.large)
         .toolbar {
-            // TODO: Differentiate between iOS and iPadOS
-            // on ios only one column is shown at the same time, meaning we
-            // can show all buttons next to each other. On iPadOS all columns
-            // are shown at the same time, so we can't display all button at
-            // the same time without the title disappearing
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(role: .confirm) {
+                    send(.createTagButtonTapped)
+                } label: {
+                    Label("Add Tag", systemImage: "plus")
+                }
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    send(.showAwardsButtonTapped)
+                } label: {
+                    Label("Show awards", systemImage: "rosette")
+                }
+            }
             ToolbarItem(placement: .topBarTrailing) {
                 SortMenu(currentOrder: store.sortOrder) { order in
                     send(.sortOrderSelected(order))
-                } extraActions: {
-                    Button(role: .confirm) {
-                        send(.createTagButtonTapped)
-                    } label: {
-                        Label("Add Tag", systemImage: "plus")
-                    }
-                    Button {
-                        send(.showAwardsButtonTapped)
-                    } label: {
-                        Label("Show awards", systemImage: "rosette")
-                    }
                 }
             }
         }
@@ -94,6 +92,10 @@ private struct FilterRow: View {
         Label(filter.title, systemImage: filter.systemImage)
             .badge(count)
             .tag(filter)
+            .accessibilityElement()
+            .accessibilityAddTraits(.isButton)
+            .accessibilityLabel(filter.title)
+            .accessibilityHint("\(count) issues", isEnabled: count > 0)
     }
 }
 

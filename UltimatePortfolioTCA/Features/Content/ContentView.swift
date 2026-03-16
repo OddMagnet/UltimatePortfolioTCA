@@ -23,7 +23,6 @@ struct ContentView: View {
             }
         }
         .navigationTitle(store.filter.title)
-        .toolbarTitleDisplayMode(.inline)
         .searchable(
             text: $store.searchText,
             tokens: $store.searchTokens,
@@ -52,7 +51,7 @@ struct ContentView: View {
             Button {
                 send(.createIssueButtonTapped)
             } label: {
-                Label("New issue", systemImage: "square.and.pencil")
+                Label("New Issue", systemImage: "square.and.pencil")
             }
 
             SortMenu(currentOrder: store.sortOrder) { order in
@@ -68,6 +67,7 @@ private struct SearchTokenLabel: View {
     var body: some View {
         Label {
             Text(token.label)
+                .accessibilityLabel(token.a11yLabel)
         } icon: {
             Image(systemName: token.systemImage)
                 .foregroundStyle(token.tintColor ?? .accentColor)
@@ -88,37 +88,38 @@ private struct IssueRow: View {
         issue.modified ?? issue.created
     }
 
-    private var accessibilityLabel: String {
-        var parts = [issue.title, "\(issue.priority.label) priority", issueDate.compactRelative(a11y: true)]
-        if issue.isCompleted { parts.append("completed") }
-        if let tagNames { parts.append("tagged with \(tagNames)") }
-        return parts.joined(separator: ", ")
-    }
-
     var body: some View {
         HStack {
             PriorityIndicator(priority: issue.priority)
+                .accessibilitySortPriority(90)
 
             VStack(alignment: .leading) {
                 Text(issue.title)
                     .strikethrough(issue.isCompleted)
                     .foregroundStyle(issue.isCompleted ? .secondary : .primary)
+                    .accessibilityLabel(issue.title)
+                    .accessibilitySortPriority(100)
 
                 if let tagNames {
                     Text(tagNames)
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                        .accessibilityLabel("tagged with: \(tagNames)")
+                        .accessibilitySortPriority(60)
                 }
             }
 
             Spacer()
+                .accessibilityLabel("Completed", isEnabled: issue.isCompleted)
+                .accessibilitySortPriority(70)
 
             Text(issueDate.compactRelative())
                 .font(.caption)
                 .foregroundStyle(.secondary)
+                .accessibilityLabel(issueDate.compactRelativeA11y())
+                .accessibilitySortPriority(80)
         }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(accessibilityLabel)
+        .accessibilityElement(children: .combine)
     }
 }
 

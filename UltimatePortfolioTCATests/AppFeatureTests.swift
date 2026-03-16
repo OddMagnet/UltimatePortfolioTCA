@@ -5,6 +5,7 @@ import SnapshotTestingCustomDump
 import Testing
 @testable import UltimatePortfolioTCA
 
+// swiftlint:disable file_length
 extension BaseTestSuite {
     // swiftlint:disable:next type_body_length
     @MainActor struct AppFeatureTests {

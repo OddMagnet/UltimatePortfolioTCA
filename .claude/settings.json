@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat:*)",
+      "Bash(cd:*)",
+      "Bash(find:*)",
+      "Bash(git add:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "mcp__xcode__BuildProject",
+      "mcp__xcode__DocumentationSearch",
+      "mcp__xcode__GetBuildLog",
+      "mcp__xcode__RenderPreview",
+      "mcp__xcode__RunAllTests",
+      "mcp__xcode__XcodeListNavigatorIssues",
+      "mcp__xcode__XcodeListWindows",
+      "mcp__xcode__XcodeLS",
+      "mcp__xcode__XcodeMakeDir",
+      "mcp__xcode__XcodeMV",
+      "mcp__xcode__XcodeRead",
+      "mcp__xcode__XcodeRefreshCodeIssuesInFile",
+      "mcp__xcode__XcodeRM",
+      "mcp__xcode__XcodeUpdate",
+      "mcp__xcode__XcodeWrite",
+      "mcp__xcode__XcodeGrep",
+      "mcp__xcode__ExecuteSnippet",
+      "mcp__xcode__XcodeGlob",
+      "WebFetch(domain:forums.swift.org)",
+      "WebSearch"
+    ]
+  },
+  "enabledPlugins": {
+    "swift-lsp@claude-plugins-official": true
+  }
+}

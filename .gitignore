@@ -21,6 +21,4 @@ DerivedData/
 # Override global gitignore for our Dependencies/ source folder
 !UltimatePortfolioTCA/Dependencies/
 
-# Claude Code
-.claude/
 

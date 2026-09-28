@@ -28,7 +28,7 @@ import SwiftUI
             self.issueID = issueID
             self.isEditing = isEditing
             @Dependency(\.date.now) var now
-            draft = Issue.Draft(created: now)
+            draft = Issue.Draft(created: now, modified: now)
 
             _issue = FetchOne(Issue.find(issueID), animation: .default)
             _tagRows = FetchAll(tagQuery, animation: .default)
@@ -185,7 +185,7 @@ import SwiftUI
     }
 
     private func resetDraftState(_ state: inout State) {
-        state.draft = Issue.Draft(created: now)
+        state.draft = Issue.Draft(created: now, modified: now)
         state.selectedTagIDs = []
         state.isEditing = false
     }

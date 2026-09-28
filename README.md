@@ -3,7 +3,7 @@
 A multiplatform issue tracker, rebuilt from scratch with The Composable Architecture and SQLiteData.
 
 ![Swift](https://img.shields.io/badge/Swift-6.0-orange)
-![Platforms](https://img.shields.io/badge/platforms-iOS%20%7C%20macOS%20%7C%20visionOS-blue)
+![Platforms](https://img.shields.io/badge/platforms-iOS%20%7C%20macOS-blue)
 ![Architecture](https://img.shields.io/badge/architecture-TCA-green)
 ![Status](https://img.shields.io/badge/status-work%20in%20progress-yellow)
 
@@ -19,7 +19,7 @@ A multiplatform issue tracker, rebuilt from scratch with The Composable Architec
 
 UltimatePortfolioTCA is an issue tracker: create issues, tag them, filter and
 search them, and keep everything in sync across devices. One SwiftUI codebase
-runs on iOS, macOS and visionOS.
+runs on iOS and macOS.
 
 The project follows Paul Hudson's Ultimate Portfolio App series, but none of the
 course code is used. Every feature is rebuilt with a stack I wanted to work with:
@@ -97,9 +97,9 @@ commit is my call.
 
 ## Building
 
-Requires Xcode 26 or newer. The project targets iOS 26.2, macOS 26.2 and
-visionOS 26.2 and builds in Swift 6 language mode. Swift package dependencies
-resolve on first open.
+Requires Xcode 26 or newer. The project targets iOS 26.2 and macOS 26.2 and
+builds in Swift 6 language mode. Swift package dependencies resolve on first
+open.
 
 ```sh
 git clone https://github.com/OddMagnet/UltimatePortfolioTCA.git

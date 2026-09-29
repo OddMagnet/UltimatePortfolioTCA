@@ -241,7 +241,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "if [ -x /opt/homebrew/bin/swiftlint ]; then\n  /opt/homebrew/bin/swiftlint lint --config \"${SRCROOT}/.swiftlint.yml\" --quiet\nelif [ -x /usr/local/bin/swiftlint ]; then\n  /usr/local/bin/swiftlint lint --config \"${SRCROOT}/.swiftlint.yml\" --quiet\nelse\n  echo \"warning: SwiftLint not installed. Run 'brew bundle' to install.\"\nfi\n\nif [ -x /opt/homebrew/bin/swiftformat ]; then\n  /opt/homebrew/bin/swiftformat --lint \"${SRCROOT}/UltimatePortfolioTCA\" \"${SRCROOT}/UltimatePortfolioTCATests\" --config \"${SRCROOT}/.swiftformat\" --lenient\nelif [ -x /usr/local/bin/swiftformat ]; then\n  /usr/local/bin/swiftformat --lint \"${SRCROOT}/UltimatePortfolioTCA\" \"${SRCROOT}/UltimatePortfolioTCATests\" --config \"${SRCROOT}/.swiftformat\" --lenient\nelse\n  echo \"warning: SwiftFormat not installed. Run 'brew bundle' to install.\"\nfi\n";
+			shellScript = "\"${SRCROOT}/scripts/code-quality.sh\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

@@ -5,15 +5,13 @@ set -euo pipefail
 # Uses git-format-staged to only format staged content, preserving unstaged changes.
 
 REPO_ROOT="$(git rev-parse --show-toplevel)"
-GFS="$REPO_ROOT/scripts/git-format-staged"
+FORMAT_STAGED="$REPO_ROOT/scripts/git-format-staged"
+source "$REPO_ROOT/scripts/tool-paths.sh"
 
-if command -v /opt/homebrew/bin/swiftformat >/dev/null 2>&1; then
-    SF=/opt/homebrew/bin/swiftformat
-elif command -v /usr/local/bin/swiftformat >/dev/null 2>&1; then
-    SF=/usr/local/bin/swiftformat
-else
+SWIFTFORMAT_BIN="$(resolve_tool swiftformat)"
+if [ -z "$SWIFTFORMAT_BIN" ]; then
     echo "warning: SwiftFormat not installed. Skipping pre-commit formatting."
     exit 0
 fi
 
-"$GFS" --formatter "$SF stdin --quiet --stdinpath '{}'" "*.swift"
+"$FORMAT_STAGED" --formatter "$SWIFTFORMAT_BIN stdin --quiet --stdinpath '{}'" "*.swift"

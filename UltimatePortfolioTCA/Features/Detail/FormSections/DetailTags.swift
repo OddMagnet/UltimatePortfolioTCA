@@ -21,8 +21,11 @@ struct DetailTags: View {
                     ForEach(assignedTags + unassignedTags) { tag in
                         TagButton(tag: tag, isAssigned: selectedTagIDs.contains(tag.id)) {
                             withAnimation {
-                                if selectedTagIDs.contains(tag.id) { selectedTagIDs.remove(tag.id) }
-                                else { selectedTagIDs.insert(tag.id) }
+                                if selectedTagIDs.contains(tag.id) {
+                                    selectedTagIDs.remove(tag.id)
+                                } else {
+                                    selectedTagIDs.insert(tag.id)
+                                }
                             }
                         }
                     }

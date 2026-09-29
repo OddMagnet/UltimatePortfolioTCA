@@ -131,14 +131,18 @@ import SwiftUI
                 case let .tag(selectedTag): tagIDs.contains(selectedTag.id)
                 default: false
                 }
-                if didDeleteSelectedFilter { state.selectedFilter = .open }
+                if didDeleteSelectedFilter {
+                    state.selectedFilter = .open
+                }
                 return .run { [database] send in
                     await withErrorReporting {
                         try await database.write { db in
                             try Tag.where { $0.id.in(tagIDs) }.delete().execute(db)
                         }
                     }
-                    if didDeleteSelectedFilter { await send(.delegate(.selectedFilterChanged(.open))) }
+                    if didDeleteSelectedFilter {
+                        await send(.delegate(.selectedFilterChanged(.open)))
+                    }
                 }
 
             case let .view(.sortOrderSelected(order)):

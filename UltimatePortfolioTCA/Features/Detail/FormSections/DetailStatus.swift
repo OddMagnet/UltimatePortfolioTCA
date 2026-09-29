@@ -9,7 +9,9 @@ struct DetailStatus: View {
         Section("Status") {
             LabeledContent("Priority") {
                 HStack {
-                    if !isEditing { PriorityIndicator(priority: priority) }
+                    if !isEditing {
+                        PriorityIndicator(priority: priority)
+                    }
                     Picker("Priority", selection: $priority) {
                         ForEach(Issue.Priority.allCases) { priority in
                             Text(priority.label).tag(priority)

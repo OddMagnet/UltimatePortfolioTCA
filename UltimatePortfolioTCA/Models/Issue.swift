@@ -91,7 +91,9 @@ extension Where<Issue> {
                 }
             }
             .where { // Priority token filter
-                if let priorityToken { $0.priority.eq(priorityToken) }
+                if let priorityToken {
+                    $0.priority.eq(priorityToken)
+                }
             }
             .where { // Status token filter
                 if let statusToken {
@@ -129,11 +131,23 @@ extension Select where From == Issue, Joins == () {
         order {
             switch sortOrder.field {
             case .priority:
-                if sortOrder.isAscending { $0.priority.asc() } else { $0.priority.desc() }
+                if sortOrder.isAscending {
+                    $0.priority.asc()
+                } else {
+                    $0.priority.desc()
+                }
             case .date:
-                if sortOrder.isAscending { $0.lastActivity.asc() } else { $0.lastActivity.desc() }
+                if sortOrder.isAscending {
+                    $0.lastActivity.asc()
+                } else {
+                    $0.lastActivity.desc()
+                }
             case .title:
-                if sortOrder.isAscending { $0.title.asc() } else { $0.title.desc() }
+                if sortOrder.isAscending {
+                    $0.title.asc()
+                } else {
+                    $0.title.desc()
+                }
             }
         }
     }

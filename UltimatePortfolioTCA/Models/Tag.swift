@@ -26,9 +26,17 @@ extension Select where From == Tag, Joins == (IssueTag?, Issue?) {
             let visibleCount = issues.count(distinct: true, filter: isVisible)
             switch sortOrder.field {
             case .name:
-                if sortOrder.isAscending { tags.name.asc() } else { tags.name.desc() }
+                if sortOrder.isAscending {
+                    tags.name.asc()
+                } else {
+                    tags.name.desc()
+                }
             case .issueCount:
-                if sortOrder.isAscending { visibleCount.asc() } else { visibleCount.desc() }
+                if sortOrder.isAscending {
+                    visibleCount.asc()
+                } else {
+                    visibleCount.desc()
+                }
             }
         }
     }

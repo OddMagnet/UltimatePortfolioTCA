@@ -143,14 +143,18 @@ import SwiftUI
                 case let .some(selectedIssueID): ids.contains(selectedIssueID)
                 default: false
                 }
-                if didDeleteSelectedIssue { state.selectedIssueID = nil }
+                if didDeleteSelectedIssue {
+                    state.selectedIssueID = nil
+                }
                 return .run { [database] send in
                     await withErrorReporting {
                         try await database.write { db in
                             try Issue.find(ids).delete().execute(db)
                         }
                     }
-                    if didDeleteSelectedIssue { await send(.delegate(.selectedIssueChanged(nil))) }
+                    if didDeleteSelectedIssue {
+                        await send(.delegate(.selectedIssueChanged(nil)))
+                    }
                 }
 
             case let .view(.sortOrderSelected(order)):

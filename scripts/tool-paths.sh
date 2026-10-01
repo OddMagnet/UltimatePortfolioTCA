@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Locates the code quality tools, wherever they happen to be installed.
-# Sourced by scripts/pre-commit and scripts/lint.sh.
+# Sourced by scripts/pre-commit and scripts/code-quality.sh.
 #
 # Checks PATH first, which covers terminal-launched tooling, then the common
 # install locations, which cover GUI-launched tooling such as Xcode: apps
